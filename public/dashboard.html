@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>SCM Digital Day - Dashboard</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body class="page-dashboard">
+  <div class="dashboard-container">
+    <h1>SCM DIGITAL DAY<br><small>DASHBOARD</small></h1>
+
+    <div class="progress-info">
+      <p><b>Visited Booth:</b> <span id="count">0</span> / 5</p>
+      <p><b>Reward:</b> <span id="reward">Belum</span></p>
+    </div>
+
+    <div id="boothGrid" class="booth-grid"></div>
+
+    <div id="qr-section">
+      <h3>Scan Booth</h3>
+      <div id="qr-reader" style="width:320px;height:240px;margin:auto;"></div>
+      <p>Terakhir terdeteksi: <b id="last-scan">-</b></p>
+    </div>
+
+    <button id="logout" class="secondary-btn">Logout</button>
+  </div>
+</body>
+</html>
