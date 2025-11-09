@@ -1,10 +1,10 @@
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyDG7V8hgvDVa7cSYrkjWOLsBnwOv_5WVyc",
+  authDomain: "gustbook-test.firebaseapp.com",
+  databaseURL: "https://gustbook-test-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "gustbook-test",
+  storageBucket: "gustbook-test.firebasestorage.app",
+  messagingSenderId: "756925029571",
+  appId: "1:756925029571:web:562ee8486d4bba2be95676",
+  measurementId: "G-WF53R29NX8"
 };

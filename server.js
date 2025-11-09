@@ -4,12 +4,50 @@ import dotenv from "dotenv";
 import admin from "firebase-admin";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔹 Firebase Admin (pakai ENV)
+// ==================================================
+// 🔹 Generate firebase-config.js only if content differs
+// ==================================================
+const firebaseConfigPath = path.join(__dirname, "public", "firebase-config.js");
+
+const firebaseConfigData = `
+export const firebaseConfig = {
+  apiKey: "${process.env.PUBLIC_FIREBASE_API_KEY}",
+  authDomain: "${process.env.PUBLIC_FIREBASE_AUTH_DOMAIN}",
+  databaseURL: "${process.env.PUBLIC_FIREBASE_DATABASE_URL}",
+  projectId: "${process.env.PUBLIC_FIREBASE_PROJECT_ID}",
+  storageBucket: "${process.env.PUBLIC_FIREBASE_STORAGE_BUCKET}",
+  messagingSenderId: "${process.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID}",
+  appId: "${process.env.PUBLIC_FIREBASE_APP_ID}",
+  measurementId: "${process.env.PUBLIC_FIREBASE_MEASUREMENT_ID}"
+};
+`.trim();
+
+// ✅ hanya tulis jika belum ada atau berbeda
+let shouldWrite = true;
+if (fs.existsSync(firebaseConfigPath)) {
+  const existing = fs.readFileSync(firebaseConfigPath, "utf8").trim();
+  if (existing === firebaseConfigData) {
+    shouldWrite = false;
+  }
+}
+
+if (shouldWrite) {
+  fs.writeFileSync(firebaseConfigPath, firebaseConfigData, "utf8");
+  console.log("✅ Firebase config generated → public/firebase-config.js");
+} else {
+  console.log("ℹ️ Firebase config unchanged, skip writing");
+}
+
+// ==================================================
+// 🔹 Firebase Admin SDK (pakai env variabel server)
+// ==================================================
 admin.initializeApp({
   credential: admin.credential.cert({
     project_id: process.env.FIREBASE_PROJECT_ID,
@@ -27,26 +65,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// serve frontend
+// ==================================================
+// 🔹 Serve frontend files
+// ==================================================
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/qr", express.static(path.join(__dirname, "qr")));
 
-// Helper
+// ==================================================
+// 🔹 Helper function
+// ==================================================
 const countVisited = (obj = {}) => Object.values(obj).filter(Boolean).length;
 
-//
-// =============================
-// 🔹 REGISTER USER (UPDATED)
-// =============================
+// ==================================================
+// 🔹 REGISTER USER
+// ==================================================
 app.post("/api/register", async (req, res) => {
   const { name, phone, password } = req.body;
 
-  // Validasi input
   if (!name || !phone || !password) {
     return res.status(400).json({ error: "Name, phone, and password are required" });
   }
 
-  // Cek apakah nomor sudah terdaftar
+  // Cek nomor WA sudah terdaftar
   const usersSnap = await db.ref("users").get();
   let exists = false;
   usersSnap.forEach((child) => {
@@ -63,7 +103,7 @@ app.post("/api/register", async (req, res) => {
   await ref.set({
     name,
     phone,
-    password, // ⚠️ nanti bisa diganti hash (bcrypt)
+    password, // ⚠️ plain-text sementara
     booths_visited: {},
     visited_count: 0,
     reward_ready: false,
@@ -74,10 +114,9 @@ app.post("/api/register", async (req, res) => {
   res.json({ userId: ref.key });
 });
 
-//
-// =============================
+// ==================================================
 // 🔹 SCAN BOOTH
-// =============================
+// ==================================================
 app.post("/api/scan", async (req, res) => {
   const { userId, boothCode } = req.body;
   if (!userId || !boothCode) return res.status(400).send("missing data");
@@ -88,7 +127,7 @@ app.post("/api/scan", async (req, res) => {
 
   const user = snap.val();
 
-  // Jika sudah pernah scan booth yang sama
+  // Cegah double scan
   if (user.booths_visited?.[boothCode]) {
     return res.json({ message: "already scanned" });
   }
@@ -104,10 +143,9 @@ app.post("/api/scan", async (req, res) => {
   res.json({ visited_count: newCount, reward_ready: !!update.reward_ready });
 });
 
-//
-// =============================
+// ==================================================
 // 🔹 KLAIM HADIAH
-// =============================
+// ==================================================
 app.post("/api/claim", async (req, res) => {
   const { userId } = req.body;
   const ref = db.ref(`users/${userId}`);
@@ -121,23 +159,25 @@ app.post("/api/claim", async (req, res) => {
   res.json({ success: true });
 });
 
-//
-// =============================
+// ==================================================
 // 🔹 LIST BOOTH
-// =============================
+// ==================================================
 app.get("/api/booths", async (_, res) => {
   const snap = await db.ref("booths").get();
   res.json(snap.val());
 });
 
-//
-// =============================
-// 🔹 DEFAULT (FRONTEND)
-// =============================
+// ==================================================
+// 🔹 FRONTEND DEFAULT ROUTE
+// ==================================================
 app.get("*", (_, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
+// ==================================================
+// 🔹 START SERVER
+// ==================================================
+const PORT = process.env.PORT || 3002;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
