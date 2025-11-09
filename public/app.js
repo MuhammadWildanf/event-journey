@@ -91,18 +91,42 @@ if (page === "page-dashboard") {
     const boothGrid = document.getElementById("boothGrid");
     const lastScanDisplay = document.getElementById("last-scan");
     const btnLogout = document.getElementById("logout");
+    const countDisplay = document.getElementById("count");
+    const rewardDisplay = document.getElementById("reward");
 
-    onValue(ref(db, "booths"), (snap) => {
+    // 🔹 Ambil daftar booth dari database (sekali saja)
+    const boothSnap = await get(ref(db, "booths"));
+    const booths = [];
+    boothSnap.forEach((child) => {
+        booths.push(child.val().name);
+    });
+
+    // 🔹 Pantau perubahan user secara realtime
+    onValue(ref(db, `users/${userId}`), (snap) => {
+        if (!snap.exists()) return;
+
+        const user = snap.val();
+        const visited = user.booths_visited || {};
+
+        // Update jumlah booth yang dikunjungi
+        const count = Object.keys(visited).length;
+        countDisplay.textContent = count;
+
+        // Update reward
+        rewardDisplay.textContent = user.reward_ready ? "✅ Siap Diambil" : "Belum";
+
+        // Update daftar booth dengan warna/status
         boothGrid.innerHTML = "";
-        snap.forEach((child) => {
-            const booth = child.val();
+        booths.forEach((name) => {
             const el = document.createElement("div");
             el.className = "booth-box";
-            el.textContent = booth.name;
+            el.textContent = name;
+            if (visited[name]) el.classList.add("visited"); // tambahkan warna hijau misalnya
             boothGrid.appendChild(el);
         });
     });
 
+    // 🔹 QR Scanner
     function startQRScanner() {
         const html5QrCode = new Html5Qrcode("qr-reader");
         const config = {
@@ -112,6 +136,7 @@ if (page === "page-dashboard") {
                 height: 250
             }
         };
+
         html5QrCode
             .start({
                 facingMode: "environment"
@@ -140,6 +165,7 @@ if (page === "page-dashboard") {
         window.location.href = "login.html";
     };
 }
+
 
 // ================== WELCOME PAGE ==================
 if (page === "page-welcome") {
