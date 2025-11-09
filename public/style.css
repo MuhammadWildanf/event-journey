@@ -1,4 +1,4 @@
-/* === GLOBAL RESET === */
+/* === RESET === */
 * {
   margin: 0;
   padding: 0;
@@ -6,9 +6,101 @@
   font-family: "Poppins", sans-serif;
 }
 
-body {
-  background: linear-gradient(180deg, #eef3ff 0%, #f5f7fb 100%);
-  color: #222;
+/* === WELCOME PAGE (index.html) === */
+body.welcome-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(180deg, #2b124c 0%, #522d80 100%);
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+
+.welcome-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  animation: fadeIn 0.7s ease;
+}
+
+body.welcome-page h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0.9;
+}
+
+body.welcome-page h1 {
+  font-family: "Orbitron", sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #e5a6ff;
+  letter-spacing: 1px;
+}
+
+.btn.primary {
+  background: linear-gradient(90deg, #a11ff2, #d86ff2);
+  border: none;
+  border-radius: 50px;
+  padding: 14px 40px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+.btn.primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+body.welcome-page p {
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+body.welcome-page a {
+  color: #ff5eff;
+  text-decoration: none;
+  font-weight: 500;
+}
+body.welcome-page a:hover {
+  text-decoration: underline;
+}
+
+/* === ANIMATION === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === RESPONSIVE WELCOME === */
+@media (max-width: 480px) {
+  body.welcome-page h1 {
+    font-size: 1.9rem;
+  }
+  .btn.primary {
+    font-size: 0.95rem;
+    padding: 12px 32px;
+  }
+}
+
+/* ==========================================================
+   === LOGIN & REGISTER PAGE ===
+   ========================================================== */
+body.page-login,
+body.page-register {
+  background: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,117 +108,189 @@ body {
   padding: 20px;
 }
 
-/* === CONTAINER === */
-.dashboard-container,
-.auth-container {
+.page-login main.card,
+.page-register main.card {
   background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
   width: 100%;
-  max-width: 420px;
-  padding: 32px 24px;
+  max-width: 400px;
+  padding: 40px 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   text-align: center;
-  transition: all 0.3s ease;
+  animation: fadeIn 0.6s ease;
 }
 
-/* === HEADER === */
-h1 {
-  font-size: 1.6rem;
-  color: #003366;
-  line-height: 1.3;
+/* === TITLE & TEXT === */
+.page-login h3,
+.page-register h3 {
   font-weight: 700;
-  margin-bottom: 8px;
-}
-
-h3 {
-  font-size: 1rem;
-  color: #444;
-  font-weight: 600;
+  color: #111;
+  font-size: 1.1rem;
   margin-bottom: 5px;
 }
 
-small,
-p {
+.page-login p,
+.page-register p {
   color: #555;
   font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.page-login h1,
+.page-register h1 {
+  font-family: "Orbitron", sans-serif;
+  font-size: 1.8rem;
+  color: #a11ff2;
+  letter-spacing: 1px;
+  line-height: 1.3;
+  margin: 20px 0;
 }
 
 /* === FORM === */
+.form-box {
+  margin-top: 10px;
+}
+
 .form-box input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px 18px;
   margin: 10px 0;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
+  border: 2px solid #d86ff2;
+  border-radius: 40px;
+  font-size: 15px;
   transition: 0.3s ease;
 }
 
 .form-box input:focus {
-  border-color: #0052cc;
+  border-color: #a11ff2;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.15);
+  box-shadow: 0 0 8px rgba(161, 31, 242, 0.25);
 }
 
-/* === BUTTONS === */
+/* === BUTTON === */
+.btn,
 .primary-btn {
   width: 100%;
-  background: linear-gradient(90deg, #0052cc, #007bff);
+  background: linear-gradient(90deg, #a11ff2, #d86ff2);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 12px 0;
-  margin-top: 10px;
+  border-radius: 40px;
+  padding: 14px 0;
+  margin-top: 15px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 1rem;
   transition: 0.3s ease;
 }
 
+.btn:hover,
 .primary-btn:hover {
-  background: linear-gradient(90deg, #0041a3, #0064e6);
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 
-.secondary-btn {
-  width: 100%;
-  background: #f0f0f0;
-  color: #222;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 0;
+/* === LINKS === */
+.page-login a,
+.page-register a {
+  color: #a11ff2;
   font-weight: 500;
-  margin-top: 15px;
-  cursor: pointer;
-  transition: 0.3s;
+  text-decoration: none;
 }
 
-.secondary-btn:hover {
-  background: #e2e2e2;
+.page-login a:hover,
+.page-register a:hover {
+  text-decoration: underline;
 }
 
-/* === TERMS LABEL === */
+/* === CHECKBOX & LABEL === */
 .terms-label {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #555;
   margin: 10px 0;
-  text-align: left;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-/* === LINKS === */
-a {
-  color: #0052cc;
-  text-decoration: none;
-  font-weight: 500;
+/* === RESPONSIVE === */
+@media (max-width: 480px) {
+  .page-login main.card,
+  .page-register main.card {
+    padding: 28px 20px;
+    border-radius: 18px;
+    max-width: 92%;
+  }
+
+  .page-login h1,
+  .page-register h1 {
+    font-size: 1.5rem;
+  }
+
+  .btn,
+  .primary-btn {
+    font-size: 0.95rem;
+  }
+
+  .form-box input {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
 }
 
-a:hover {
-  text-decoration: underline;
+/* ==========================================================
+   === DASHBOARD PAGE ===
+   ========================================================== */
+body.page-dashboard {
+  background: #f8f7fc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
 }
 
-/* === DASHBOARD === */
+.page-dashboard main.card {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  padding: 30px 25px 40px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+/* === HEADER === */
+.page-dashboard h1 {
+  font-family: "Orbitron", sans-serif;
+  color: #2b124c;
+  font-size: 1.6rem;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+.page-dashboard small {
+  display: block;
+  color: #a11ff2;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* === PROGRESS INFO === */
+.progress-info {
+  font-size: 0.95rem;
+  background: #f3e8ff;
+  border-radius: 12px;
+  padding: 12px 10px;
+  margin-bottom: 18px;
+}
+.progress-info b {
+  color: #2b124c;
+}
+
+/* === BOOTH GRID === */
 .booth-grid {
   display: flex;
   flex-wrap: wrap;
@@ -136,64 +300,68 @@ a:hover {
 }
 
 .booth-box {
-  background: #f0f6ff;
-  color: #003366;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-weight: 600;
   flex: 1 1 45%;
-  text-align: center;
-  border: 1px solid #e1e8f7;
+  background: #f5f0ff;
+  border: 2px solid #e4c8ff;
+  border-radius: 12px;
+  padding: 12px 0;
+  color: #2b124c;
+  font-weight: 600;
   transition: 0.3s ease;
+  cursor: default;
 }
 
 .booth-box.visited {
-  background: linear-gradient(90deg, #00c68a, #00b894);
+  background: linear-gradient(90deg, #a11ff2, #d86ff2);
   color: #fff;
-  border: none;
   transform: scale(1.03);
 }
 
-/* === SCANNER === */
+/* === QR SCANNER === */
+#qr-section {
+  margin-top: 20px;
+}
 #qr-reader {
   width: 100%;
-  max-width: 300px;
+  max-width: 280px;
   height: 220px;
   margin: 12px auto;
   border-radius: 10px;
+  border: 2px solid #e4c8ff;
   overflow: hidden;
-  border: 2px solid #e0e6f0;
 }
 
-/* === TEXT === */
-.progress-info {
-  font-size: 0.95rem;
-  margin-bottom: 12px;
+/* === LOGOUT BUTTON === */
+.btn.secondary {
+  width: 100%;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(90deg, #a11ff2, #d86ff2);
+  color: #fff;
+  font-weight: 600;
+  padding: 14px 0;
+  margin-top: 25px;
+  cursor: pointer;
+  transition: 0.3s ease;
 }
 
-.progress-info b {
-  color: #222;
+.btn.secondary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 480px) {
-  .dashboard-container,
-  .auth-container {
-    padding: 24px 16px;
-    max-width: 95%;
-    border-radius: 14px;
+  .page-dashboard main.card {
+    padding: 24px 18px;
+    border-radius: 16px;
+    max-width: 92%;
   }
-
-  h1 {
-    font-size: 1.3rem;
-  }
-
-  .primary-btn {
-    font-size: 15px;
-  }
-
   .booth-box {
     flex: 1 1 48%;
     font-size: 0.9rem;
+  }
+  .page-dashboard h1 {
+    font-size: 1.4rem;
   }
 }
