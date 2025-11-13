@@ -1,0 +1,68 @@
+<%- include("../layouts/header", { title: "Booth Detail" }) %>
+
+    <div class="text-white text-center d-flex flex-column align-items-center justify-content-center"
+        style="min-height:100vh;">
+        <h3 class="mb-2">
+            <%= boothData.name || 'Booth' %>
+        </h3>
+        <p class="text-white-50 mb-4">
+            <%= boothData.description || '' %>
+        </p>
+
+        <form action="/booth/<%= boothType %>/review" method="POST" class="w-75">
+            <textarea name="comment" class="form-control mb-3" rows="4" placeholder="Tulis review..."
+                required></textarea>
+
+            <div class="rating mb-3">
+                <% for(let i=5;i>=1;i--){ %>
+                    <input type="radio" name="rating" value="<%= i %>" id="star<%= i %>">
+                    <label for="star<%= i %>">★</label>
+                    <% } %>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Submit</button>
+        </form>
+
+        <% if (reviews.length> 0) { %>
+            <div class="mt-4 w-75 text-start">
+                <h5>Recent Reviews</h5>
+                <% reviews.slice(-5).reverse().forEach(r=> { %>
+                    <div class="border rounded p-2 mb-2 bg-dark bg-opacity-25">
+                        <strong>
+                            <%= r.user %>
+                        </strong> — ⭐ <%= r.rating %><br>
+                            <small>
+                                <%= r.comment %>
+                            </small>
+                    </div>
+                    <% }) %>
+            </div>
+            <% } %>
+
+                <a href="/booth" class="btn btn-outline-light mt-4">⬅️ Kembali</a>
+    </div>
+
+    <style>
+        .rating {
+            direction: rtl;
+            unicode-bidi: bidi-override;
+            font-size: 2rem;
+        }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            color: #555;
+            cursor: pointer;
+        }
+
+        .rating input:checked~label,
+        .rating label:hover,
+        .rating label:hover~label {
+            color: #00ffcc;
+        }
+    </style>
+
+    <%- include("../layouts/footer") %>

@@ -6,6 +6,9 @@ import admin from "firebase-admin";
 import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import boothRoutes from "./routes/boothRoutes.js";
+import scanRoutes from "./routes/scanRoutes.js";
 import serverless from "serverless-http";
 
 dotenv.config();
@@ -62,6 +65,9 @@ app.use("/qr", express.static(path.join(__dirname, "qr")));
 // ✅ Routes
 // ==================================================
 app.use("/", authRoutes);
+app.use("/", dashboardRoutes);
+app.use("/", boothRoutes);
+app.use("/", scanRoutes);
 
 // Default Redirect
 app.get("*", (req, res) => res.redirect("/login"));
