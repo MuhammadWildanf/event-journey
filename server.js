@@ -1,19 +1,18 @@
 import express from "express";
+import session from "express-session";
 import cors from "cors";
 import dotenv from "dotenv";
 import admin from "firebase-admin";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ==================================================
-// 🔹 Generate firebase-config.js only if content differs
-// ==================================================
 const firebaseConfigPath = path.join(__dirname, "public", "firebase-config.js");
 
 const firebaseConfigData = `
@@ -45,9 +44,7 @@ if (shouldWrite) {
   console.log("ℹ️ Firebase config unchanged, skip writing");
 }
 
-// ==================================================
-// 🔹 Firebase Admin SDK (pakai env variabel server)
-// ==================================================
+
 admin.initializeApp({
   credential: admin.credential.cert({
     project_id: process.env.FIREBASE_PROJECT_ID,
@@ -60,123 +57,35 @@ admin.initializeApp({
 });
 
 const db = admin.database();
+export { db };
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "scm_digitalday_secret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
-// ==================================================
-// 🔹 Serve frontend files
-// ==================================================
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/qr", express.static(path.join(__dirname, "qr")));
 
-// ==================================================
-// 🔹 Helper function
-// ==================================================
 const countVisited = (obj = {}) => Object.values(obj).filter(Boolean).length;
 
-// ==================================================
-// 🔹 REGISTER USER
-// ==================================================
-app.post("/api/register", async (req, res) => {
-  const { name, phone, password } = req.body;
+app.use("/", authRoutes);
 
-  if (!name || !phone || !password) {
-    return res.status(400).json({ error: "Name, phone, and password are required" });
-  }
 
-  // Cek nomor WA sudah terdaftar
-  const usersSnap = await db.ref("users").get();
-  let exists = false;
-  usersSnap.forEach((child) => {
-    const u = child.val();
-    if (u.phone === phone) exists = true;
-  });
-
-  if (exists) {
-    return res.status(409).json({ error: "Phone already registered" });
-  }
-
-  // Simpan user baru
-  const ref = db.ref("users").push();
-  await ref.set({
-    name,
-    phone,
-    password, // ⚠️ plain-text sementara
-    booths_visited: {},
-    visited_count: 0,
-    reward_ready: false,
-    reward_claimed: false,
-    created_at: new Date().toISOString(),
-  });
-
-  res.json({ userId: ref.key });
+app.get("*", (req, res) => {
+  res.redirect("/login");
 });
 
-// ==================================================
-// 🔹 SCAN BOOTH
-// ==================================================
-app.post("/api/scan", async (req, res) => {
-  const { userId, boothCode } = req.body;
-  if (!userId || !boothCode) return res.status(400).send("missing data");
 
-  const userRef = db.ref(`users/${userId}`);
-  const snap = await userRef.get();
-  if (!snap.exists()) return res.status(404).send("user not found");
-
-  const user = snap.val();
-
-  // Cegah double scan
-  if (user.booths_visited?.[boothCode]) {
-    return res.json({ message: "already scanned" });
-  }
-
-  // Simpan kunjungan baru
-  await userRef.child(`booths_visited/${boothCode}`).set(true);
-
-  const newCount = countVisited({ ...user.booths_visited, [boothCode]: true });
-  const update = { visited_count: newCount };
-  if (newCount >= 5) update.reward_ready = true;
-
-  await userRef.update(update);
-  res.json({ visited_count: newCount, reward_ready: !!update.reward_ready });
-});
-
-// ==================================================
-// 🔹 KLAIM HADIAH
-// ==================================================
-app.post("/api/claim", async (req, res) => {
-  const { userId } = req.body;
-  const ref = db.ref(`users/${userId}`);
-  const snap = await ref.get();
-  if (!snap.exists()) return res.status(404).send("user not found");
-
-  const user = snap.val();
-  if (!user.reward_ready) return res.status(400).send("reward not ready");
-
-  await ref.update({ reward_claimed: true });
-  res.json({ success: true });
-});
-
-// ==================================================
-// 🔹 LIST BOOTH
-// ==================================================
-app.get("/api/booths", async (_, res) => {
-  const snap = await db.ref("booths").get();
-  res.json(snap.val());
-});
-
-// ==================================================
-// 🔹 FRONTEND DEFAULT ROUTE
-// ==================================================
-app.get("*", (_, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// ==================================================
-// 🔹 START SERVER
-// ==================================================
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

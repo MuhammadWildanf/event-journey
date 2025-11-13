@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <%= title || "SCM Digital Day 2025" %>
+    </title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* === BACKGROUND & BODY === */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            width: 100%;
+            background: url("/assets/img/bg.png") no-repeat center center / cover;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: "Poppins", sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* === LOGO === */
+        .auth-logo {
+            width: 340px;
+            margin-top: 50px;
+            z-index: 2;
+        }
+
+        /* === CONTAINER === */
+        .auth-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            z-index: 2;
+            animation: fadeIn 1s ease;
+        }
+
+        /* === JUDUL === */
+        .auth-title {
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            margin-bottom: 1.8rem;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
+        }
+
+        /* === FORM === */
+        .auth-form {
+            width: 85%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 40px;
+            padding: 0.6rem 1rem;
+            transition: 0.3s ease;
+        }
+
+        .input-box:focus-within {
+            border-color: #3af0af;
+            box-shadow: 0 0 10px rgba(58, 240, 175, 0.5);
+        }
+
+        .input-box i {
+            color: #3af0af;
+            font-size: 1.1rem;
+            margin-right: 8px;
+        }
+
+        .input-box input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: #fff;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .input-box input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .input-box button {
+            background: none;
+            border: none;
+            color: #3af0af;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6px;
+        }
+
+        /* === TOMBOL === */
+        .btn-auth {
+            width: 100%;
+            background: linear-gradient(90deg, #3af0af, #32ffb2);
+            border: none;
+            border-radius: 40px;
+            padding: 0.8rem;
+            color: #00333a;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 12px rgba(50, 255, 178, 0.5);
+        }
+
+        /* === LINK BAWAH === */
+        .auth-link {
+            margin-top: 1.2rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .auth-link a {
+            color: #3af0af;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* === ANIMASI === */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 480px) {
+            .auth-logo {
+                width: 220px;
+                margin-top: 20px;
+            }
+
+            .auth-page {
+                margin-top: 140px;
+            }
+
+            .auth-title {
+                font-size: 1.2rem;
+            }
+
+            .auth-form {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <img src="/assets/img/logo.png" alt="SCM Digital Day" class="auth-logo">

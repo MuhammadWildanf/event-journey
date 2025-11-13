@@ -1,0 +1,100 @@
+<%- include("../layouts/header-auth", { title: "Register" , bodyClass: "page-auth" }) %>
+
+    <section class="auth-page">
+        <h1 class="auth-title">REGISTRATION</h1>
+
+        <form id="registerForm" class="auth-form">
+            <div class="input-box">
+                <i class="bi bi-person"></i>
+                <input type="text" id="name" name="name" placeholder="Full Name" required>
+            </div>
+
+            <div class="input-box">
+                <i class="bi bi-envelope"></i>
+                <input type="email" id="email" name="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-box">
+                <i class="bi bi-lock"></i>
+                <input type="password" id="password" name="password" placeholder="Enter Password" required>
+            </div>
+
+            <div class="input-box">
+                <i class="bi bi-lock-fill"></i>
+                <input type="password" id="repeatpassword" name="repeatpassword" placeholder="Repeat Password" required>
+            </div>
+
+            <button type="submit" class="btn-auth">Sign Up</button>
+        </form>
+
+        <p class="auth-link">Already have an account? <a href="/login">Login to Account</a></p>
+    </section>
+
+    <script>
+        const registerForm = document.getElementById("registerForm");
+
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const repeat = document.getElementById("repeatpassword").value.trim();
+
+            if (!name || !email || !password || !repeat) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Perhatian",
+                    text: "Semua field wajib diisi!",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            if (password !== repeat) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Password Tidak Cocok",
+                    text: "Pastikan password dan konfirmasi password sama.",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            try {
+                const res = await fetch("/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password }),
+                });
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Akun Berhasil Dibuat",
+                        text: "Silakan login untuk melanjutkan.",
+                        confirmButtonColor: "#3af0af",
+                    }).then(() => {
+                        window.location.href = "/comingsoon";
+                    });
+                } else {
+                    const text = await res.text();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Gagal Mendaftar",
+                        text: text || "Terjadi kesalahan, coba lagi nanti.",
+                        confirmButtonColor: "#3af0af",
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Koneksi Error",
+                    text: "Tidak dapat terhubung ke server.",
+                    confirmButtonColor: "#3af0af",
+                });
+            }
+        });
+    </script>
+
+    <%- include("../layouts/footer") %>

@@ -1,0 +1,95 @@
+<%- include("../layouts/header-auth", { title: "Login" , bodyClass: "page-auth" }) %>
+
+    <section class="auth-page">
+        <h1 class="auth-title">LOGIN</h1>
+
+        <form id="loginForm" class="auth-form">
+            <div class="input-box">
+                <i class="bi bi-envelope"></i>
+                <input type="email" id="emailLogin" name="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-box">
+                <i class="bi bi-lock"></i>
+                <input type="password" id="passwordLogin" name="password" placeholder="Enter Password" required>
+                <button type="button" id="togglePassword"><i class="bi bi-eye"></i></button>
+            </div>
+
+            <button type="submit" class="btn-auth">Login</button>
+        </form>
+
+        <p class="auth-link">New member? <a href="/register">Register now</a></p>
+    </section>
+
+    <script>
+        // === Toggle password visibility ===
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const passField = document.getElementById("passwordLogin");
+            const icon = this.querySelector("i");
+            if (passField.type === "password") {
+                passField.type = "text";
+                icon.classList.replace("bi-eye", "bi-eye-slash");
+            } else {
+                passField.type = "password";
+                icon.classList.replace("bi-eye-slash", "bi-eye");
+            }
+        });
+
+        // === AJAX Login ===
+        const loginForm = document.getElementById("loginForm");
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("emailLogin").value.trim();
+            const password = document.getElementById("passwordLogin").value.trim();
+
+            if (!email || !password) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Perhatian",
+                    text: "Email dan password wajib diisi!",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            try {
+                const res = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (res.ok) {
+                    // Redirect ke dashboard
+                    Swal.fire({
+                        icon: "success",
+                        title: "Login Berhasil",
+                        text: "Selamat datang di SCM Digital Day 2025!",
+                        confirmButtonColor: "#3af0af",
+                        timer: 1500,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        window.location.href = "/comingsoon";
+                    });
+                } else {
+                    const text = await res.text();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Login Gagal",
+                        text: text || "Email atau password salah!",
+                        confirmButtonColor: "#3af0af",
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Terjadi Kesalahan",
+                    text: "Tidak dapat menghubungi server.",
+                    confirmButtonColor: "#3af0af",
+                });
+            }
+        });
+    </script>
+
+    <%- include("../layouts/footer") %>
