@@ -6,7 +6,7 @@ import admin from "firebase-admin";
 import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
-import serverless from "serverless-http"; // penting
+import serverless from "serverless-http";
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ==================================================
-// ✅ Firebase Admin
+// ✅ Firebase Admin Initialization
 // ==================================================
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -33,7 +33,7 @@ const db = admin.database();
 export { db };
 
 // ==================================================
-// ✅ Express setup
+// ✅ Express App Configuration
 // ==================================================
 const app = express();
 
@@ -41,36 +41,36 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "scm_digitalday_secret",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
+// 🚫 Hindari MemoryStore di Vercel
+if (!process.env.VERCEL) {
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "scm_digitalday_secret",
+      resave: false,
+      saveUninitialized: false,
+    })
+  );
+}
 
-// View engine + public folder
+// View Engine & Static Files
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/qr", express.static(path.join(__dirname, "qr")));
 
-// Routes
+// ==================================================
+// ✅ Routes
+// ==================================================
 app.use("/", authRoutes);
 
-// Default redirect
+// Default Redirect
 app.get("*", (req, res) => res.redirect("/login"));
 
 // ==================================================
-// ✅ Dual mode (Local & Vercel)
+// ✅ Dual Mode: Local (dev) + Serverless (Vercel)
 // ==================================================
 const PORT = process.env.PORT || 3002;
 
-if (process.env.VERCEL) {
-  console.log("Running on Vercel serverless");
-}
-
-// Jalankan hanya jika di local (tanpa VERCEL)
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`🚀 Local server running at http://localhost:${PORT}`);
