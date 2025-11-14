@@ -16,21 +16,22 @@
         <div class="container">
             <div class="row justify-content-center g-3">
 
-                <% Object.entries(booths).forEach(([key, booth])=> { %>
+                <% const visited=typeof visited !=="undefined" ? visited : {}; %>
 
-                    <% let isVisited=visited && visited[key]===true; %>
+                    <% Object.entries(booths).forEach(([key, booth])=> { %>
 
-                        <div class="col-6">
-                            <a href="/booth/<%= key %>" class="text-decoration-none">
-                                <div class="booth-card booth-main <%= isVisited ? 'visited' : 'not-visited' %>">
-                                    <i class="bi bi-shop"></i>
-                                    <%= booth.name %>
-                                </div>
-                            </a>
-                        </div>
+                        <% let isVisited=visited[key]===true; %>
 
+                            <div class="col-6">
+                                <a href="/booth/<%= key %>" class="text-decoration-none">
+                                    <div class="booth-card booth-main <%= isVisited ? 'visited' : 'not-visited' %>">
+                                        <i class="bi bi-shop"></i>
+                                        <%= booth.name %>
+                                    </div>
+                                </a>
+                            </div>
 
-                        <% }) %>
+                            <% }) %>
 
             </div>
         </div>
