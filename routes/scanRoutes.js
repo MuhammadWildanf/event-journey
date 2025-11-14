@@ -15,6 +15,6 @@ function requireLogin(req, res, next) {
 router.get("/scan", requireLogin, showScan);
 
 // endpoint POST untuk menerima hasil scan (QR code)
-router.post("/scan", requireLogin, handleScanResult);
+router.post("/scan/result", requireLogin, handleScanResult);
 
 export default router;

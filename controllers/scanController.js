@@ -19,14 +19,10 @@ export const handleScanResult = async (req, res) => {
         const snap = await userRef.get();
         const userData = snap.exists() ? snap.val() : {};
 
-        // tandai booth dikunjungi
         await userRef.child(`booths_visited/${boothCode}`).set(true);
 
-        // hitung ulang visited count
-        const visitedCount = Object.keys({
-            ...(userData.booths_visited || {}),
-            [boothCode]: true,
-        }).length;
+        const newSnap = await userRef.child("booths_visited").get();
+        const visitedCount = newSnap.exists() ? Object.keys(newSnap.val()).length : 0;
 
         await userRef.update({
             visited_count: visitedCount,

@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import boothRoutes from "./routes/boothRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
+import serviceRoutes from "./routes/serviceRoutes.js";
 import serverless from "serverless-http";
 
 dotenv.config();
@@ -51,6 +52,12 @@ if (!process.env.VERCEL) {
       secret: process.env.SESSION_SECRET || "scm_digitalday_secret",
       resave: false,
       saveUninitialized: false,
+      cookie: {
+        maxAge: 24 * 60 * 60 * 1000, // 1 hari
+        httpOnly: true,
+        secure: false, // true jika HTTPS
+        sameSite: "lax",
+      }
     })
   );
 }
@@ -68,6 +75,7 @@ app.use("/", authRoutes);
 app.use("/", dashboardRoutes);
 app.use("/", boothRoutes);
 app.use("/", scanRoutes);
+app.use("/", serviceRoutes);
 
 // Default Redirect
 app.get("*", (req, res) => res.redirect("/login"));

@@ -1,0 +1,10 @@
+<%- include("../layouts/header", { title: "Lunch Box" }) %>
+
+    <div class="text-white text-center" style="margin-top: 120px;">
+        <h2>Lunch Box</h2>
+        <p>Status: <strong>
+                <%= userData.lunch_status || 'Belum diambil' %>
+            </strong></p>
+    </div>
+
+    <%- include("../layouts/footer") %>

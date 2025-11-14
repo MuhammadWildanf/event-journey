@@ -1,13 +1,11 @@
 <%- include("../layouts/header", { title: "Booth" }) %>
 
     <header class="d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <div>
-                <small>Welcome</small><br>
-                <strong>
-                    <%= user.name %>
-                </strong>
-            </div>
+        <div>
+            <small>Welcome</small><br>
+            <strong>
+                <%= user.name %>
+            </strong>
         </div>
         <a href="/logout" class="logout-btn text-white text-decoration-none">
             <i class="bi bi-box-arrow-right"></i>
@@ -17,16 +15,23 @@
     <main class="text-center">
         <div class="container">
             <div class="row justify-content-center g-3">
+
                 <% Object.entries(booths).forEach(([key, booth])=> { %>
-                    <div class="col-6">
-                        <a href="/booth/<%= key %>" class="text-decoration-none">
-                            <div class="booth-card booth-main">
-                                <i class="bi bi-shop"></i>
-                                <%= booth.name %>
-                            </div>
-                        </a>
-                    </div>
-                    <% }) %>
+
+                    <% let isVisited=visited && visited[key]===true; %>
+
+                        <div class="col-6">
+                            <a href="/booth/<%= key %>" class="text-decoration-none">
+                                <div class="booth-card booth-main <%= isVisited ? 'visited' : 'not-visited' %>">
+                                    <i class="bi bi-shop"></i>
+                                    <%= booth.name %>
+                                </div>
+                            </a>
+                        </div>
+
+
+                        <% }) %>
+
             </div>
         </div>
     </main>

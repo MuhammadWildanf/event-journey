@@ -9,37 +9,41 @@
             <%= boothData.description || '' %>
         </p>
 
-        <form action="/booth/<%= boothType %>/review" method="POST" class="w-75">
-            <textarea name="comment" class="form-control mb-3" rows="4" placeholder="Tulis review..."
-                required></textarea>
+        <% if (!userReview) { %>
 
-            <div class="rating mb-3">
-                <% for(let i=5;i>=1;i--){ %>
-                    <input type="radio" name="rating" value="<%= i %>" id="star<%= i %>">
-                    <label for="star<%= i %>">★</label>
-                    <% } %>
-            </div>
+            <!-- FORM REVIEW (user BELUM review) -->
+            <form action="/booth/<%= boothType %>/review" method="POST" class="w-75">
+                <textarea name="comment" class="form-control mb-3" rows="4" placeholder="Tulis review..."
+                    required></textarea>
 
-            <button type="submit" class="btn btn-success w-100">Submit</button>
-        </form>
+                <div class="rating mb-3">
+                    <% for (let i=5; i>= 1; i--) { %>
+                        <input type="radio" name="rating" value="<%= i %>" id="star<%= i %>" required>
+                        <label for="star<%= i %>">★</label>
+                        <% } %>
+                </div>
 
-        <% if (reviews.length> 0) { %>
-            <div class="mt-4 w-75 text-start">
-                <h5>Recent Reviews</h5>
-                <% reviews.slice(-5).reverse().forEach(r=> { %>
-                    <div class="border rounded p-2 mb-2 bg-dark bg-opacity-25">
-                        <strong>
-                            <%= r.user %>
-                        </strong> — ⭐ <%= r.rating %><br>
-                            <small>
-                                <%= r.comment %>
-                            </small>
-                    </div>
-                    <% }) %>
-            </div>
-            <% } %>
+                <button type="submit" class="btn btn-success w-100">Submit</button>
+            </form>
 
-                <a href="/booth" class="btn btn-outline-light mt-4">⬅️ Kembali</a>
+            <% } else { %>
+
+                <!-- REVIEW MILIK USER (user SUDAH review) -->
+                <div class="w-75 mt-4 p-3 bg-dark bg-opacity-25 border rounded text-start">
+                    <h5>Review Anda</h5>
+                    <strong>
+                        <%= userReview.user %>
+                    </strong> — ⭐ <%= userReview.rating %>
+                        <br>
+                        <small>
+                            <%= userReview.comment %>
+                        </small>
+                </div>
+
+                <% } %>
+
+
+                    <a href="/booth" class="btn btn-outline-light mt-4">⬅️ Kembali</a>
     </div>
 
     <style>

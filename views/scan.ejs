@@ -23,7 +23,6 @@
             flex-direction: column;
         }
 
-        /* HEADER */
         header {
             position: absolute;
             top: 0;
@@ -52,11 +51,6 @@
             transition: 0.3s;
         }
 
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* MAIN SCAN AREA */
         main {
             flex: 1;
             display: flex;
@@ -95,51 +89,10 @@
             aspect-ratio: 1 / 1.1;
         }
 
-        .qr-box i {
-            font-size: 5rem;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        /* Bottom QR Icon */
-        .scan-footer {
-            position: absolute;
-            bottom: 45px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-        }
-
-        .scan-footer i {
-            font-size: 1.8rem;
-            color: #00ffcc;
-            background: rgba(0, 255, 204, 0.15);
-            border: 2px solid #00ffcc;
-            border-radius: 50%;
-            padding: 14px;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
-        }
-
-        .scan-footer p {
-            margin-top: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #fff;
-            letter-spacing: 1px;
-        }
-
         @media (max-width: 480px) {
             .scan-container {
                 width: 90%;
                 padding: 1.5rem;
-            }
-
-            .qr-box i {
-                font-size: 4rem;
-            }
-
-            .scan-footer i {
-                font-size: 1.5rem;
-                padding: 12px;
             }
         }
     </style>
@@ -155,15 +108,17 @@
             </div>
             <div>
                 <small>Welcome</small><br>
-                <strong id="username">Sandra Sarango</strong>
+                <strong id="username">
+                    <%= user.name %>
+                </strong>
             </div>
         </div>
-        <a href="#" id="logout" class="logout-btn text-white text-decoration-none">
+        <a href="/logout" id="logout" class="logout-btn text-white text-decoration-none">
             <i class="bi bi-box-arrow-right"></i>
         </a>
     </header>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN -->
     <main>
         <div class="scan-container">
             <h2>SCAN QR</h2>
@@ -173,10 +128,47 @@
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="./app.js"></script>
+
+    <script>
+        const scanner = new Html5Qrcode("qr-reader");
+
+        function startScanner() {
+            scanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                },
+                async (decodedText) => {
+
+                    await scanner.stop();
+                    console.log("QR:", decodedText);
+
+                    const res = await fetch("/scan/result", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ boothCode: decodedText })
+                    });
+
+                    if (res.redirected) {
+                        window.location.href = res.url;
+                        return;
+                    }
+
+                    const message = await res.text();
+                    Swal.fire("Error", message, "error");
+                    startScanner();
+                }
+            );
+        }
+
+        document.addEventListener("DOMContentLoaded", startScanner);
+    </script>
+
+
 </body>
 
 </html>
