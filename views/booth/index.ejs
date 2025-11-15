@@ -1,5 +1,33 @@
 <%- include("../layouts/header", { title: "Booth" }) %>
 
+    <style>
+        /* BOOTH PAGE FIX */
+
+        body {
+            overflow-y: auto !important;
+            /* body bisa scroll */
+        }
+
+        main {
+            display: block !important;
+            /* non-flex supaya konten turun normal */
+            padding-top: 7rem !important;
+            padding-bottom: 7rem !important;
+            overflow-y: auto !important;
+            /* allow scroll */
+        }
+
+        .container {
+            max-height: calc(100vh - 150px);
+            /* menghindari overflow ke bawah */
+            overflow-y: auto;
+        }
+
+        .col-12 {
+            margin-bottom: 15px;
+        }
+    </style>
+
     <header class="d-flex justify-content-between align-items-center">
         <div>
             <small>Welcome</small><br>
@@ -22,7 +50,7 @@
 
                         <% let isVisited=visitedSafe[key]===true; %>
 
-                            <div class="col-6">
+                            <div class="col-12">
                                 <a href="/booth/<%= key %>" class="text-decoration-none">
                                     <div class="booth-card booth-main <%= isVisited ? 'visited' : 'not-visited' %>">
                                         <i class="bi bi-shop"></i>
@@ -30,6 +58,7 @@
                                     </div>
                                 </a>
                             </div>
+
 
                             <% }) %>
 
