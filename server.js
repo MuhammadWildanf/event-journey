@@ -55,7 +55,7 @@ if (!process.env.VERCEL) {
       cookie: {
         maxAge: 24 * 60 * 60 * 1000, // 1 hari
         httpOnly: true,
-        secure: true, // true jika HTTPS
+        secure: false, // true jika HTTPS
         sameSite: "lax",
       }
     })

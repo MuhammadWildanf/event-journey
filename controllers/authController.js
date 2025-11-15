@@ -39,11 +39,12 @@ export const registerUser = async (req, res) => {
     req.session.user = { id: ref.key, name, email };
 
     // Jika request dari fetch()
-    if (req.headers["content-type"]?.includes("application/json")) {
-        return res.status(200).json({ success: true });
-    }
-
-    res.redirect("/comingsoon");
+    req.session.save(() => {
+        if (req.headers["content-type"]?.includes("application/json")) {
+            return res.status(200).json({ success: true });
+        }
+        res.redirect("/comingsoon");
+    });
 };
 
 
@@ -71,11 +72,12 @@ export const loginUser = async (req, res) => {
     req.session.user = { id: user.id, name: user.name, email: user.email };
 
     // Deteksi apakah ini fetch() atau form normal
-    if (req.headers["content-type"]?.includes("application/json")) {
-        return res.status(200).json({ success: true });
-    }
-
-    res.redirect("/comingsoon");
+    req.session.save(() => {
+        if (req.headers["content-type"]?.includes("application/json")) {
+            return res.status(200).json({ success: true });
+        }
+        res.redirect("/comingsoon");
+    });
 };
 
 
