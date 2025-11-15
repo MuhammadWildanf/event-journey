@@ -104,7 +104,7 @@ app.use("/admin", adminRoutes);
 app.get("/test-email", async (req, res) => {
   try {
     const ok = await sendEmail(
-      "wildant.daftar@gmail.com",
+      "wildanf.daftar@gmail.com",
       "TEST EMAIL",
       "",
       "<h1>Test berhasil!</h1>"
