@@ -14,6 +14,7 @@ export const registerUser = async (req, res) => {
         return res.status(400).send("Semua field wajib diisi!");
     }
 
+    // Cek email sudah ada atau belum
     const usersSnap = await db.ref("users").get();
     let exists = false;
     usersSnap.forEach((child) => {
@@ -29,23 +30,47 @@ export const registerUser = async (req, res) => {
         name,
         email,
         password,
-        booths_visited: {},      // 🆕 mulai kosong
-        visited_count: 0,        // 🆕 0 awal
-        reward_ready: false,     // 🆕 belum siap reward
-        reward_claimed: false,   // 🆕 belum klaim reward
+
+        // === STATUS BOOTH ===
+        booths_visited: {},
+        visited_count: 0,
+
+        // === STATUS LUNCH ===
+        lunch_claimed: false,
+
+        // === STATUS SOUVENIR ===
+        souvenir_claimed: false,
+
+        // === STATUS PHOTOBOOTH ===
+        photobooth_done: false,   // 🆕
+
+        // === SAMPLE PHOTOS FUTURE ===
+        photobooth_images: {},    // 🆕
+
+        reward_ready: false,
+        reward_claimed: false,
+
         created_at: new Date().toISOString(),
     });
 
+    // Simpan session
     req.session.user = { id: ref.key, name, email };
 
-    // Jika request dari fetch()
+    // Kirim EMAIL
+    try {
+        await sendRegistrationEmail(name, email);
+    } catch (e) {
+        console.error("Email error:", e);
+    }
+
     req.session.save(() => {
         if (req.headers["content-type"]?.includes("application/json")) {
             return res.status(200).json({ success: true });
         }
-        res.redirect("/comingsoon");
+        res.redirect("/dashboard");
     });
 };
+
 
 
 
@@ -76,7 +101,9 @@ export const loginUser = async (req, res) => {
         if (req.headers["content-type"]?.includes("application/json")) {
             return res.status(200).json({ success: true });
         }
-        res.redirect("/comingsoon");
+        // res.redirect("/comingsoon");
+        res.redirect("/dashboard");
+
     });
 };
 

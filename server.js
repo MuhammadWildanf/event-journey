@@ -98,6 +98,18 @@ app.use((req, res, next) => {
 
 app.use("/admin", adminRoutes);
 
+app.get("/test-email", async (req, res) => {
+  const ok = await sendEmail(
+    "wildant.daftar@gmail.com",
+    "TEST EMAIL",
+    "",
+    "<h1>Test berhasil!</h1>"
+  );
+  res.send(ok ? "Terkirim!" : "Gagal");
+});
+
+
+
 
 // Default Redirect
 app.get("*", (req, res) => res.redirect("/login"));
