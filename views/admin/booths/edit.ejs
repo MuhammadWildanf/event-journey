@@ -1,0 +1,20 @@
+<%- include("../../layouts/header-admin", { title: "Edit Booth" }) %>
+
+    <div class="container py-4">
+
+        <h3>Edit Booth</h3>
+
+        <form method="POST" action="/admin/booths/<%= id %>/edit" class="mt-3">
+
+            <div class="mb-3">
+                <label class="form-label">Nama Booth</label>
+                <input type="text" class="form-control" name="name" value="<%= data.name %>" required>
+            </div>
+
+            <button class="btn btn-primary">Update</button>
+            <a href="/admin/booths" class="btn btn-secondary">Kembali</a>
+        </form>
+
+    </div>
+
+    <%- include("../../layouts/footer") %>

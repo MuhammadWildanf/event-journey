@@ -10,6 +10,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import boothRoutes from "./routes/boothRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import serverless from "serverless-http";
 
 dotenv.config();
@@ -76,6 +77,27 @@ app.use("/", dashboardRoutes);
 app.use("/", boothRoutes);
 app.use("/", scanRoutes);
 app.use("/", serviceRoutes);
+
+// AUTO SET ACTIVE MENU
+app.use((req, res, next) => {
+  const url = req.originalUrl;
+
+  if (url.startsWith("/admin/booths")) {
+    res.locals.active = "booths";
+  } else if (url.startsWith("/admin/users")) {
+    res.locals.active = "users";
+  } else if (url.startsWith("/admin")) {
+    res.locals.active = "dashboard";
+  } else {
+    res.locals.active = "";
+  }
+
+  next();
+});
+
+
+app.use("/admin", adminRoutes);
+
 
 // Default Redirect
 app.get("*", (req, res) => res.redirect("/login"));

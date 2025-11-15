@@ -1,0 +1,42 @@
+<%- include("../../layouts/header-admin", { title: "Detail User" }) %>
+
+    <div class="container py-4">
+
+        <h3>Detail User</h3>
+
+        <form method="POST" action="/admin/users/<%= id %>/edit">
+
+            <div class="mb-3">
+                <label class="form-label">Nama</label>
+                <input type="text" class="form-control" name="name" value="<%= user.name %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" value="<%= user.email %>">
+            </div>
+
+            <button class="btn btn-primary">Update</button>
+            <a href="/admin/users" class="btn btn-secondary">Kembali</a>
+
+        </form>
+
+        <hr>
+
+        <h4>Visited Booth</h4>
+
+        <% if (user.booths_visited) { %>
+            <ul>
+                <% Object.keys(user.booths_visited).forEach(b=> { %>
+                    <li>
+                        <%= b %>
+                    </li>
+                    <% }) %>
+            </ul>
+            <% } else { %>
+                <p class="text-muted">Belum mengunjungi booth</p>
+                <% } %>
+
+    </div>
+
+    <%- include("../../layouts/footer") %>

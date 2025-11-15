@@ -1,0 +1,61 @@
+<%- include("../../layouts/header-admin", { title: "Detail Booth" }) %>
+
+    <div class="container py-4">
+
+        <h3>Detail Booth: <%= booth.name %>
+        </h3>
+
+        <img src="<%= booth.qrUrl %>" width="200" class="my-3 d-block">
+
+        <a href="/admin/booths/<%= id %>/download" class="btn btn-success mb-3">Download QR</a>
+
+        <hr>
+
+        <h4>Pengunjung yang Visit</h4>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nama</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% visitedUsers.forEach(u=> { %>
+                    <tr>
+                        <td>
+                            <%= u.name %>
+                        </td>
+                        <td>
+                            <%= u.email %>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <h4>Review</h4>
+
+        <% if (reviews.length===0) { %>
+            <p class="text-muted">Belum ada review.</p>
+            <% } else { %>
+                <% reviews.forEach(r=> { %>
+                    <div class="border rounded p-2 mb-2 bg-light">
+                        <strong>
+                            <%= r.user %>
+                        </strong> — ⭐ <%= r.rating %><br>
+                            <small>
+                                <%= r.comment %>
+                            </small>
+                    </div>
+                    <% }) %>
+                        <% } %>
+
+                            <a href="/admin/booths" class="btn btn-secondary mt-3">Kembali</a>
+
+    </div>
+
+    <%- include("../../layouts/footer") %>

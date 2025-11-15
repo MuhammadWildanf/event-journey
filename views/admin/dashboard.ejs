@@ -1,0 +1,36 @@
+<%- include("../layouts/header-admin", { title: "Admin Dashboard" }) %>
+
+    <div class="container py-4">
+
+        <h2 class="mb-4">Admin Dashboard</h2>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h3>
+                            <%= userCount %>
+                        </h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <a href="/admin/booths" class="text-decoration-none text-dark">
+                    <div class="card shadow">
+                        <div class="card-body text-center">
+                            <h3>
+                                <%= boothCount %>
+                            </h3>
+                            <p>Total Booth</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <%- include("../layouts/footer") %>

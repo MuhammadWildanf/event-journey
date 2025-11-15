@@ -1,0 +1,48 @@
+<%- include("../../layouts/header-admin", { title: "Data Booth" }) %>
+
+    <div class="container py-4">
+
+        <div class="d-flex justify-content-between mb-3">
+            <h3>Daftar Booth</h3>
+            <div>
+                <a href="/admin/booths/create" class="btn btn-primary">+ Booth Baru</a>
+                <a href="/admin/booths/export" class="btn btn-success">Export CSV</a>
+            </div>
+        </div>
+
+        <table class="table table-striped table-bordered datatable">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nama</th>
+                    <th>QR</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% Object.entries(booths).forEach(([id, b])=> { %>
+                    <tr>
+                        <td>
+                            <%= id %>
+                        </td>
+                        <td>
+                            <%= b.name %>
+                        </td>
+                        <td>
+                            <img src="<%= b.qrUrl %>" width="80">
+                        </td>
+                        <td>
+                            <a href="/admin/booths/<%= id %>" class="btn btn-sm btn-info">Detail</a>
+                            <a href="/admin/booths/<%= id %>/edit" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="/admin/booths/<%= id %>/delete" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Hapus booth ini?')">Delete</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+
+    </div>
+
+    <%- include("../../layouts/footer") %>
