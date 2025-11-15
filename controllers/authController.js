@@ -1,4 +1,6 @@
 import { db } from "../server.js";
+import { sendRegistrationEmail } from "../utils/sendRegistrationEmail.js";
+
 
 export const showRegister = (req, res) => {
     res.render("auth/register");

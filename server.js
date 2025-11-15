@@ -12,6 +12,9 @@ import scanRoutes from "./routes/scanRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import serverless from "serverless-http";
+import { sendEmail } from "./utils/mailer.js";
+
+
 
 dotenv.config();
 
