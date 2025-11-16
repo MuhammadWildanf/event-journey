@@ -4,6 +4,9 @@
 
         <h3>Detail User</h3>
 
+        <!-- ============================
+         FORM UPDATE USER (Nama + Email)
+    ============================== -->
         <form method="POST" action="/admin/users/<%= id %>/edit">
 
             <div class="mb-3">
@@ -23,6 +26,61 @@
 
         <hr>
 
+        <!-- ============================
+         RESET DATA USER
+    ============================== -->
+        <form method="POST" action="/admin/users/<%= id %>/reset"
+            onsubmit="return confirm('Yakin reset user ini seperti baru daftar?')">
+            <button class="btn btn-warning">Reset Data User</button>
+        </form>
+
+        <hr>
+
+        <!-- ============================
+         EDIT STATUS (Lunch / Souvenir / Photobooth / Visit)
+    ============================== -->
+        <h4>Edit Status User</h4>
+
+        <form method="POST" action="/admin/users/<%= id %>/status">
+
+            <div class="mb-3">
+                <label class="form-label">Lunch Claimed</label>
+                <select name="lunch_claimed" class="form-control">
+                    <option value="false" <%=!user.lunch_claimed ? "selected" : "" %>>Belum</option>
+                    <option value="true" <%=user.lunch_claimed ? "selected" : "" %>>Sudah</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Souvenir Claimed</label>
+                <select name="souvenir_claimed" class="form-control">
+                    <option value="false" <%=!user.souvenir_claimed ? "selected" : "" %>>Belum</option>
+                    <option value="true" <%=user.souvenir_claimed ? "selected" : "" %>>Sudah</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Photobooth Done</label>
+                <select name="photobooth_done" class="form-control">
+                    <option value="false" <%=!user.photobooth_done ? "selected" : "" %>>Belum</option>
+                    <option value="true" <%=user.photobooth_done ? "selected" : "" %>>Sudah</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Visited Count</label>
+                <input type="number" class="form-control" name="visited_count" value="<%= user.visited_count || 0 %>">
+            </div>
+
+            <button class="btn btn-success">Update Status</button>
+
+        </form>
+
+        <hr>
+
+        <!-- ============================
+         VISITED BOOTHS LIST
+    ============================== -->
         <h4>Visited Booth</h4>
 
         <% if (user.booths_visited) { %>

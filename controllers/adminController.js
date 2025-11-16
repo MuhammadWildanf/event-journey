@@ -258,3 +258,38 @@ export const userExportCSV = async (req, res) => {
     res.setHeader("Content-Disposition", "attachment; filename=users.csv");
     res.send(csv);
 };
+
+
+export const userReset = async (req, res) => {
+    const { id } = req.params;
+
+    const resetData = {
+        booths_visited: {},
+        visited_count: 0,
+        lunch_claimed: false,
+        souvenir_claimed: false,
+        photobooth_done: false,
+        photobooth_images: {},
+        reward_ready: false,
+        reward_claimed: false,
+    };
+
+    await db.ref("users/" + id).update(resetData);
+
+    res.redirect("/admin/users/" + id);
+};
+
+
+export const userUpdateStatus = async (req, res) => {
+    const { id } = req.params;
+    const { lunch_claimed, souvenir_claimed, visited_count, photobooth_done } = req.body;
+
+    await db.ref("users/" + id).update({
+        lunch_claimed: lunch_claimed === "true",
+        souvenir_claimed: souvenir_claimed === "true",
+        photobooth_done: photobooth_done === "true",
+        visited_count: Number(visited_count) || 0
+    });
+
+    res.redirect("/admin/users/" + id);
+};

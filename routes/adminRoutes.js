@@ -15,7 +15,9 @@ import {
     userDetail,
     userDelete,
     userUpdate,
-    userExportCSV
+    userExportCSV,
+    userReset,
+    userUpdateStatus
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -42,5 +44,7 @@ router.get("/users/export", userExportCSV);
 router.get("/users/:id", userDetail);
 router.post("/users/:id/edit", userUpdate);
 router.get("/users/:id/delete", userDelete);
+router.post("/users/:id/reset", userReset);
+router.post("/users/:id/status", userUpdateStatus);
 
 export default router;
