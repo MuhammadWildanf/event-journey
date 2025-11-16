@@ -1,98 +1,122 @@
 <%- include("../layouts/header", { title: "Booth" }) %>
 
-    <style>
-        /* BOOTH PAGE FIX */
+<style>
+    /* BOOTH PAGE FIX */
 
-        body {
-            overflow-y: auto !important;
-            /* body bisa scroll */
-        }
+    body {
+        overflow-y: auto !important;
+        /* body bisa scroll */
+    }
 
-        main {
-            display: block !important;
-            /* non-flex supaya konten turun normal */
-            padding-top: 7rem !important;
-            padding-bottom: 7rem !important;
-            overflow-y: auto !important;
-            /* allow scroll */
-        }
+    main {
+        display: block !important;
+        /* non-flex supaya konten turun normal */
+        padding-top: 7rem !important;
+        padding-bottom: 7rem !important;
+        overflow-y: auto !important;
+        /* allow scroll */
+    }
 
-        .container {
-            max-height: calc(100vh - 150px);
-            /* menghindari overflow ke bawah */
-            overflow-y: auto;
-        }
+    .container {
+        max-height: calc(100vh - 150px);
+        /* menghindari overflow ke bawah */
+        overflow-y: auto;
+    }
 
-        .col-12 {
-            margin-bottom: 15px;
-        }
+    .col-12 {
+        margin-bottom: 15px;
+    }
 
-         .btn-back-custom {
-            display: block;
-            width: 100%;
-            padding: 14px 0;
-            margin-top: 2rem;
-            border-radius: 14px;
+    .booth-list-card {
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #000;
+        font-weight: 600;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        margin-bottom: 14px;
+    }
 
-            background: #0c2340;
-            /* Navy gelap */
-            color: #ffffff;
-            font-size: 1rem;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow:
-                0 0 12px rgba(0, 255, 255, 0.2),
-                0 0 20px rgba(0, 255, 255, 0.1);
-
-            transition: all 0.25s ease;
-        }
-
-        .btn-back-custom:hover {
-            transform: translateY(-2px);
-            box-shadow:
-                0 0 18px rgba(0, 255, 255, 0.35),
-                0 0 30px rgba(0, 255, 255, 0.2);
-            color: #fff;
-        }
-    </style>
-
-    <header class="d-flex justify-content-between align-items-center">
-        <div>
-            <small>Welcome</small><br>
-            <strong>
-                <%= user.name %>
-            </strong>
-        </div>
-    </header>
-
-    <main class="text-center">
-        <div class="container">
-            <div class="row justify-content-center g-3">
-
-                <% const visitedSafe=(typeof visited !=="undefined" && visited) ? visited : {}; %>
-
-                    <% Object.entries(booths).forEach(([key, booth])=> { %>
-
-                        <% let isVisited=visitedSafe[key]===true; %>
-
-                            <div class="col-12">
-                                <a href="/booth/<%= key %>" class="text-decoration-none">
-                                    <div class="booth-card booth-main <%= isVisited ? 'visited' : 'not-visited' %>">
-                                        <i class="bi bi-shop"></i>
-                                        <%= booth.name %>
-                                    </div>
-                                </a>
-                            </div>
+    .booth-visited {
+        background: linear-gradient(135deg, #C65AFF 0%, #8A23D9 100%);
+        color: #fff;
+        border: 3px solid #F0B6FF;
+    }
 
 
-                            <% }) %>
+    .btn-back-custom {
+        display: block;
+        width: 100%;
+        padding: 14px 0;
+        margin-top: 2rem;
+        border-radius: 14px;
 
+        background: #0c2340;
+        /* Navy gelap */
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow:
+            0 0 12px rgba(0, 255, 255, 0.2),
+            0 0 20px rgba(0, 255, 255, 0.1);
+
+        transition: all 0.25s ease;
+    }
+
+    .btn-back-custom:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 0 18px rgba(0, 255, 255, 0.35),
+            0 0 30px rgba(0, 255, 255, 0.2);
+        color: #fff;
+    }
+</style>
+
+<header class="d-flex justify-content-between align-items-center">
+    <div>
+        <small>Welcome</small><br>
+        <strong>
+            <%= user.name %>
+        </strong>
+    </div>
+</header>
+
+<%
+  const visitedSafe = (typeof visited !== "undefined" && visited) ? visited : {};
+
+  const sortedBooths = Object.entries(booths).sort((a, b) => {
+      const isAVisited = visitedSafe[a[0]] ? 1 : 0;
+      const isBVisited = visitedSafe[b[0]] ? 1 : 0;
+      return isBVisited - isAVisited;
+  });
+%>
+
+<main class="text-center">
+    <div class="container">
+        <div class="row justify-content-center g-3">
+
+            <% sortedBooths.forEach(([key, booth]) => { %>
+            <% let isVisited = visitedSafe[key] === true; %>
+
+            <div class="col-12">
+                <a href="<%= isVisited ? '/booth/' + key : '/scan?redirect=/booth/' + key %>"
+                    class="text-decoration-none">
+                    <div class="booth-list-card <%= isVisited ? 'booth-visited' : '' %>">
+                        <i class="bi bi-shop"></i>
+                        <%= booth.name %>
+                    </div>
+                </a>
             </div>
-            <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
-        </div>
-    </main>
 
-    <%- include("../layouts/footer") %>
+            <% }) %>
+
+        </div>
+        <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
+    </div>
+</main>
+
+<%- include("../layouts/footer") %>
