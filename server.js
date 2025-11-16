@@ -102,20 +102,10 @@ app.use((req, res, next) => {
 app.use("/admin", adminRoutes);
 
 app.get("/test-email", async (req, res) => {
-  try {
-    const ok = await sendEmail(
-      "wildanf.daftar@gmail.com",
-      "TEST EMAIL",
-      "",
-      "<h1>Test berhasil!</h1>"
-    );
-
-    res.send(ok ? "Terkirim!" : "Gagal");
-  } catch (err) {
-    console.error("🔥 ERROR TEST EMAIL:", err);
-    res.send("ERROR: " + err.message);
-  }
+  const ok = await sendEmail("wildanf.daftar@gmail.com", "Test Brevo", "Works!", "<h1>OK</h1>");
+  res.send(ok ? "Sukses" : "Gagal");
 });
+
 
 
 

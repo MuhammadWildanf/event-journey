@@ -2,33 +2,28 @@ import nodemailer from "nodemailer";
 
 export const sendEmail = async (to, subject, text = "", html = "") => {
     try {
-        console.log("🔌 Connecting to SMTP...");
-
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,     // smtp.mailersend.net
-            port: 587,
-            secure: false,                   // Wajib false
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT),
+            secure: false, // WAJIB false untuk port 587
             auth: {
-                user: process.env.SMTP_USER, // MS_xxxxx@scmdigitalday2025.com
+                user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
-            },
-            tls: {
-                rejectUnauthorized: false,
             },
         });
 
         const info = await transporter.sendMail({
-            from: process.env.MAIL_FROM,     // langsung, TIDAK pakai tambahan name
+            from: process.env.MAIL_FROM,
             to,
             subject,
+            text,
             html,
         });
 
-        console.log("📧 Email sent:", info);
+        console.log("Email sent:", info.messageId);
         return true;
-
     } catch (err) {
-        console.error("❌ SMTP ERROR:", err);
+        console.error("Email error:", err);
         return false;
     }
 };
