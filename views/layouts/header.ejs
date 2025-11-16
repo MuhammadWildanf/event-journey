@@ -15,7 +15,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-    <style>
+       <style>
+        /* =====================
+           BASE LAYOUT
+        ====================== */
         body {
             background: url("/assets/img/bg-dashboard.png") no-repeat center top/cover;
             font-family: 'Poppins', sans-serif;
@@ -35,174 +38,112 @@
             z-index: 10;
         }
 
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.25);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.2rem;
-        }
-
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 1.2rem;
-            transition: 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
         main {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding-top: 6rem;
-            padding-bottom: 7rem;
+            padding-bottom: 2rem;
         }
 
-        .material-symbols-rounded {
-            font-family: 'Material Symbols Rounded';
-            font-weight: normal;
-            font-style: normal;
-            font-size: 32px;
-            line-height: 1;
-            display: inline-block;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
-            font-feature-settings: 'liga';
-            letter-spacing: normal;
-            text-transform: none;
-            margin-bottom: 6px;
+        /* =====================
+           GRID WRAPPER (PHONE UI)
+        ====================== */
+        .dashboard-grid {
+            width: 100%;
+            max-width: 390px; /* ukuran paling dekat dengan HP kamu */
+            margin: 0 auto;
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(2, 1fr);
+            padding: 20px 12px 40px;
         }
 
+        /* Desktop scaling (NO ZOOM berlebihan) */
+        @media (min-width: 1024px) {
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                transform: scale(1.15);
+                transform-origin: top center;
+            }
+        }
+
+        /* =====================
+           CARD BASE
+        ====================== */
+        .grid-item {
+            width: 100%;
+        }
+
+        .grid-item.wide {
+            grid-column: span 2;
+        }
 
         .booth-card {
-            height: 150px;
-            background-size: cover !important;
+            width: 100%;
+            background-size: contain !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
+            border-radius: 0 !important; /* NO RADIUS */
             overflow: hidden;
-            transition: .25s;
+
+            /* Supaya PNG tidak terpotong */
+            padding: 16px 0;
         }
 
-        .booth-card:hover {
-            transform: translateY(-4px);
+        /* RATIO CARD – mengikuti desain PNG */
+        .grid-item.wide .booth-card {
+            aspect-ratio: 18/7; 
         }
 
-        /* Card images */
-        .card-scan {
-            background-image: url('/assets/cards/scan.png');
+        .grid-item.square .booth-card {
+            aspect-ratio: 1/1;
         }
 
-        .card-lunch {
-            background-image: url('/assets/cards/lunch.png');
-        }
+        /* =====================
+           CARD IMAGES
+        ====================== */
+        .card-scan { background-image: url('/assets/cards/scan.png'); }
+        .card-lunch { background-image: url('/assets/cards/lunch.png'); }
+        .card-souvenir { background-image: url('/assets/cards/souvenir.png'); }
+        .card-photo { background-image: url('/assets/cards/photo.png'); }
+        .card-games { background-image: url('/assets/cards/games.png'); }
+        .card-booth { background-image: url('/assets/cards/booth.png'); }
 
-        .card-souvenir {
-            background-image: url('/assets/cards/souvenir.png');
-        }
-
-        .card-photo {
-            background-image: url('/assets/cards/photo.png');
-        }
-
-        .card-games {
-            background-image: url('/assets/cards/games.png');
-        }
-
-        .card-booth {
-            background-image: url('/assets/cards/booth.png');
-        }
-
-        .not-visited {
-            pointer-events: none;
-            position: relative;
-            filter: grayscale(30%) brightness(70%);
-        }
-
+        /* =====================
+           NOT VISITED EFFECT
+        ====================== */
         .not-visited {
             pointer-events: none;
             position: relative;
             filter: grayscale(25%) brightness(80%);
         }
 
-        /* Overlay biru soft */
         .not-visited::after {
             content: "";
             position: absolute;
             inset: 0;
             background: rgba(0, 45, 90, 0.45);
-            /* lebih soft, tidak terlalu gelap */
-            border-radius: inherit;
-            backdrop-filter: blur(1px);
-            /* efek modern soft glass */
         }
 
-
-
-
-        .visited {
-            opacity: 1 !important;
-            filter: none !important;
+        /* Hover (Desktop only) */
+        @media (hover:hover) {
+            .booth-card:hover {
+                transform: translateY(-4px);
+                transition: 0.25s;
+            }
         }
 
-
-        .scan-area {
-            position: absolute;
-            bottom: 45px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-        }
-
-        .scan-btn {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: rgba(0, 255, 204, 0.25);
-            border: 2px solid #00ffcc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #00ffcc;
-            font-size: 2rem;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
-            transition: all 0.3s;
-            margin: 0 auto;
-        }
-
-        .scan-btn:hover {
-            background: #00ffcc;
-            color: #000;
-            transform: scale(1.08);
-        }
-
-        .scan-label {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-
+        /* Logout button */
         .logout-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-
             width: 42px;
             height: 42px;
-
-
-            margin-right: 6px;
-
             transition: 0.25s ease;
         }
 
@@ -212,8 +153,6 @@
 
         .logout-icon {
             font-size: 22px;
-            /* icon diperkecil */
-            line-height: 1;
         }
     </style>
 

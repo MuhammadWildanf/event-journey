@@ -30,52 +30,32 @@ const nv = (v) => (v ? "" : "not-visited");
 
 
 <main>
-  <div class="container text-center">
-    <div class="row justify-content-center g-3">
+  <div class="dashboard-grid">
 
-      <!-- SCAN -->
-      <div class="col-12">
-        <a href="/scan" class="text-decoration-none">
-          <div class="booth-card card-scan"></div>
-        </a>
-      </div>
+    <a href="/scan" class="grid-item wide">
+      <div class="booth-card card-scan"></div>
+    </a>
 
-      <!-- LUNCH -->
-      <div class="col-6">
-        <a href="/lunch" class="text-decoration-none">
-          <div class="booth-card card-lunch <%= nv(featureStatus.lunch) %>"></div>
-        </a>
-      </div>
+    <a href="/lunch" class="grid-item square">
+      <div class="booth-card card-lunch <%= nv(featureStatus.lunch) %>"></div>
+    </a>
 
-      <!-- SOUVENIR -->
-      <div class="col-6">
-        <a href="/souvenir" class="text-decoration-none">
-          <div class="booth-card card-souvenir <%= nv(featureStatus.souvenir) %>"></div>
-        </a>
-      </div>
+    <a href="/souvenir" class="grid-item square">
+      <div class="booth-card card-souvenir <%= nv(featureStatus.souvenir) %>"></div>
+    </a>
 
-      <!-- PHOTOBOOTH -->
-      <div class="col-6">
-        <a href="/photobooth" class="text-decoration-none">
-          <div class="booth-card card-photo <%= nv(featureStatus.photobooth) %>"></div>
-        </a>
-      </div>
+    <a href="/photobooth" class="grid-item square">
+      <div class="booth-card card-photo <%= nv(featureStatus.photobooth) %>"></div>
+    </a>
 
-      <!-- GAMES -->
-      <div class="col-6">
-        <a href="/games" class="text-decoration-none">
-          <div class="booth-card card-games <%= nv(featureStatus.games) %>"></div>
-        </a>
-      </div>
+    <a href="/games" class="grid-item square">
+      <div class="booth-card card-games <%= nv(featureStatus.games) %>"></div>
+    </a>
 
-      <!-- BOOTH -->
-      <div class="col-12">
-        <a href="/booth" class="text-decoration-none">
-          <div class="booth-card card-booth w-100 <%= nv(featureStatus.booth) %>"></div>
-        </a>
-      </div>
+    <a href="/booth" class="grid-item wide">
+      <div class="booth-card card-booth <%= nv(featureStatus.booth) %>"></div>
+    </a>
 
-    </div>
   </div>
 </main>
 
