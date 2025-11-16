@@ -1,72 +1,116 @@
-<%- include("../layouts/header", { title: "Booth Detail" }) %>
+<%- include("../layouts/header", { title: "Booth" }) %>
 
-    <div class="text-white text-center d-flex flex-column align-items-center justify-content-center"
-        style="min-height:100vh;">
-        <h3 class="mb-2">
-            <%= boothData.name || 'Booth' %>
-        </h3>
-        <p class="text-white-50 mb-4">
-            <%= boothData.description || '' %>
-        </p>
+<style>
+    .booth-wrapper {
+        min-height: 100vh;
+        padding-top: 6rem;
+        padding-bottom: 4rem;
+    }
 
-        <% if (!userReview) { %>
+    h3 {
+        font-weight: 700;
+        letter-spacing: .5px;
+    }
 
-            <!-- FORM REVIEW (user BELUM review) -->
-            <form action="/booth/<%= boothType %>/review" method="POST" class="w-75">
-                <textarea name="comment" class="form-control mb-3" rows="4" placeholder="Tulis review..."
-                    required></textarea>
+    /* RATING STYLE */
+    .rating {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        font-size: 2.2rem;
+        cursor: pointer;
+    }
 
-                <div class="rating mb-3">
-                    <% for (let i=5; i>= 1; i--) { %>
-                        <input type="radio" name="rating" value="<%= i %>" id="star<%= i %>" required>
-                        <label for="star<%= i %>">★</label>
-                        <% } %>
-                </div>
+    .rating input {
+        display: none;
+    }
 
-                <button type="submit" class="btn btn-success w-100">Submit</button>
-            </form>
+    .rating label {
+        color: #444;
+        transition: .2s;
+    }
 
-            <% } else { %>
+    .rating label:hover,
+    .rating label:hover ~ label,
+    .rating input:checked ~ label {
+        color: #00ffcc !important;
+    }
 
-                <!-- REVIEW MILIK USER (user SUDAH review) -->
-                <div class="w-75 mt-4 p-3 bg-dark bg-opacity-25 border rounded text-start">
-                    <h5>Review Anda</h5>
-                    <strong>
-                        <%= userReview.user %>
-                    </strong> — ⭐ <%= userReview.rating %>
-                        <br>
-                        <small>
-                            <%= userReview.comment %>
-                        </small>
-                </div>
+    /* REVIEW CARD */
+    .review-box {
+        background: rgba(12, 35, 64, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(4px);
+        border-radius: 14px;
+        padding: 20px;
+        width: 75%;
+        color: #fff;
+    }
 
+    /* BACK BUTTON SAME STYLE */
+    .btn-back-custom {
+        display: block;
+        width: 75%;
+        padding: 14px 0;
+        margin-top: 2rem;
+        border-radius: 14px;
+
+        background: #0c2340;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow:
+            0 0 12px rgba(0, 255, 255, 0.2),
+            0 0 20px rgba(0, 255, 255, 0.1);
+
+        transition: 0.25s;
+    }
+
+    .btn-back-custom:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 0 18px rgba(0, 255, 255, 0.35),
+            0 0 30px rgba(0, 255, 255, 0.2);
+    }
+</style>
+
+<div class="text-white text-center d-flex flex-column align-items-center booth-wrapper">
+
+    <h3><%= boothData.name || 'Booth' %></h3>
+    <p class="text-white-50 mb-4"><%= boothData.description || '' %></p>
+
+    <% if (!userReview) { %>
+
+        <!-- FORM REVIEW -->
+        <form action="/booth/<%= boothType %>/review" method="POST" class="w-75">
+
+            <textarea name="comment" class="form-control mb-3" rows="4" placeholder="Tulis review..." required></textarea>
+
+            <div class="rating mb-3">
+                <% for (let i = 5; i >= 1; i--) { %>
+                    <input type="radio" name="rating" value="<%= i %>" id="star<%= i %>" required>
+                    <label for="star<%= i %>">★</label>
                 <% } %>
+            </div>
 
+            <button type="submit" class="btn btn-success w-100">SEND</button>
+        </form>
 
-                    <a href="/booth" class="btn btn-outline-light mt-4">⬅️ Kembali</a>
-    </div>
+    <% } else { %>
 
-    <style>
-        .rating {
-            direction: rtl;
-            unicode-bidi: bidi-override;
-            font-size: 2rem;
-        }
+        <!-- REVIEW SUDAH ADA -->
+        <div class="review-box mt-3 text-start">
+            <h5>Review Anda</h5>
+            <strong><%= userReview.user %></strong> — ⭐ <%= userReview.rating %>  
+            <p class="mt-2 mb-0"><%= userReview.comment %></p>
+        </div>
 
-        .rating input {
-            display: none;
-        }
+    <% } %>
 
-        .rating label {
-            color: #555;
-            cursor: pointer;
-        }
+    <a href="/dashboard" class="btn-back-custom">BACK</a>
+</div>
 
-        .rating input:checked~label,
-        .rating label:hover,
-        .rating label:hover~label {
-            color: #00ffcc;
-        }
-    </style>
-
-    <%- include("../layouts/footer") %>
+<%- include("../layouts/footer") %>

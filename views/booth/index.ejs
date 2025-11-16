@@ -26,6 +26,37 @@
         .col-12 {
             margin-bottom: 15px;
         }
+
+         .btn-back-custom {
+            display: block;
+            width: 100%;
+            padding: 14px 0;
+            margin-top: 2rem;
+            border-radius: 14px;
+
+            background: #0c2340;
+            /* Navy gelap */
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 0 12px rgba(0, 255, 255, 0.2),
+                0 0 20px rgba(0, 255, 255, 0.1);
+
+            transition: all 0.25s ease;
+        }
+
+        .btn-back-custom:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 0 18px rgba(0, 255, 255, 0.35),
+                0 0 30px rgba(0, 255, 255, 0.2);
+            color: #fff;
+        }
     </style>
 
     <header class="d-flex justify-content-between align-items-center">
@@ -35,9 +66,6 @@
                 <%= user.name %>
             </strong>
         </div>
-        <a href="/logout" class="logout-btn text-white text-decoration-none">
-            <i class="bi bi-box-arrow-right"></i>
-        </a>
     </header>
 
     <main class="text-center">
@@ -63,6 +91,7 @@
                             <% }) %>
 
             </div>
+            <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
         </div>
     </main>
 
