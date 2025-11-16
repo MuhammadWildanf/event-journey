@@ -186,12 +186,14 @@
 
 
 
-       .not-visited {
-    opacity: 0.25 !important;
-    filter: grayscale(100%) brightness(60%) !important;
-    pointer-events: none !important; /* Tidak bisa diklik */
-    box-shadow: none !important;
-}
+        .not-visited {
+            opacity: 0.25 !important;
+            filter: grayscale(100%) brightness(60%) !important;
+            pointer-events: none !important;
+            /* Tidak bisa diklik */
+            box-shadow: none !important;
+        }
+
         .visited {
             opacity: 1;
             filter: none;
@@ -232,6 +234,31 @@
             font-size: 0.9rem;
             font-weight: 600;
             letter-spacing: 1px;
+        }
+
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 42px;
+            height: 42px;
+
+
+            margin-right: 6px;
+
+            transition: 0.25s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .logout-icon {
+            font-size: 22px;
+            /* icon diperkecil */
+            line-height: 1;
         }
     </style>
 

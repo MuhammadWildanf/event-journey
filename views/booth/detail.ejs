@@ -12,12 +12,14 @@
         letter-spacing: .5px;
     }
 
-    /* RATING STYLE */
+    /* ==== RATING DESAIN BARU ==== */
     .rating {
         display: flex;
+        flex-direction: row-reverse;
+        /* membuat 1 bintang paling kiri */
         justify-content: center;
-        gap: 6px;
-        font-size: 2.2rem;
+        gap: 18px;
+        font-size: 2.7rem;
         cursor: pointer;
     }
 
@@ -26,39 +28,69 @@
     }
 
     .rating label {
-        color: #444;
+        color: #ffffff;
+        opacity: 0.35;
+        /* outline look */
         transition: .2s;
     }
 
+    /* Saat hover bintang ke kiri ikut menyala */
     .rating label:hover,
-    .rating label:hover ~ label,
-    .rating input:checked ~ label {
-        color: #00ffcc !important;
+    .rating label:hover~label {
+        opacity: 1 !important;
     }
 
-    /* REVIEW CARD */
+    /* Saat selected */
+    .rating input:checked~label {
+        opacity: 1 !important;
+    }
+
+    /* REVIEW CARD sesuai desain */
     .review-box {
-        background: rgba(12, 35, 64, 0.55);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(4px);
-        border-radius: 14px;
-        padding: 20px;
-        width: 75%;
-        color: #fff;
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 24px;
+        width: 85%;
+        color: #000;
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
     }
 
-    /* BACK BUTTON SAME STYLE */
+    /* === BUTTON NEON DESIGN === */
+    .btn-send {
+        width: 85%;
+        margin: 20px auto 0;
+        display: block;
+
+        padding: 14px 0;
+        border-radius: 12px;
+
+        background: linear-gradient(90deg, #b4ff30, #78ff00);
+        border: 2px solid #d7ff76;
+
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #003300;
+        letter-spacing: 1px;
+
+        box-shadow: 0 0 18px rgba(180, 255, 48, 0.6);
+    }
+
+
+    /* BUTTON */
     .btn-back-custom {
         display: block;
-        width: 75%;
+        width: 85%;
+        max-width: 300px;
+        margin: 40px auto 0;
         padding: 14px 0;
-        margin-top: 2rem;
         border-radius: 14px;
 
         background: #0c2340;
         color: #ffffff;
         font-size: 1rem;
         font-weight: 600;
+        text-align: center;
         text-decoration: none;
 
         border: 1px solid rgba(255, 255, 255, 0.15);
@@ -75,42 +107,74 @@
             0 0 18px rgba(0, 255, 255, 0.35),
             0 0 30px rgba(0, 255, 255, 0.2);
     }
+
+    .booth-title {
+        display: flex;
+        align-items: center;
+        /* icon & text SEGARIS / sejajar */
+        justify-content: center;
+        /* center horizontal */
+        gap: 10px;
+        /* jarak icon–text */
+        max-width: 90%;
+        /* supaya booth name panjang tetap aman */
+        flex-wrap: wrap;
+        /* kalau panjang → text turun ke bawah */
+        text-align: center;
+        /* text turun tetap center */
+        margin-bottom: 1rem;
+    }
+
+    .booth-title .material-symbols-rounded {
+        font-size: 40px;
+        /* ukuran icon */
+        line-height: 1;
+    }
 </style>
 
 <div class="text-white text-center d-flex flex-column align-items-center booth-wrapper">
 
-    <h3><%= boothData.name || 'Booth' %></h3>
+    <div class="booth-title">
+        <span class="material-symbols-rounded">storefront</span>
+        <h3><%= boothData.name || 'Booth' %></h3>
+    </div>
+
+
     <p class="text-white-50 mb-4"><%= boothData.description || '' %></p>
 
     <% if (!userReview) { %>
 
-        <!-- FORM REVIEW -->
-        <form action="/booth/<%= boothType %>/review" method="POST" class="w-75">
+    <!-- FORM REVIEW -->
+    <form action="/booth/<%= boothType %>/review" method="POST" class="w-100 d-flex flex-column align-items-center">
 
-            <textarea name="comment" class="form-control mb-3" rows="4" placeholder="Tulis review..." required></textarea>
+        <div class="review-box mb-4">
+            <textarea name="comment" class="form-control border-0" rows="5" placeholder="Write your review..." required
+                style="background:none; resize:none; outline:none; box-shadow:none;"></textarea>
+        </div>
 
-            <div class="rating mb-3">
-                <% for (let i = 5; i >= 1; i--) { %>
-                    <input type="radio" name="rating" value="<%= i %>" id="star<%= i %>" required>
-                    <label for="star<%= i %>">★</label>
-                <% } %>
-            </div>
+        <!-- RATING -->
+        <div class="rating mb-4">
+            <% for (let i = 5; i >= 1; i--) { %>
+            <input type="radio" name="rating" value="<%= i %>" id="star<%= i %>" required>
+            <label for="star<%= i %>">★</label>
+            <% } %>
+        </div>
 
-            <button type="submit" class="btn btn-success w-100">SEND</button>
-        </form>
+        <button type="submit" class="btn-send">SEND</button>
+    </form>
 
     <% } else { %>
 
-        <!-- REVIEW SUDAH ADA -->
-        <div class="review-box mt-3 text-start">
-            <h5>Review Anda</h5>
-            <strong><%= userReview.user %></strong> — ⭐ <%= userReview.rating %>  
-            <p class="mt-2 mb-0"><%= userReview.comment %></p>
-        </div>
+    <!-- REVIEW SUDAH ADA -->
+    <div class="review-box mt-3 text-start">
+        <h5>Review Anda</h5>
+        <strong><%= userReview.user %></strong> — ⭐ <%= userReview.rating %>
+        <p class="mt-2 mb-0"><%= userReview.comment %></p>
+    </div>
 
     <% } %>
 
-    <a href="/dashboard" class="btn-back-custom">BACK</a>
+    <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
 </div>
 
 <%- include("../layouts/footer") %>
