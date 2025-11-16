@@ -89,6 +89,38 @@
             aspect-ratio: 1 / 1.1;
         }
 
+        .btn-back-custom {
+            display: block;
+            width: 100%;
+            padding: 14px 0;
+            margin-top: 2rem;
+            border-radius: 14px;
+
+            background: #0c2340;
+            /* Navy gelap */
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 0 12px rgba(0, 255, 255, 0.2),
+                0 0 20px rgba(0, 255, 255, 0.1);
+
+            transition: all 0.25s ease;
+        }
+
+        .btn-back-custom:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 0 18px rgba(0, 255, 255, 0.35),
+                0 0 30px rgba(0, 255, 255, 0.2);
+            color: #fff;
+        }
+
+
         @media (max-width: 480px) {
             .scan-container {
                 width: 90%;
@@ -125,7 +157,9 @@
             <div class="qr-box">
                 <div id="qr-reader" style="width:100%;"></div>
             </div>
+            <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
         </div>
+
     </main>
 
     <!-- Scripts -->
@@ -136,11 +170,14 @@
         const scanner = new Html5Qrcode("qr-reader");
 
         function startScanner() {
-            scanner.start(
-                { facingMode: "environment" },
-                {
+            scanner.start({
+                    facingMode: "environment"
+                }, {
                     fps: 10,
-                    qrbox: { width: 250, height: 250 },
+                    qrbox: {
+                        width: 250,
+                        height: 250
+                    },
                 },
                 async (decodedText) => {
 
@@ -149,8 +186,12 @@
 
                     const res = await fetch("/scan/result", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ boothCode: decodedText })
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            boothCode: decodedText
+                        })
                     });
 
                     if (res.redirected) {

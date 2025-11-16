@@ -8,7 +8,10 @@
         <%= title || "SCM Digital Day 2025" %>
     </title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@400&display=swap" />
+
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
@@ -64,9 +67,24 @@
             padding-bottom: 7rem;
         }
 
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 32px;
+            line-height: 1;
+            display: inline-block;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            font-feature-settings: 'liga';
+            letter-spacing: normal;
+            text-transform: none;
+            margin-bottom: 6px;
+        }
+
+
         .booth-card {
             height: 120px;
-            border-radius: 16px;
             color: #fff;
             font-weight: 600;
             font-size: 1rem;
@@ -74,10 +92,24 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: transform 0.25s;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+            transition: transform 0.25s, box-shadow 0.25s;
             cursor: pointer;
+
+            /* efek kaca */
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(10px);
+
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+
+            /* soft glow universal */
+            box-shadow:
+                inset 0 0 8px rgba(255, 255, 255, 0.08),
+                0 0 8px rgba(255, 255, 255, 0.1);
         }
+
+
+
 
         .booth-card i {
             font-size: 2rem;
@@ -88,36 +120,82 @@
             transform: translateY(-4px);
         }
 
+        .booth-scan {
+            background: linear-gradient(135deg, #C2FF37 0%, #68D533 100%);
+            border-color: rgba(216, 255, 85, 0.8);
+
+            box-shadow:
+                0 0 10px rgba(216, 255, 85, 0.7),
+                /* glow terang */
+                0 0 25px rgba(216, 255, 85, 0.4),
+                /* glow sedang */
+                0 0 45px rgba(216, 255, 85, 0.2);
+            /* glow besar */
+        }
+
         .booth-lunch {
-            background: #a7632f;
+            background: linear-gradient(135deg, #FFAF68 0%, #E86932 100%);
+            border-color: rgba(255, 207, 166, 0.8);
+
+            box-shadow:
+                0 0 10px rgba(255, 207, 166, 0.6),
+                0 0 22px rgba(255, 207, 166, 0.3),
+                0 0 35px rgba(255, 207, 166, 0.15);
         }
 
         .booth-souvenir {
-            background: #8b60c0;
+            background: linear-gradient(135deg, #59F0FF 0%, #1DC3FF 100%);
+            border-color: rgba(155, 244, 255, 0.8);
+
+            box-shadow:
+                0 0 10px rgba(155, 244, 255, 0.6),
+                0 0 22px rgba(155, 244, 255, 0.3),
+                0 0 35px rgba(155, 244, 255, 0.15);
         }
 
         .booth-photo {
-            background: #c94e6d;
+            background: linear-gradient(135deg, #FF7C74 0%, #D53D5A 100%);
+            border-color: rgba(255, 186, 196, 0.85);
+
+            box-shadow:
+                0 0 10px rgba(255, 186, 196, 0.6),
+                0 0 22px rgba(255, 186, 196, 0.3),
+                0 0 35px rgba(255, 186, 196, 0.15);
         }
 
         .booth-games {
-            background: #3c88d9;
+            background: linear-gradient(135deg, #5A7BFF 0%, #263CC6 100%);
+            border-color: rgba(190, 202, 255, 0.8);
+
+            box-shadow:
+                0 0 10px rgba(190, 202, 255, 0.6),
+                0 0 22px rgba(190, 202, 255, 0.3),
+                0 0 35px rgba(190, 202, 255, 0.15);
         }
 
         .booth-main {
-            background: #6d3b9c;
+            background: linear-gradient(135deg, #BF77F2 0%, #792FA6 100%);
+            border-color: rgba(233, 182, 255, 0.85);
+
+            box-shadow:
+                0 0 10px rgba(233, 182, 255, 0.6),
+                0 0 22px rgba(233, 182, 255, 0.3),
+                0 0 35px rgba(233, 182, 255, 0.15);
         }
 
-        .not-visited {
-            opacity: 0.35;
-            filter: grayscale(100%) brightness(80%);
-        }
 
+
+
+       .not-visited {
+    opacity: 0.25 !important;
+    filter: grayscale(100%) brightness(60%) !important;
+    pointer-events: none !important; /* Tidak bisa diklik */
+    box-shadow: none !important;
+}
         .visited {
             opacity: 1;
             filter: none;
         }
-
 
         .scan-area {
             position: absolute;

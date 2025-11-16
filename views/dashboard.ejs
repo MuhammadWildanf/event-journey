@@ -10,63 +10,76 @@
       </div>
     </div>
     <a href="/logout" class="logout-btn text-white text-decoration-none">
-      <i class="bi bi-box-arrow-right"></i>
+      <span class="material-symbols-rounded logout-icon">logout</span>
     </a>
   </header>
 
+  <%
+  const featureStatus = {
+    scan: true,
+    lunch: user.lunch_claimed ?? false,
+    souvenir: user.souvenir_claimed ?? false,
+    photobooth: user.photobooth_done ?? false,
+    games: false,
+    booth: (user.visited_count ?? 0) >= 1
+  };
+
+  const nv = (v) => (v ? "" : "not-visited");
+%>
+  
   <main>
     <div class="container text-center">
       <div class="row justify-content-center g-3">
+         <div class="col-12">
+          <a href="/scan" class="text-decoration-none">
+            <div class="booth-card booth-scan">
+             <span class="material-symbols-rounded">qr_code_scanner</span>
+             Scan QR Booth
+            </div>
+          </a>
+        </div>
         <div class="col-6">
           <a href="/lunch" class="text-decoration-none">
-            <div class="booth-card booth-lunch">
-              <i class="bi bi-egg-fried"></i>
-              Lunch Box
+           <div class="booth-card booth-lunch <%= nv(featureStatus.lunch) %>">
+             <span class="material-symbols-rounded">restaurant</span>
+              LUNCH BOX
             </div>
           </a>
         </div>
         <div class="col-6">
           <a href="/souvenir" class="text-decoration-none">
-            <div class="booth-card booth-souvenir">
-              <i class="bi bi-gift"></i>
-              Souvenir
+           <div class="booth-card booth-souvenir <%= nv(featureStatus.souvenir) %>">
+             <span class="material-symbols-rounded">card_giftcard</span>
+             SOUVENIR
             </div>
           </a>
         </div>
         <div class="col-6">
           <a href="/photobooth" class="text-decoration-none">
-            <div class="booth-card booth-photo">
-              <i class="bi bi-camera"></i>
-              Photobooth
+          <div class="booth-card booth-photo <%= nv(featureStatus.photobooth) %>">
+             <span class="material-symbols-rounded">photo_camera</span>
+             PHOTOBOOTH
             </div>
           </a>
         </div>
         <div class="col-6">
           <a href="/games" class="text-decoration-none">
-            <div class="booth-card booth-games">
-              <i class="bi bi-controller"></i>
-              Games
+           <div class="booth-card booth-games <%= nv(featureStatus.games) %>">
+            <span class="material-symbols-rounded">stadia_controller</span>
+              GAMES
             </div>
           </a>
         </div>
         <div class="col-12">
           <a href="/booth" class="text-decoration-none">
-            <div class="booth-card booth-main w-100">
-              <i class="bi bi-shop"></i>
-              Booth
+           <div class="booth-card booth-main w-100 <%= nv(featureStatus.booth) %>">
+             <span class="material-symbols-rounded">storefront</span>
+            BOOTH
             </div>
           </a>
         </div>
       </div>
     </div>
   </main>
-
-  <!-- SCAN BUTTON -->
-  <div class="scan-area">
-    <a href="/scan" class="scan-btn">
-      <i class="bi bi-qr-code-scan"></i>
-    </a>
-    <div class="scan-label">SCAN QR</div>
-  </div>
 
   <%- include("./layouts/footer") %>
