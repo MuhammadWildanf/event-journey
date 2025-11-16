@@ -84,120 +84,76 @@
 
 
         .booth-card {
-            height: 120px;
-            color: #fff;
-            font-weight: 600;
-            font-size: 1rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.25s, box-shadow 0.25s;
-            cursor: pointer;
-
-            /* efek kaca */
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(10px);
-
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-
-            /* soft glow universal */
-            box-shadow:
-                inset 0 0 8px rgba(255, 255, 255, 0.08),
-                0 0 8px rgba(255, 255, 255, 0.1);
-        }
-
-
-
-
-        .booth-card i {
-            font-size: 2rem;
-            margin-bottom: 6px;
+            height: 150px;
+            border-radius: 22px;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            overflow: hidden;
+            transition: .25s;
         }
 
         .booth-card:hover {
             transform: translateY(-4px);
         }
 
-        .booth-scan {
-            background: linear-gradient(135deg, #C2FF37 0%, #68D533 100%);
-            border-color: rgba(216, 255, 85, 0.8);
-
-            box-shadow:
-                0 0 10px rgba(216, 255, 85, 0.7),
-                /* glow terang */
-                0 0 25px rgba(216, 255, 85, 0.4),
-                /* glow sedang */
-                0 0 45px rgba(216, 255, 85, 0.2);
-            /* glow besar */
+        /* Card images */
+        .card-scan {
+            background-image: url('/assets/cards/scan.png');
         }
 
-        .booth-lunch {
-            background: linear-gradient(135deg, #FFAF68 0%, #E86932 100%);
-            border-color: rgba(255, 207, 166, 0.8);
-
-            box-shadow:
-                0 0 10px rgba(255, 207, 166, 0.6),
-                0 0 22px rgba(255, 207, 166, 0.3),
-                0 0 35px rgba(255, 207, 166, 0.15);
+        .card-lunch {
+            background-image: url('/assets/cards/lunch.png');
         }
 
-        .booth-souvenir {
-            background: linear-gradient(135deg, #59F0FF 0%, #1DC3FF 100%);
-            border-color: rgba(155, 244, 255, 0.8);
-
-            box-shadow:
-                0 0 10px rgba(155, 244, 255, 0.6),
-                0 0 22px rgba(155, 244, 255, 0.3),
-                0 0 35px rgba(155, 244, 255, 0.15);
+        .card-souvenir {
+            background-image: url('/assets/cards/souvenir.png');
         }
 
-        .booth-photo {
-            background: linear-gradient(135deg, #FF7C74 0%, #D53D5A 100%);
-            border-color: rgba(255, 186, 196, 0.85);
-
-            box-shadow:
-                0 0 10px rgba(255, 186, 196, 0.6),
-                0 0 22px rgba(255, 186, 196, 0.3),
-                0 0 35px rgba(255, 186, 196, 0.15);
+        .card-photo {
+            background-image: url('/assets/cards/photo.png');
         }
 
-        .booth-games {
-            background: linear-gradient(135deg, #5A7BFF 0%, #263CC6 100%);
-            border-color: rgba(190, 202, 255, 0.8);
-
-            box-shadow:
-                0 0 10px rgba(190, 202, 255, 0.6),
-                0 0 22px rgba(190, 202, 255, 0.3),
-                0 0 35px rgba(190, 202, 255, 0.15);
+        .card-games {
+            background-image: url('/assets/cards/games.png');
         }
 
-        .booth-main {
-            background: linear-gradient(135deg, #BF77F2 0%, #792FA6 100%);
-            border-color: rgba(233, 182, 255, 0.85);
-
-            box-shadow:
-                0 0 10px rgba(233, 182, 255, 0.6),
-                0 0 22px rgba(233, 182, 255, 0.3),
-                0 0 35px rgba(233, 182, 255, 0.15);
+        .card-booth {
+            background-image: url('/assets/cards/booth.png');
         }
-
-
-
 
         .not-visited {
-            opacity: 0.25 !important;
-            filter: grayscale(100%) brightness(60%) !important;
-            pointer-events: none !important;
-            /* Tidak bisa diklik */
-            box-shadow: none !important;
+            pointer-events: none;
+            position: relative;
+            filter: grayscale(30%) brightness(70%);
         }
 
-        .visited {
-            opacity: 1;
-            filter: none;
+        .not-visited {
+            pointer-events: none;
+            position: relative;
+            filter: grayscale(25%) brightness(80%);
         }
+
+        /* Overlay biru soft */
+        .not-visited::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 45, 90, 0.45);
+            /* lebih soft, tidak terlalu gelap */
+            border-radius: inherit;
+            backdrop-filter: blur(1px);
+            /* efek modern soft glass */
+        }
+
+
+
+
+        .visited {
+            opacity: 1 !important;
+            filter: none !important;
+        }
+
 
         .scan-area {
             position: absolute;

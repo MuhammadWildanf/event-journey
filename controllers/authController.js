@@ -1,5 +1,9 @@
-import { db } from "../server.js";
-import { sendRegistrationEmail } from "../utils/sendRegistrationEmail.js";
+import {
+    db
+} from "../server.js";
+import {
+    sendRegistrationEmail
+} from "../utils/sendRegistrationEmail.js";
 
 
 export const showRegister = (req, res) => {
@@ -11,7 +15,11 @@ export const showLogin = (req, res) => {
 };
 
 export const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const {
+        name,
+        email,
+        password
+    } = req.body;
     if (!name || !email || !password) {
         return res.status(400).send("Semua field wajib diisi!");
     }
@@ -33,21 +41,15 @@ export const registerUser = async (req, res) => {
         email,
         password,
 
-        // === STATUS BOOTH ===
         booths_visited: {},
         visited_count: 0,
 
-        // === STATUS LUNCH ===
         lunch_claimed: false,
-
-        // === STATUS SOUVENIR ===
         souvenir_claimed: false,
+        photobooth_done: false,
+        photobooth_images: {},
 
-        // === STATUS PHOTOBOOTH ===
-        photobooth_done: false,   // 🆕
-
-        // === SAMPLE PHOTOS FUTURE ===
-        photobooth_images: {},    // 🆕
+        games_done: false, // 🆕 penting
 
         reward_ready: false,
         reward_claimed: false,
@@ -55,8 +57,13 @@ export const registerUser = async (req, res) => {
         created_at: new Date().toISOString(),
     });
 
+
     // Simpan session
-    req.session.user = { id: ref.key, name, email };
+    req.session.user = {
+        id: ref.key,
+        name,
+        email
+    };
 
     // Kirim EMAIL
     try {
@@ -67,7 +74,9 @@ export const registerUser = async (req, res) => {
 
     req.session.save(() => {
         if (req.headers["content-type"]?.includes("application/json")) {
-            return res.status(200).json({ success: true });
+            return res.status(200).json({
+                success: true
+            });
         }
         res.redirect("/dashboard");
     });
@@ -77,7 +86,10 @@ export const registerUser = async (req, res) => {
 
 
 export const loginUser = async (req, res) => {
-    const { email, password } = req.body;
+    const {
+        email,
+        password
+    } = req.body;
 
     if (!email || !password) {
         return res.status(400).send("Isi semua field!");
@@ -88,7 +100,10 @@ export const loginUser = async (req, res) => {
     snap.forEach((child) => {
         const u = child.val();
         if (u.email === email && u.password === password) {
-            user = { id: child.key, ...u };
+            user = {
+                id: child.key,
+                ...u
+            };
         }
     });
 
@@ -96,12 +111,18 @@ export const loginUser = async (req, res) => {
         return res.status(401).send("Email atau password salah!");
     }
 
-    req.session.user = { id: user.id, name: user.name, email: user.email };
+    req.session.user = {
+        id: user.id,
+        name: user.name,
+        email: user.email
+    };
 
     // Deteksi apakah ini fetch() atau form normal
     req.session.save(() => {
         if (req.headers["content-type"]?.includes("application/json")) {
-            return res.status(200).json({ success: true });
+            return res.status(200).json({
+                success: true
+            });
         }
         // res.redirect("/comingsoon");
         res.redirect("/dashboard");
