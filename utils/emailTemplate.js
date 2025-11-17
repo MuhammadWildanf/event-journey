@@ -16,8 +16,8 @@ export const registrationEmailTemplate = (name) => {
 
             <p>
                 SCM Digital Day 2025 akan berlangsung pada:<br><br>
-                • <strong>25–26 November 2025</strong> — pukul 09.00 s/d 16.00 WIB<br>
-                • <strong>Lokasi:</strong> Multi Function Room, PHE Tower lt. 2, Jakarta
+                • <strong>25–26 November 2025</strong> — pukul 08.00 s/d 16.00 WIB<br>
+                • <strong>Lokasi:</strong> Multifunction Room, PHE Tower lt. 2, Jakarta
             </p>
 
             <h3>🎫 Penting untuk Masuk Acara</h3>
