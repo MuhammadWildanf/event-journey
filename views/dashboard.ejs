@@ -1,43 +1,45 @@
-<%- include("./layouts/header", { title: "Dashboard" , bodyClass: "page-dashboard" }) %>
+<%- include("./layouts/header", { title: "Dashboard || SCM Digital Day 2025" }) %>
 
-  <header class="d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center gap-2">
-      <div>
-        <small>Welcome</small><br>
-        <strong>
-          <%= user.name %>
-        </strong>
-      </div>
-    </div>
-    <a href="/logout" class="logout-btn text-white text-decoration-none">
-      <span class="material-symbols-rounded logout-icon">logout</span>
-    </a>
-  </header>
+<div class="dashboard-wrapper">
 
-  <% const btn=(url, active, classes, card)=> {
-    const href = active ? url : "javascript:void(0)";
-    const nvClass = active ? "" : "not-visited";
-    return `<a href="${href}" class="${classes}">
-      <div class="booth-card ${card} ${nvClass}"></div>
-    </a>`;
+    <header class="d-flex justify-content-between align-items-center">
+        <div>
+            <small>Welcome</small><br>
+            <strong><%= user.name %></strong>
+        </div>
+
+        <a href="/logout" class="logout-btn text-white text-decoration-none">
+            <span class="material-symbols-rounded logout-icon">logout</span>
+        </a>
+    </header>
+
+    <% 
+    const btn = (url, active, classes, card) => {
+        const href = active ? url : "javascript:void(0)";
+        const nv = active ? "" : "not-visited";
+        return `
+        <a href="${href}" class="${classes}">
+            <div class="booth-card ${card} ${nv}"></div>
+        </a>
+        `;
     };
     %>
 
     <main>
-      <div class="dashboard-grid">
+        <div class="dashboard-grid">
+            <!-- Scan selalu aktif -->
+            <a href="/scan" class="grid-item wide">
+                <div class="booth-card card-scan"></div>
+            </a>
 
-        <!-- Scan selalu aktif -->
-        <a href="/scan" class="grid-item wide">
-          <div class="booth-card card-scan"></div>
-        </a>
-
-        <%- btn('/lunch', user.lunch_active, 'grid-item square' , 'card-lunch' ) %>
-          <%- btn('/souvenir', user.souvenir_active, 'grid-item square' , 'card-souvenir' ) %>
-            <%- btn('/photobooth', user.photobooth_active, 'grid-item square' , 'card-photo' ) %>
-              <%- btn('/games', user.games_active, 'grid-item square' , 'card-games' ) %>
-                <%- btn('/booth', user.booth_active, 'grid-item wide' , 'card-booth' ) %>
-
-      </div>
+            <%- btn('/lunch', user.lunch_active, 'grid-item square', 'card-lunch') %>
+            <%- btn('/souvenir', user.souvenir_active, 'grid-item square', 'card-souvenir') %>
+            <%- btn('/photobooth', user.photobooth_active, 'grid-item square', 'card-photo') %>
+            <%- btn('/games', user.games_active, 'grid-item square', 'card-games') %>
+            <%- btn('/booth', user.booth_active, 'grid-item wide', 'card-booth') %>
+        </div>
     </main>
 
-    <%- include("./layouts/footer") %>
+</div>
+
+<%- include("./layouts/footer") %>
