@@ -1,4 +1,6 @@
-import { db } from "../server.js";
+import {
+    db
+} from "../server.js";
 
 /* ---------------------------------------
    PAGE VIEW (Lunch, Souvenir, Photobooth, Games)
@@ -9,7 +11,10 @@ export const showLunch = async (req, res) => {
     const snap = await db.ref("users/" + user.id).get();
     const userData = snap.exists() ? snap.val() : {};
 
-    res.render("services/lunch", { user, userData });
+    res.render("services/lunch", {
+        user,
+        userData
+    });
 };
 
 export const showSouvenir = async (req, res) => {
@@ -18,15 +23,22 @@ export const showSouvenir = async (req, res) => {
     const snap = await db.ref("users/" + user.id).get();
     const userData = snap.exists() ? snap.val() : {};
 
-    res.render("services/souvenir", { user, userData });
+    res.render("services/souvenir", {
+        user,
+        userData
+    });
 };
 
 export const showPhotobooth = (req, res) => {
-    res.render("services/photobooth", { user: req.session.user });
+    res.render("services/photobooth", {
+        user: req.session.user
+    });
 };
 
 export const showGames = (req, res) => {
-    res.render("services/games", { user: req.session.user });
+    res.render("services/games", {
+        user: req.session.user
+    });
 };
 
 /* ---------------------------------------
@@ -37,7 +49,9 @@ export const showGames = (req, res) => {
 export const handleLunchScan = async (req, res) => {
     try {
         const user = req.session.user;
-        const { code } = req.body;
+        const {
+            code
+        } = req.body;
 
         if (!code || code !== "lunch") {
             return res.status(400).send("QR Code lunch tidak valid!");
@@ -59,9 +73,9 @@ export const handleLunchScan = async (req, res) => {
             .equalTo(true)
             .get();
 
-        const lunchCount = countSnap.exists()
-            ? Object.keys(countSnap.val()).length
-            : 0;
+        const lunchCount = countSnap.exists() ?
+            Object.keys(countSnap.val()).length :
+            0;
 
         if (lunchCount >= 300) {
             return res.status(400).send("Lunch box sudah habis!");
@@ -89,7 +103,9 @@ export const handleLunchScan = async (req, res) => {
 export const handleSouvenirScan = async (req, res) => {
     try {
         const user = req.session.user;
-        const { code } = req.body;
+        const {
+            code
+        } = req.body;
 
         if (!code || code !== "souvenir") {
             return res.status(400).send("QR Code souvenir tidak valid!");

@@ -170,7 +170,7 @@
         const scanner = new Html5Qrcode("qr-reader");
 
         const urlParams = new URLSearchParams(window.location.search);
-const redirectParam = urlParams.get("redirect") || null;
+        const redirectParam = urlParams.get("redirect") || null;
 
         function startScanner() {
             scanner.start({
@@ -194,7 +194,7 @@ const redirectParam = urlParams.get("redirect") || null;
                         },
                         body: JSON.stringify({
                             boothCode: decodedText,
-                              redirect: redirectParam
+                            redirect: redirectParam
                         })
                     });
 
