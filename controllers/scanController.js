@@ -113,7 +113,7 @@ export const handleScanResult = async (req, res) => {
             return res.json({ success: false, message: "QR Code tidak valid." });
         }
 
-        // Normalisasi QR sebelum digunakan
+        // Normalisasi QR
         const code = boothCode.toLowerCase();
         const boothKey = normalizeBoothKey(boothCode);
 
@@ -125,13 +125,13 @@ export const handleScanResult = async (req, res) => {
             games: "/games"
         };
 
-        // 🔥 Jika QR adalah CHECK-IN / LUNCH / SOUVENIR → direct process
+        // --- Service scan seperti checkin/lunch/souvenir
         if (typeof SCAN_ACTIONS[code] === "function") {
             req.body.code = code;
             return SCAN_ACTIONS[code](req, res);
         }
 
-        // 🔥 Jika service redirect (photobooth / games)
+        // --- Direct redirect services (photobooth / games)
         if (typeof SCAN_ACTIONS[code] === "string") {
             return res.json({
                 success: true,
@@ -140,13 +140,28 @@ export const handleScanResult = async (req, res) => {
             });
         }
 
-        // 🔵 Default → BOOTH visit
+        // =====================================
+        // 🔵 BOOTH SCANNING — GET BOOTH NAME
+        // =====================================
+        const boothsSnap = await db.ref("booths").child(boothKey).get();
+
+        if (!boothsSnap.exists()) {
+            return res.json({
+                success: false,
+                message: "Booth tidak ditemukan."
+            });
+        }
+
+        const boothData = boothsSnap.val();
+        const boothName = boothData.name || boothKey;
+
+        // =====================================
+        // 🔵 Tandai visited
+        // =====================================
         const userRef = db.ref(`users/${user.id}`);
 
-        // tandai visited booth normalizer → benar!
         await userRef.child(`booths_visited/${boothKey}`).set(true);
 
-        // hitung jumlah booth yang dikunjungi
         const snap = await userRef.child("booths_visited").get();
         const count = snap.exists() ? Object.keys(snap.val()).length : 0;
 
@@ -155,9 +170,13 @@ export const handleScanResult = async (req, res) => {
             reward_ready: count >= 5
         });
 
+        // =====================================
+        // 🔥 Response memakai NAMA BOOTH
+        // =====================================
         return res.json({
             success: true,
-            message: `Berhasil mengunjungi booth ${boothKey}.`,
+            message: `Berhasil mengunjungi booth ${boothName}.`,
+            boothName,
             redirect: `/booth/${boothKey}`
         });
 
@@ -169,3 +188,4 @@ export const handleScanResult = async (req, res) => {
         });
     }
 };
+
