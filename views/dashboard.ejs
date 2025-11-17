@@ -14,41 +14,28 @@
     </a>
   </header>
 
-  <% const nv=(v)=> (v ? "" : "not-visited");
+  <% const btn=(url, active, classes, card)=> {
+    const href = active ? url : "javascript:void(0)";
+    const nvClass = active ? "" : "not-visited";
+    return `<a href="${href}" class="${classes}">
+      <div class="booth-card ${card} ${nvClass}"></div>
+    </a>`;
+    };
     %>
 
     <main>
       <div class="dashboard-grid">
 
-        <!-- SCAN SELALU AKTIF -->
+        <!-- Scan selalu aktif -->
         <a href="/scan" class="grid-item wide">
           <div class="booth-card card-scan"></div>
         </a>
 
-        <!-- LUNCH -->
-        <a href="/lunch" class="grid-item square">
-          <div class="booth-card card-lunch <%= nv(user.lunch_active) %>"></div>
-        </a>
-
-        <!-- SOUVENIR -->
-        <a href="/souvenir" class="grid-item square">
-          <div class="booth-card card-souvenir <%= nv(user.souvenir_active) %>"></div>
-        </a>
-
-        <!-- PHOTOBOOTH -->
-        <a href="/photobooth" class="grid-item square">
-          <div class="booth-card card-photo <%= nv(user.photobooth_active) %>"></div>
-        </a>
-
-        <!-- GAMES -->
-        <a href="/games" class="grid-item square">
-          <div class="booth-card card-games <%= nv(user.games_active) %>"></div>
-        </a>
-
-        <!-- BOOTH LIST -->
-        <a href="/booth" class="grid-item wide">
-          <div class="booth-card card-booth <%= nv(user.booth_active) %>"></div>
-        </a>
+        <%- btn('/lunch', user.lunch_active, 'grid-item square' , 'card-lunch' ) %>
+          <%- btn('/souvenir', user.souvenir_active, 'grid-item square' , 'card-souvenir' ) %>
+            <%- btn('/photobooth', user.photobooth_active, 'grid-item square' , 'card-photo' ) %>
+              <%- btn('/games', user.games_active, 'grid-item square' , 'card-games' ) %>
+                <%- btn('/booth', user.booth_active, 'grid-item wide' , 'card-booth' ) %>
 
       </div>
     </main>
