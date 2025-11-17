@@ -1,13 +1,43 @@
-import { db } from "../server.js";
+import {
+    db
+} from "../server.js";
 import QRCode from "qrcode";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import { Parser } from "json2csv";
+import {
+    fileURLToPath
+} from "url";
+import {
+    Parser
+} from "json2csv";
 
 // untuk path file QR
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(
+    import.meta.url);
 const __dirname = path.dirname(__filename);
+
+
+function slug(str) {
+    return str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "");
+}
+
+function fileNameSafe(str) {
+    return str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
 
 
 /* =====================================================
@@ -34,8 +64,11 @@ export const boothList = async (req, res) => {
     const snap = await db.ref("booths").get();
     const booths = snap.exists() ? snap.val() : {};
 
-    res.render("admin/booths/index", { booths });
+    res.render("admin/booths/index", {
+        booths
+    });
 };
+
 
 
 /* =====================================================
@@ -50,68 +83,118 @@ export const boothCreateForm = (req, res) => {
     ✔ CREATE BOOTH + QR
 ===================================================== */
 export const boothCreate = async (req, res) => {
-    const { name } = req.body;
+    const {
+        name
+    } = req.body;
     if (!name) return res.send("Nama booth wajib!");
 
-    const id = name.replace(/\s+/g, "-").toUpperCase(); // BOOTH-NAME
-    const code = id;
+    const key = slug(name); // general_services
+    const fileName = fileNameSafe(name) + ".png"; // general-services.png
 
-    // Folder QR
-    const outDir = path.join(__dirname, "../qr/booths");
-    if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+    const qrDir = path.join(__dirname, "../qr/booths");
+    if (!fs.existsSync(qrDir)) fs.mkdirSync(qrDir, {
+        recursive: true
+    });
 
-    const qrPath = `${outDir}/${code}.png`;
+    const qrPath = path.join(qrDir, fileName);
 
-    await QRCode.toFile(qrPath, code, { width: 400 });
+    // QR payload = key
+    await QRCode.toFile(qrPath, key, {
+        width: 500
+    });
 
-    await db.ref("booths/" + code).set({
+    await db.ref("booths/" + key).set({
+        key,
         name,
-        qrUrl: `/qr/booths/${code}.png`,
+        code: key,
+        qrPayload: key,
+        qrUrl: `/qr/booths/${fileName}`,
     });
 
     res.redirect("/admin/booths");
 };
 
 
+
 /* =====================================================
     ✏ FORM EDIT BOOTH
 ===================================================== */
 export const boothEditForm = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
+
     const snap = await db.ref("booths/" + id).get();
     if (!snap.exists()) return res.send("Booth tidak ditemukan");
 
-    res.render("admin/booths/edit", { id, data: snap.val() });
+    res.render("admin/booths/edit", {
+        id,
+        data: snap.val()
+    });
 };
 
 
-/* =====================================================
-    ✔ UPDATE BOOTH (tanpa buat QR baru)
-===================================================== */
-export const boothUpdate = async (req, res) => {
-    const { id } = req.params;
-    const { name } = req.body;
 
-    await db.ref("booths/" + id).update({ name });
+export const boothUpdate = async (req, res) => {
+    const {
+        id
+    } = req.params; // old key
+    const {
+        name
+    } = req.body;
+
+    const newKey = slug(name);
+    const newFileName = fileNameSafe(name) + ".png";
+
+    const qrDir = path.join(__dirname, "../qr/booths");
+
+    // OLD QR
+    const oldFile = path.join(qrDir, fileNameSafe(id) + ".png");
+    if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
+
+    // GENERATE NEW QR
+    const newFile = path.join(qrDir, newFileName);
+    await QRCode.toFile(newFile, newKey, {
+        width: 500
+    });
+
+    const boothRef = db.ref("booths");
+    const oldSnap = await boothRef.child(id).get();
+
+    if (!oldSnap.exists()) return res.send("Booth tidak ditemukan");
+
+    const oldData = oldSnap.val();
+
+    // Remove old key
+    await boothRef.child(id).remove();
+
+    // Create new updated booth
+    await boothRef.child(newKey).set({
+        ...oldData,
+        key: newKey,
+        name,
+        code: newKey,
+        qrPayload: newKey,
+        qrUrl: `/qr/booths/${newFileName}`
+    });
 
     res.redirect("/admin/booths");
 };
+
 
 
 /* =====================================================
     ❌ DELETE BOOTH + DELETE QR FILE
 ===================================================== */
 export const boothDelete = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
-    // Hapus QR
-    const qrFile = path.join(__dirname, "../qr/booths/" + id + ".png");
-    if (fs.existsSync(qrFile)) fs.unlinkSync(qrFile);
+    const file = path.join(__dirname, "../qr/booths/" + fileNameSafe(id) + ".png");
+    if (fs.existsSync(file)) fs.unlinkSync(file);
 
-    // Hapus booth di Firebase
     await db.ref("booths/" + id).remove();
-
-    // Hapus review
     await db.ref("reviews/" + id).remove();
 
     res.redirect("/admin/booths");
@@ -122,22 +205,25 @@ export const boothDelete = async (req, res) => {
     📄 DETAIL BOOTH (Visited + Review)
 ===================================================== */
 export const boothDetail = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
     const boothSnap = await db.ref("booths/" + id).get();
     const booth = boothSnap.exists() ? boothSnap.val() : {};
 
-    // Review
     const reviewSnap = await db.ref("reviews/" + id).get();
     const reviews = reviewSnap.exists() ? Object.values(reviewSnap.val()) : [];
 
-    // User visited
     const usersSnap = await db.ref("users").get();
     const users = usersSnap.exists() ? usersSnap.val() : {};
 
     const visitedUsers = Object.entries(users)
         .filter(([uid, u]) => u.booths_visited && u.booths_visited[id])
-        .map(([uid, u]) => ({ id: uid, ...u }));
+        .map(([uid, u]) => ({
+            id: uid,
+            ...u
+        }));
 
     res.render("admin/booths/detail", {
         id,
@@ -148,11 +234,14 @@ export const boothDetail = async (req, res) => {
 };
 
 
+
 /* =====================================================
     📥 DOWNLOAD QR
 ===================================================== */
 export const boothDownloadQR = (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
     const file = path.join(__dirname, `../qr/booths/${id}.png`);
 
     if (!fs.existsSync(file)) return res.send("QR tidak ditemukan");
@@ -189,7 +278,9 @@ export const userList = async (req, res) => {
     const snap = await db.ref("users").get();
     const users = snap.exists() ? snap.val() : {};
 
-    res.render("admin/users/index", { users });
+    res.render("admin/users/index", {
+        users
+    });
 };
 
 
@@ -197,38 +288,57 @@ export const userList = async (req, res) => {
     👤 USER DETAIL
 ===================================================== */
 export const userDetail = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
-    const snap = await db.ref("users/" + id).get();
-    if (!snap.exists()) return res.send("User tidak ditemukan");
+    const userSnap = await db.ref("users/" + id).get();
+    if (!userSnap.exists()) return res.send("User tidak ditemukan");
 
-    const data = snap.val();
+    const userData = userSnap.val();
+
+    // ambil semua booth untuk mapping key → nama
+    const boothSnap = await db.ref("booths").get();
+    const booths = boothSnap.exists() ? boothSnap.val() : {};
 
     res.render("admin/users/detail", {
         id,
-        user: data
+        user: userData,
+        booths
     });
 };
+
 
 
 /* =====================================================
     ✏ UPDATE USER
 ===================================================== */
 export const userUpdate = async (req, res) => {
-    const { id } = req.params;
-    const { name, email } = req.body;
+    const {
+        id
+    } = req.params;
+    const {
+        name,
+        email
+    } = req.body;
 
-    await db.ref("users/" + id).update({ name, email });
+    await db.ref("users/" + id).update({
+        name,
+        email
+    });
 
     res.redirect("/admin/users/" + id);
 };
+
 
 
 /* =====================================================
     ❌ DELETE USER
 ===================================================== */
 export const userDelete = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
     await db.ref("users/" + id).remove();
 
@@ -243,14 +353,22 @@ export const userExportCSV = async (req, res) => {
     const snap = await db.ref("users").get();
     const users = snap.exists() ? snap.val() : {};
 
-    const rows = Object.entries(users).map(([id, u]) => ({
-        id,
-        name: u.name,
-        email: u.email,
-        lunch_claimed: u.lunch_claimed || false,
-        souvenir_claimed: u.souvenir_claimed || false,
-        visited_count: u.visited_count || 0,
-    }));
+    const rows = Object.entries(users).map(([id, u]) => {
+        const visitedCount = u.visited_count || (u.booths_visited ? Object.keys(u.booths_visited).length : 0);
+        const lunchClaimed = u.lunch_claimed_dates && Object.keys(u.lunch_claimed_dates).length > 0;
+        const souvenirClaimed = u.souvenir_claimed_dates && Object.keys(u.souvenir_claimed_dates).length > 0;
+
+        return {
+            id,
+            name: u.name,
+            email: u.email,
+            visited_count: visitedCount,
+            lunch_claimed: lunchClaimed,
+            souvenir_claimed: souvenirClaimed,
+            games_done: !!u.games_done,
+            reward_ready: !!u.reward_ready,
+        };
+    });
 
     const parser = new Parser();
     const csv = parser.parse(rows);
@@ -260,16 +378,22 @@ export const userExportCSV = async (req, res) => {
 };
 
 
+
 export const userReset = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
     const resetData = {
-        booths_visited: {},
+        booths_visited: null,
         visited_count: 0,
-        lunch_claimed: false,
-        souvenir_claimed: false,
+        checkin_dates: null,
+        checkin_order: null,
+        lunch_claimed_dates: null,
+        souvenir_claimed_dates: null,
+        games_done: false,
         photobooth_done: false,
-        photobooth_images: {},
+        photobooth_images: null,
         reward_ready: false,
         reward_claimed: false,
     };
@@ -280,16 +404,43 @@ export const userReset = async (req, res) => {
 };
 
 
+
 export const userUpdateStatus = async (req, res) => {
     const { id } = req.params;
-    const { lunch_claimed, souvenir_claimed, visited_count, photobooth_done } = req.body;
+    const { lunch_claimed, souvenir_claimed, photobooth_done, games_done } = req.body;
 
-    await db.ref("users/" + id).update({
-        lunch_claimed: lunch_claimed === "true",
-        souvenir_claimed: souvenir_claimed === "true",
-        photobooth_done: photobooth_done === "true",
-        visited_count: Number(visited_count) || 0
-    });
+    const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+    const userRef = db.ref("users/" + id);
+    const updates = {};
+
+    // Lunch
+    if (lunch_claimed === "true") {
+        updates[`lunch_claimed_dates/${today}`] = true;
+    } else {
+        updates["lunch_claimed_dates"] = null; // clear semua
+    }
+
+    // Souvenir
+    if (souvenir_claimed === "true") {
+        updates[`souvenir_claimed_dates/${today}`] = true;
+    } else {
+        updates["souvenir_claimed_dates"] = null;
+    }
+
+    // Photobooth & Games
+    updates.photobooth_done = photobooth_done === "true";
+    updates.games_done = games_done === "true";
+
+    // Recompute visited_count + reward_ready dari booths_visited
+    const visitedSnap = await userRef.child("booths_visited").get();
+    const visitedCount = visitedSnap.exists()
+        ? Object.keys(visitedSnap.val()).length
+        : 0;
+
+    updates.visited_count = visitedCount;
+    updates.reward_ready = visitedCount >= 5;
+
+    await userRef.update(updates);
 
     res.redirect("/admin/users/" + id);
 };

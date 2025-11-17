@@ -1,100 +1,157 @@
 <%- include("../../layouts/header-admin", { title: "Detail User" }) %>
 
-    <div class="container py-4">
+<div class="container py-4">
 
-        <h3>Detail User</h3>
+  <h3>Detail User</h3>
 
-        <!-- ============================
-         FORM UPDATE USER (Nama + Email)
-    ============================== -->
-        <form method="POST" action="/admin/users/<%= id %>/edit">
+  <!-- SUMMARY CARD -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3"><%= user.name %></h5>
 
-            <div class="mb-3">
-                <label class="form-label">Nama</label>
-                <input type="text" class="form-control" name="name" value="<%= user.name %>">
-            </div>
+      <p class="mb-1"><strong>Email:</strong> <%= user.email %></p>
+      <p class="mb-1"><strong>Dibuat:</strong> <%= user.created_at || "-" %></p>
 
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="email" value="<%= user.email %>">
-            </div>
+      <% 
+        const visitedCount = user.visited_count || (user.booths_visited ? Object.keys(user.booths_visited).length : 0);
+        const lunchClaimed = user.lunch_claimed_dates && Object.keys(user.lunch_claimed_dates).length > 0;
+        const souvenirClaimed = user.souvenir_claimed_dates && Object.keys(user.souvenir_claimed_dates).length > 0;
+        const gamesDone = !!user.games_done;
+        const rewardReady = !!user.reward_ready;
+      %>
 
-            <button class="btn btn-primary">Update</button>
-            <a href="/admin/users" class="btn btn-secondary">Kembali</a>
+      <div class="mt-2">
+        <span class="badge bg-primary me-1">Visited: <%= visitedCount %> booth</span>
 
-        </form>
+        <% if (lunchClaimed) { %>
+          <span class="badge bg-success me-1">Lunch: Sudah</span>
+        <% } else { %>
+          <span class="badge bg-secondary me-1">Lunch: Belum</span>
+        <% } %>
 
-        <hr>
+        <% if (souvenirClaimed) { %>
+          <span class="badge bg-success me-1">Souvenir: Sudah</span>
+        <% } else { %>
+          <span class="badge bg-secondary me-1">Souvenir: Belum</span>
+        <% } %>
 
-        <!-- ============================
-         RESET DATA USER
-    ============================== -->
-        <form method="POST" action="/admin/users/<%= id %>/reset"
-            onsubmit="return confirm('Yakin reset user ini seperti baru daftar?')">
-            <button class="btn btn-warning">Reset Data User</button>
-        </form>
+        <% if (gamesDone) { %>
+          <span class="badge bg-success me-1">Games: Selesai</span>
+        <% } else { %>
+          <span class="badge bg-secondary me-1">Games: Belum</span>
+        <% } %>
 
-        <hr>
-
-        <!-- ============================
-         EDIT STATUS (Lunch / Souvenir / Photobooth / Visit)
-    ============================== -->
-        <h4>Edit Status User</h4>
-
-        <form method="POST" action="/admin/users/<%= id %>/status">
-
-            <div class="mb-3">
-                <label class="form-label">Lunch Claimed</label>
-                <select name="lunch_claimed" class="form-control">
-                    <option value="false" <%=!user.lunch_claimed ? "selected" : "" %>>Belum</option>
-                    <option value="true" <%=user.lunch_claimed ? "selected" : "" %>>Sudah</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Souvenir Claimed</label>
-                <select name="souvenir_claimed" class="form-control">
-                    <option value="false" <%=!user.souvenir_claimed ? "selected" : "" %>>Belum</option>
-                    <option value="true" <%=user.souvenir_claimed ? "selected" : "" %>>Sudah</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Photobooth Done</label>
-                <select name="photobooth_done" class="form-control">
-                    <option value="false" <%=!user.photobooth_done ? "selected" : "" %>>Belum</option>
-                    <option value="true" <%=user.photobooth_done ? "selected" : "" %>>Sudah</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Visited Count</label>
-                <input type="number" class="form-control" name="visited_count" value="<%= user.visited_count || 0 %>">
-            </div>
-
-            <button class="btn btn-success">Update Status</button>
-
-        </form>
-
-        <hr>
-
-        <!-- ============================
-         VISITED BOOTHS LIST
-    ============================== -->
-        <h4>Visited Booth</h4>
-
-        <% if (user.booths_visited) { %>
-            <ul>
-                <% Object.keys(user.booths_visited).forEach(b=> { %>
-                    <li>
-                        <%= b %>
-                    </li>
-                    <% }) %>
-            </ul>
-            <% } else { %>
-                <p class="text-muted">Belum mengunjungi booth</p>
-                <% } %>
-
+        <% if (rewardReady) { %>
+          <span class="badge bg-warning text-dark">Reward: Ready</span>
+        <% } else { %>
+          <span class="badge bg-secondary">Reward: Belum</span>
+        <% } %>
+      </div>
     </div>
+  </div>
 
-    <%- include("../../layouts/footer") %>
+  <!-- UPDATE USER (Nama + Email) -->
+  <div class="card mb-4">
+    <div class="card-header">Edit Data User</div>
+    <div class="card-body">
+      <form method="POST" action="/admin/users/<%= id %>/edit">
+        <div class="mb-3">
+          <label class="form-label">Nama</label>
+          <input type="text" class="form-control" name="name" value="<%= user.name %>" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email" value="<%= user.email %>" required>
+        </div>
+
+        <button class="btn btn-primary">Update</button>
+        <a href="/admin/users" class="btn btn-secondary">Kembali</a>
+      </form>
+    </div>
+  </div>
+
+  <!-- RESET USER -->
+  <div class="card mb-4">
+    <div class="card-header">Reset Data User</div>
+    <div class="card-body">
+      <form method="POST" action="/admin/users/<%= id %>/reset"
+            onsubmit="return confirm('Yakin reset user ini seperti baru daftar?')">
+        <button class="btn btn-warning">Reset Data User</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT STATUS -->
+  <div class="card mb-4">
+    <div class="card-header">Edit Status User</div>
+    <div class="card-body">
+      <form method="POST" action="/admin/users/<%= id %>/status">
+
+        <div class="mb-3">
+          <label class="form-label">Lunch Claimed</label>
+          <% const lunchClaimedFlag = user.lunch_claimed_dates && Object.keys(user.lunch_claimed_dates).length > 0; %>
+          <select name="lunch_claimed" class="form-select">
+            <option value="false" <%= !lunchClaimedFlag ? "selected" : "" %>>Belum</option>
+            <option value="true"  <%=  lunchClaimedFlag ? "selected" : "" %>>Sudah</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Souvenir Claimed</label>
+          <% const souvenirClaimedFlag = user.souvenir_claimed_dates && Object.keys(user.souvenir_claimed_dates).length > 0; %>
+          <select name="souvenir_claimed" class="form-select">
+            <option value="false" <%= !souvenirClaimedFlag ? "selected" : "" %>>Belum</option>
+            <option value="true"  <%=  souvenirClaimedFlag ? "selected" : "" %>>Sudah</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Photobooth Done</label>
+          <select name="photobooth_done" class="form-select">
+            <option value="false" <%= !user.photobooth_done ? "selected" : "" %>>Belum</option>
+            <option value="true"  <%=  user.photobooth_done ? "selected" : "" %>>Sudah</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Games Done</label>
+          <select name="games_done" class="form-select">
+            <option value="false" <%= !user.games_done ? "selected" : "" %>>Belum</option>
+            <option value="true"  <%=  user.games_done ? "selected" : "" %>>Sudah</option>
+          </select>
+        </div>
+
+        <button class="btn btn-success">Update Status</button>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- VISITED BOOTHS -->
+  <div class="card mb-4">
+    <div class="card-header">Visited Booth</div>
+    <div class="card-body">
+      <% if (user.booths_visited) { %>
+        <ul class="list-group">
+          <% Object.keys(user.booths_visited).forEach(key => { 
+               const booth = booths[key];
+          %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>
+                <strong><%= booth ? booth.name : key %></strong>
+                <small class="text-muted d-block"><%= key %></small>
+              </span>
+              <span class="badge bg-primary">Visited</span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="text-muted mb-0">Belum mengunjungi booth.</p>
+      <% } %>
+    </div>
+  </div>
+
+</div>
+
+<%- include("../../layouts/footer") %>
