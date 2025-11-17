@@ -1,35 +1,75 @@
-import {
-    db
-} from "../server.js";
+import { db } from "../server.js";
+import { getToday } from "../utils/date.js";
 
 export const showDashboard = async (req, res) => {
     try {
         const user = req.session.user;
         if (!user) return res.redirect("/login");
 
-        const snap = await db.ref(`users/${user.id}`).get();
+        const today = getToday(); // "2025-11-17"
+        const userRef = db.ref(`users/${user.id}`);
+
+        const snap = await userRef.get();
         const d = snap.exists() ? snap.val() : {};
+
+        const boothsVisited = d.booths_visited || {};
+        const visitCount = Object.keys(boothsVisited).length;
+
+        // ----- CHECK-IN STATUS -----
+        const todayCheckin = d.checkin_dates?.[today] === true;
+
+        // Ambil urutan check-in user
+        const checkinOrderToday = d.checkin_order?.[today] || null;
+
+        // Ambil kuota check-in hari ini (untuk lunch)
+        const checkinCountSnap = await db.ref(`services/checkin/today_count/${today}`).get();
+        const checkinCountToday = checkinCountSnap.val() || 0;
+
+        // Ambil kuota lunch & souvenir
+        const lunchLimit = (await db.ref("services/lunch/QUOTA").get()).val() || 300;
+        const souvenirLimit = (await db.ref("services/souvenir/QUOTA").get()).val() || 150;
+
+        const lunchCount = (await db.ref(`services/lunch/today_count/${today}`).get()).val() || 0;
+        const souvenirCount = (await db.ref(`services/souvenir/today_count/${today}`).get()).val() || 0;
+
+        // ----- FEATURE ACTIVE LOGIC -----
+
+        // LUNCH
+        const lunchActive =
+            todayCheckin &&
+            checkinOrderToday &&
+            checkinOrderToday <= lunchLimit &&
+            !d.lunch_claimed_dates?.[today];
+
+        // SOUVENIR
+        const souvenirActive =
+            todayCheckin &&
+            visitCount >= 5 &&
+            souvenirCount < souvenirLimit &&
+            !d.souvenir_claimed_dates?.[today];
+
+        // BOOTH
+        const boothActive = todayCheckin;
+
+        // PHOTBOOTH & GAMES
+        const photoActive = todayCheckin && !d.photobooth_done;
+        const gamesActive = todayCheckin && !d.games_done;
 
         res.render("dashboard", {
             user: {
                 id: user.id,
-                name: d.name || "User",
+                name: d.name || "-",
                 email: d.email || "-",
 
-                // === BOOTH STATUS ===
-                booths_visited: d.booths_visited || {},
-                visited_count: d.visited_count || 0,
+                visited_count: visitCount,
+                today_checkin: todayCheckin,
+                checkin_order: checkinOrderToday,
 
-                // === CLAIMED STATUS ===
-                lunch_claimed: d.lunch_claimed || false,
-                souvenir_claimed: d.souvenir_claimed || false,
-                photobooth_done: d.photobooth_done || false,
-
-                // === GAME STATUS (kalau ada nanti)
-                games_done: d.games_done || false,
-
-                reward_ready: d.reward_ready || false,
-                reward_claimed: d.reward_claimed || false,
+                lunch_active: lunchActive,
+                souvenir_active: souvenirActive,
+                booth_active: boothActive,
+                photobooth_active: photoActive,
+                games_active: gamesActive,
             },
         });
 

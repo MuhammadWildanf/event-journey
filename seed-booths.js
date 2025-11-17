@@ -27,69 +27,116 @@ admin.initializeApp({
 const db = admin.database();
 
 // ================================
+// Helper → slug + fileName sanitizer
+// ================================
+function slug(str) {
+  return str
+    .toLowerCase()
+    .normalize("NFD")                     // buang karakter spesial
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, "and")                // fix simbol
+    .replace(/[^a-z0-9]+/g, "_")         // ganti semua non-alfanumerik jadi _
+    .replace(/_+/g, "_")                 // hapus double underscore
+    .replace(/^_+|_+$/g, "");            // trim
+}
+
+function fileNameSafe(str) {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// ================================
 // MAIN FUNCTION
 // ================================
 async function main() {
-  /* ======================================
-     GENERATE BOOTH QR
-  ====================================== */
+  /* =======================================================
+     1. GENERATE BOOTH QR
+  ======================================================= */
 
-  const boothCount = 12;
+  const boothNames = [
+    "SCM System",
+    "TKDN",
+    "Logistic",
+    "Procurement & Planning",
+    "General Services",
+    "PT Pertamina (Persero)",
+    "SCM Regional 1",
+    "SCM Regional 2",
+    "SCM Regional 3",
+    "SCM Regional 4",
+  ];
+
   const boothDir = path.join(__dirname, "qr", "booths");
   await fs.mkdir(boothDir, { recursive: true });
 
   const booths = {};
 
-  for (let i = 1; i <= boothCount; i++) {
-    const code = `BOOTH-${i}`;
-    const name = `Booth ${i}`;
+  for (const boothName of boothNames) {
+    const key = slug(boothName);              // firebase + QR payload
+    const fileName = fileNameSafe(boothName) + ".png";
+    const filePath = path.join(boothDir, fileName);
 
-    const pngPath = path.join(boothDir, `${code}.png`);
+    // QR now contains ONLY the slug (best practice)
+    await QRCode.toFile(filePath, key, { width: 500 });
 
-    await QRCode.toFile(pngPath, code, { width: 400 });
-
-    booths[code] = {
-      name,
-      qrUrl: `/qr/booths/${code}.png`,
+    booths[key] = {
+      key: key,
+      name: boothName,
+      code: key,
+      qrPayload: key,
+      qrUrl: `/qr/booths/${fileName}`,
     };
+
+    console.log(`🎟 Booth QR created: ${fileName} → ${key}`);
   }
 
   await db.ref("booths").set(booths);
-  console.log(`✅ QR Booth selesai (${boothCount} booth)`);
+  console.log(`✅ Booth QR selesai dibuat (${boothNames.length} booth)`);
 
 
-  /* ======================================
-     GENERATE LUNCH & SOUVENIR QR
-  ====================================== */
+
+  /* =======================================================
+     2. GENERATE SERVICES QR
+  ======================================================= */
 
   const serviceDir = path.join(__dirname, "qr", "services");
   await fs.mkdir(serviceDir, { recursive: true });
 
-  // 🔹 QR untuk LUNCH
-  const lunchCode = "lunch";
-  await QRCode.toFile(path.join(serviceDir, "lunch.png"), lunchCode, {
-    width: 400,
-  });
+  const services = [
+    { code: "lunch", name: "Lunch" },
+    { code: "souvenir", name: "Souvenir" },
+    { code: "checkin", name: "Check-In" },
+  ];
 
-  // 🔹 QR untuk SOUVENIR
-  const souvenirCode = "souvenir";
-  await QRCode.toFile(path.join(serviceDir, "souvenir.png"), souvenirCode, {
-    width: 400,
-  });
+  const servicesMeta = {};
 
-  // Simpan metadata ke firebase (opsional)
-  await db.ref("services").set({
-    lunch: {
-      code: "lunch",
-      qrUrl: "/qr/services/lunch.png",
-    },
-    souvenir: {
-      code: "souvenir",
-      qrUrl: "/qr/services/souvenir.png",
-    },
-  });
+  for (const svc of services) {
+    const fileName = `${svc.code}.png`;
+    const filePath = path.join(serviceDir, fileName);
 
-  console.log("✅ QR Lunch & Souvenir selesai dibuat");
+    // QR berisi code langsung
+    await QRCode.toFile(filePath, svc.code, { width: 500 });
+
+    servicesMeta[svc.code] = {
+      code: svc.code,
+      name: svc.name,
+      qrUrl: `/qr/services/${fileName}`,
+    };
+
+    console.log(`📦 Service QR created: ${fileName}`);
+  }
+
+  await db.ref("services").set(servicesMeta);
+
+  console.log("✅ QR untuk Lunch, Souvenir, dan Check-In selesai dibuat");
 }
 
+
+// Run
 main().catch(console.error);

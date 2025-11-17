@@ -174,18 +174,17 @@
 
         function startScanner() {
             scanner.start({
-                    facingMode: "environment"
-                }, {
-                    fps: 10,
-                    qrbox: {
-                        width: 250,
-                        height: 250
-                    },
+                facingMode: "environment"
+            }, {
+                fps: 10,
+                qrbox: {
+                    width: 250,
+                    height: 250
                 },
+            },
                 async (decodedText) => {
 
                     await scanner.stop();
-                    console.log("QR:", decodedText);
 
                     const res = await fetch("/scan/result", {
                         method: "POST",
@@ -198,15 +197,30 @@
                         })
                     });
 
-                    if (res.redirected) {
-                        window.location.href = res.url;
-                        return;
+                    let data;
+                    try {
+                        data = await res.json();
+                    } catch (e) {
+                        Swal.fire("Error", "Response tidak valid.", "error");
+                        return startScanner();
                     }
 
-                    const message = await res.text();
-                    Swal.fire("Error", message, "error");
-                    startScanner();
+                    if (data.success) {
+                        return Swal.fire({
+                            title: "Berhasil!",
+                            text: data.message,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = data.redirect || "/dashboard";
+                        });
+                    }
+
+
+                    Swal.fire("Gagal", data.message, "error").then(startScanner);
                 }
+
             );
         }
 

@@ -15,16 +15,22 @@ export const showLogin = (req, res) => {
 };
 
 export const registerUser = async (req, res) => {
-    const {
-        name,
-        email,
-        password
-    } = req.body;
+    const { name, email, password } = req.body;
+
     if (!name || !email || !password) {
         return res.status(400).send("Semua field wajib diisi!");
     }
 
-    // Cek email sudah ada atau belum
+    // ❗ VALIDASI PASSWORD
+    if (password.length < 6) {
+        return res.status(400).send("Password minimal 6 karakter!");
+    }
+
+    if (password.length > 32) {
+        return res.status(400).send("Password maksimal 32 karakter!");
+    }
+
+    // CEK EMAIL SUDAH ADA
     const usersSnap = await db.ref("users").get();
     let exists = false;
     usersSnap.forEach((child) => {
@@ -39,44 +45,27 @@ export const registerUser = async (req, res) => {
     await ref.set({
         name,
         email,
-        password,
-
+        password,  // ❗ tetap plaintext sesuai sistemmu
+        checkin_dates: {},
         booths_visited: {},
         visited_count: 0,
-
-        lunch_claimed: false,
-        souvenir_claimed: false,
+        lunch_claimed_dates: {},
+        souvenir_claimed_dates: {},
         photobooth_done: false,
         photobooth_images: {},
-
-        games_done: false, // 🆕 penting
-
+        games_done: false,
         reward_ready: false,
         reward_claimed: false,
-
         created_at: new Date().toISOString(),
     });
 
+    req.session.user = { id: ref.key, name, email };
 
-    // Simpan session
-    req.session.user = {
-        id: ref.key,
-        name,
-        email
-    };
-
-    // Kirim EMAIL
-    try {
-        await sendRegistrationEmail(name, email);
-    } catch (e) {
-        console.error("Email error:", e);
-    }
+    try { await sendRegistrationEmail(name, email); } catch (e) { }
 
     req.session.save(() => {
         if (req.headers["content-type"]?.includes("application/json")) {
-            return res.status(200).json({
-                success: true
-            });
+            return res.status(200).json({ success: true });
         }
         res.redirect("/dashboard");
     });

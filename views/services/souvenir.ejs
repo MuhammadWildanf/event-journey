@@ -40,7 +40,7 @@
             margin-bottom: 20px;
         }
 
-         .btn-back-custom {
+        .btn-back-custom {
             display: block;
             width: 100%;
             padding: 14px 0;
@@ -90,7 +90,7 @@
         <div class="qr-box">
             <div id="qr-reader" style="width:100%;"></div>
         </div>
-                   <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
+        <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -113,22 +113,24 @@
                         body: JSON.stringify({ code: decodedText })
                     });
 
-                    // SUCCESS → redirect
                     if (res.redirected) {
                         return window.location.href = res.url;
                     }
 
-                    // ERROR → SweetAlert tampilkan pesan dari server
-                    const msg = await res.text();
+                    const data = await res.json();
 
+                    // Jika sukses
+                    if (data.success && data.redirect) {
+                        return window.location.href = data.redirect;
+                    }
+
+                    // Jika error
                     Swal.fire({
                         icon: "error",
                         title: "Gagal",
-                        text: msg,
-                        confirmButtonColor: "#3085d6"
-                    }).then(() => {
-                        startScanner(); // restart scanner
-                    });
+                        text: data.message
+                    }).then(() => startScanner());
+
                 }
             );
         }

@@ -1,63 +1,56 @@
 <%- include("./layouts/header", { title: "Dashboard" , bodyClass: "page-dashboard" }) %>
 
-<header class="d-flex justify-content-between align-items-center">
-  <div class="d-flex align-items-center gap-2">
-    <div>
-      <small>Welcome</small><br>
-      <strong>
-        <%= user.name %>
-      </strong>
+  <header class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      <div>
+        <small>Welcome</small><br>
+        <strong>
+          <%= user.name %>
+        </strong>
+      </div>
     </div>
-  </div>
-  <a href="/logout" class="logout-btn text-white text-decoration-none">
-    <span class="material-symbols-rounded logout-icon">logout</span>
-  </a>
-</header>
-
-<%
-const featureStatus = {
-  scan: true,
-  lunch: user.lunch_claimed,
-  souvenir: user.souvenir_claimed,
-  photobooth: user.photobooth_done,
-  games: user.games_done,
-  booth: Object.keys(user.booths_visited || {}).length > 0
-};
-
-const nv = (v) => (v ? "" : "not-visited");
-
-%>
-
-
-<main>
-  <div class="dashboard-grid">
-
-    <a href="/scan" class="grid-item wide">
-      <div class="booth-card card-scan"></div>
+    <a href="/logout" class="logout-btn text-white text-decoration-none">
+      <span class="material-symbols-rounded logout-icon">logout</span>
     </a>
+  </header>
 
-    <a href="/lunch" class="grid-item square">
-      <div class="booth-card card-lunch <%= nv(featureStatus.lunch) %>"></div>
-    </a>
+  <% const nv=(v)=> (v ? "" : "not-visited");
+    %>
 
-    <a href="/souvenir" class="grid-item square">
-      <div class="booth-card card-souvenir <%= nv(featureStatus.souvenir) %>"></div>
-    </a>
+    <main>
+      <div class="dashboard-grid">
 
-    <a href="/photobooth" class="grid-item square">
-      <div class="booth-card card-photo <%= nv(featureStatus.photobooth) %>"></div>
-    </a>
+        <!-- SCAN SELALU AKTIF -->
+        <a href="/scan" class="grid-item wide">
+          <div class="booth-card card-scan"></div>
+        </a>
 
-    <a href="/games" class="grid-item square">
-      <div class="booth-card card-games <%= nv(featureStatus.games) %>"></div>
-    </a>
+        <!-- LUNCH -->
+        <a href="/lunch" class="grid-item square">
+          <div class="booth-card card-lunch <%= nv(user.lunch_active) %>"></div>
+        </a>
 
-    <a href="/booth" class="grid-item wide">
-      <div class="booth-card card-booth <%= nv(featureStatus.booth) %>"></div>
-    </a>
+        <!-- SOUVENIR -->
+        <a href="/souvenir" class="grid-item square">
+          <div class="booth-card card-souvenir <%= nv(user.souvenir_active) %>"></div>
+        </a>
 
-  </div>
-</main>
+        <!-- PHOTOBOOTH -->
+        <a href="/photobooth" class="grid-item square">
+          <div class="booth-card card-photo <%= nv(user.photobooth_active) %>"></div>
+        </a>
 
+        <!-- GAMES -->
+        <a href="/games" class="grid-item square">
+          <div class="booth-card card-games <%= nv(user.games_active) %>"></div>
+        </a>
 
-<%- include("./layouts/footer") %>
+        <!-- BOOTH LIST -->
+        <a href="/booth" class="grid-item wide">
+          <div class="booth-card card-booth <%= nv(user.booth_active) %>"></div>
+        </a>
+
+      </div>
+    </main>
+
+    <%- include("./layouts/footer") %>

@@ -1,6 +1,7 @@
 import {
     db
 } from "../server.js";
+import { getToday } from "../utils/date.js";
 
 /* ---------------------------------------
    PAGE VIEW (Lunch, Souvenir, Photobooth, Games)
@@ -49,51 +50,58 @@ export const showGames = (req, res) => {
 export const handleLunchScan = async (req, res) => {
     try {
         const user = req.session.user;
-        const {
-            code
-        } = req.body;
+        const { code } = req.body;
+        const today = new Date().toISOString().slice(0, 10);
 
-        if (!code || code !== "lunch") {
-            return res.status(400).send("QR Code lunch tidak valid!");
+        if (code !== "lunch") {
+            return res.json({ success: false, message: "QR Code lunch tidak valid!" });
         }
 
-        // Ambil data user
         const userRef = db.ref("users/" + user.id);
-        const snap = await userRef.get();
-        const userData = snap.exists() ? snap.val() : {};
+        const userSnap = await userRef.get();
+        const userData = userSnap.val() || {};
 
-        // ❗ CEK: sudah ambil lunch atau belum
-        if (userData.lunch_claimed === true) {
-            return res.status(400).send("Anda sudah mengambil lunch box.");
+        // 1️⃣ Check-in wajib
+        if (!userData.checkin_dates?.[today]) {
+            return res.json({ success: false, message: "Silakan check-in terlebih dahulu." });
         }
 
-        // ❗ CEK KUOTA 300 LUNCH
-        const countSnap = await db.ref("users")
-            .orderByChild("lunch_claimed")
-            .equalTo(true)
-            .get();
-
-        const lunchCount = countSnap.exists() ?
-            Object.keys(countSnap.val()).length :
-            0;
-
-        if (lunchCount >= 300) {
-            return res.status(400).send("Lunch box sudah habis!");
+        // 2️⃣ Sudah ambil hari ini?
+        if (userData.lunch_claimed_dates?.[today]) {
+            return res.json({ success: false, message: "Anda sudah mengambil lunch hari ini." });
         }
 
-        // ✔ Tandai ambil lunch
-        await userRef.update({
-            lunch_claimed: true,
-            lunch_claimed_at: new Date().toISOString(),
+        // 3️⃣ Cek kuota harian
+        const quotaRef = db.ref(`services/lunch/today_count/${today}`);
+        const quotaSnap = await quotaRef.get();
+        const countToday = quotaSnap.val() || 0;
+
+        const limitSnap = await db.ref("services/lunch/QUOTA").get();
+        const limit = limitSnap.val() || 300;
+
+        if (countToday >= limit) {
+            return res.json({ success: false, message: "Lunch box sudah habis hari ini!" });
+        }
+
+        // 4️⃣ Berikan lunch
+        await userRef.child(`lunch_claimed_dates/${today}`).set(true);
+
+        // 5️⃣ Update counter
+        await quotaRef.set(countToday + 1);
+
+        return res.json({
+            success: true,
+            message: "Lunch berhasil di-claim!",
+            redirect: "/lunch-success"
         });
 
-        return res.redirect("/lunch-success");
-
     } catch (err) {
-        console.error("Error lunch scan:", err);
-        res.status(500).send("Terjadi kesalahan server");
+        console.error("Lunch error:", err);
+        return res.json({ success: false, message: "Terjadi kesalahan server." });
     }
 };
+
+
 
 /* ---------------------------------------
    🔥 HANDLE SOUVENIR SCAN
@@ -103,41 +111,66 @@ export const handleLunchScan = async (req, res) => {
 export const handleSouvenirScan = async (req, res) => {
     try {
         const user = req.session.user;
-        const {
-            code
-        } = req.body;
+        const { code } = req.body;
+        const today = new Date().toISOString().slice(0, 10);
 
-        if (!code || code !== "souvenir") {
-            return res.status(400).send("QR Code souvenir tidak valid!");
+        if (code !== "souvenir") {
+            return res.json({ success: false, message: "QR Code souvenir tidak valid!" });
         }
 
-        // Ambil data user
         const userRef = db.ref("users/" + user.id);
-        const snap = await userRef.get();
-        const userData = snap.exists() ? snap.val() : {};
+        const userSnap = await userRef.get();
+        const userData = userSnap.val() || {};
 
-        // ❗ CEK: sudah ambil souvenir atau belum
-        if (userData.souvenir_claimed === true) {
-            return res.status(400).send("Anda sudah mengambil souvenir.");
+        // 1️⃣ Check-in wajib
+        if (!userData.checkin_dates?.[today]) {
+            return res.json({ success: false, message: "Silakan check-in terlebih dahulu." });
         }
 
-        // ❗ CEK syarat 5 booth
-        if (!userData.visited_count || userData.visited_count < 5) {
-            return res.status(400).send(
-                "Anda harus mengunjungi minimal 5 booth untuk mengambil souvenir."
-            );
+        // 2️⃣ Sudah claim hari ini?
+        if (userData.souvenir_claimed_dates?.[today]) {
+            return res.json({ success: false, message: "Anda sudah mengambil souvenir hari ini." });
         }
 
-        // ✔ Tandai ambil souvenir
-        await userRef.update({
-            souvenir_claimed: true,
-            souvenir_claimed_at: new Date().toISOString(),
+        // 3️⃣ Wajib 5 booth
+        if ((userData.visited_count || 0) < 5) {
+            return res.json({
+                success: false,
+                message: "Anda harus mengunjungi minimal 5 booth."
+            });
+        }
+
+        // 4️⃣ Kuota harian
+        const quotaRef = db.ref(`services/souvenir/today_count/${today}`);
+        const quotaSnap = await quotaRef.get();
+        const countToday = quotaSnap.val() || 0;
+
+        const limitSnap = await db.ref("services/souvenir/QUOTA").get();
+        const limit = limitSnap.val() || 150;
+
+        if (countToday >= limit) {
+            return res.json({
+                success: false,
+                message: "Souvenir habis hari ini. Coba besok."
+            });
+        }
+
+        // 5️⃣ Berikan souvenir
+        await userRef.child(`souvenir_claimed_dates/${today}`).set(true);
+
+        // 6️⃣ Update counter
+        await quotaRef.set(countToday + 1);
+
+        return res.json({
+            success: true,
+            message: "Souvenir berhasil di-claim!",
+            redirect: "/souvenir-success"
         });
 
-        return res.redirect("/souvenir-success");
-
     } catch (err) {
-        console.error("Error souvenir scan:", err);
-        res.status(500).send("Terjadi kesalahan server");
+        console.error("Souvenir error:", err);
+        return res.json({ success: false, message: "Terjadi kesalahan server." });
     }
 };
+
+

@@ -1,6 +1,20 @@
+import { handleLunchScan, handleSouvenirScan } from "./serviceController.js";
+import { handleCheckin } from "./checkinController.js";
 import {
     db
 } from "../server.js";
+
+function normalizeBoothKey(str) {
+    return str
+        .toLowerCase()
+        .normalize("NFD")                    // hilangkan karakter aneh
+        .replace(/[\u0300-\u036f]/g, "")     //
+        .replace(/&/g, "and")                // ganti karakter simbol
+        .replace(/[^a-z0-9]+/g, "_")         // semua non alfanumerik jadi _
+        .replace(/_+/g, "_")                 // fix underscore berlebih
+        .replace(/^_+|_+$/g, "");            // trim underscore
+}
+
 
 export const showScan = (req, res) => {
     const user = req.session.user;
@@ -87,59 +101,52 @@ export const showScan = (req, res) => {
 
 // v3 
 
+
+
+
 export const handleScanResult = async (req, res) => {
     try {
-        const {
-            boothCode,
-            redirect
-        } = req.body; // 👈 redirect ditambah
+        const { boothCode, redirect } = req.body;
         const user = req.session.user;
 
         if (!boothCode) {
-            return res.status(400).send("QR Code tidak valid");
+            return res.json({ success: false, message: "QR Code tidak valid." });
         }
 
+        // Normalisasi QR sebelum digunakan
         const code = boothCode.toLowerCase();
-        let redirectTo = redirect && redirect.startsWith("/") ?
-            redirect // 👈 prioritas redirect param
-            :
-            null;
+        const boothKey = normalizeBoothKey(boothCode);
 
-        // =============================
-        // 🔥 1) LUNCH  (langsung handle)
-        // =============================
-        if (code === "lunch") {
-            return res.redirect(307, "/scan-lunch/result");
+        const SCAN_ACTIONS = {
+            checkin: handleCheckin,
+            lunch: handleLunchScan,
+            souvenir: handleSouvenirScan,
+            photobooth: "/photobooth",
+            games: "/games"
+        };
+
+        // 🔥 Jika QR adalah CHECK-IN / LUNCH / SOUVENIR → direct process
+        if (typeof SCAN_ACTIONS[code] === "function") {
+            req.body.code = code;
+            return SCAN_ACTIONS[code](req, res);
         }
 
-        // =============================
-        // 🔥 2) SOUVENIR (langsung handle)
-        // =============================
-        if (code === "souvenir") {
-            return res.redirect(307, "/scan-souvenir/result");
+        // 🔥 Jika service redirect (photobooth / games)
+        if (typeof SCAN_ACTIONS[code] === "string") {
+            return res.json({
+                success: true,
+                message: "Arahkan ke halaman...",
+                redirect: SCAN_ACTIONS[code]
+            });
         }
 
-        // =============================
-        // 🔥 3) PHOTOBOOTH
-        // =============================
-        if (code === "photobooth") {
-            return res.redirect("/photobooth");
-        }
-
-        // =============================
-        // 🔥 4) GAMES
-        // =============================
-        if (code === "games") {
-            return res.redirect("/games");
-        }
-
-        // =============================
-        // 🔵 5) BOOTH (default)
-        // =============================
+        // 🔵 Default → BOOTH visit
         const userRef = db.ref(`users/${user.id}`);
 
-        await userRef.child(`booths_visited/${code}`).set(true);
+        // tandai visited booth normalizer → benar!
+        await userRef.child(`booths_visited/${boothKey}`).set(true);
 
+        // hitung jumlah booth yang dikunjungi
         const snap = await userRef.child("booths_visited").get();
         const count = snap.exists() ? Object.keys(snap.val()).length : 0;
 
@@ -148,15 +155,17 @@ export const handleScanResult = async (req, res) => {
             reward_ready: count >= 5
         });
 
-        // default redirect booth jika tidak pakai redirect param
-        if (!redirectTo) {
-            redirectTo = `/booth/${code}`;
-        }
-
-        return res.redirect(redirectTo);
+        return res.json({
+            success: true,
+            message: `Berhasil mengunjungi booth ${boothKey}.`,
+            redirect: `/booth/${boothKey}`
+        });
 
     } catch (err) {
         console.error("Scan error:", err);
-        return res.status(500).send("Internal Server Error");
+        return res.json({
+            success: false,
+            message: "Terjadi kesalahan server."
+        });
     }
 };

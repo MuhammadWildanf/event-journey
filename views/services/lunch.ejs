@@ -34,7 +34,7 @@
             padding: 12px;
         }
 
-         .btn-back-custom {
+        .btn-back-custom {
             display: block;
             width: 100%;
             padding: 14px 0;
@@ -83,9 +83,9 @@
         <div class="qr-box">
             <div id="qr-reader" style="width:100%"></div>
         </div>
-            <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
+        <a href="/dashboard" class="btn-back-custom mt-4">BACK</a>
 
-       
+
     </div>
 
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -107,11 +107,20 @@
                         body: JSON.stringify({ code: decoded })
                     });
 
-                    if (res.redirected) return window.location.href = res.url;
+                    // Redirect sukses
+                    if (res.redirected) return (window.location.href = res.url);
 
-                    const msg = await res.text();
-                    Swal.fire("Error", msg, "error");
-                    startScan();
+                    // Ambil JSON
+                    const data = await res.json();
+
+                    // Jika sukses → redirect manual
+                    if (data.success && data.redirect) {
+                        return window.location.href = data.redirect;
+                    }
+
+                    // Jika gagal → show message
+                    Swal.fire("Error", data.message, "error").then(startScan);
+
                 }
             );
         }

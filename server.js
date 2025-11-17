@@ -11,6 +11,7 @@ import boothRoutes from "./routes/boothRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import checkinRoutes from "./routes/checkinRoutes.js";
 import serverless from "serverless-http";
 import { sendEmail } from "./utils/mailer.js";
 
@@ -92,6 +93,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/", authRoutes);
+app.use("/", checkinRoutes);
 app.use("/", dashboardRoutes);
 app.use("/", boothRoutes);
 app.use("/", scanRoutes);
