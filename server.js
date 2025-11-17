@@ -75,6 +75,22 @@ app.use("/qr", express.static(path.join(__dirname, "qr")));
 // ==================================================
 // ✅ Routes
 // ==================================================
+
+
+app.get("/", (req, res) => {
+  if (req.session.user) {
+    return res.redirect("/dashboard");
+  }
+
+  if (!req.session.hasVisited) {
+    req.session.hasVisited = true;
+    return res.redirect("/register");
+  }
+
+  return res.redirect("/login");
+});
+
+
 app.use("/", authRoutes);
 app.use("/", dashboardRoutes);
 app.use("/", boothRoutes);
