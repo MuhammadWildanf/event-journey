@@ -18,16 +18,16 @@ export const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-        return res.status(400).send("Semua field wajib diisi!");
+        return res.status(400).send("All fields are required!");
     }
 
     // ❗ VALIDASI PASSWORD
     if (password.length < 6) {
-        return res.status(400).send("Password minimal 6 karakter!");
+        return res.status(400).send("Password must be at least 6 characters!");
     }
 
     if (password.length > 32) {
-        return res.status(400).send("Password maksimal 32 karakter!");
+        return res.status(400).send("Password must be at most 32 characters!");
     }
 
     // CEK EMAIL SUDAH ADA
@@ -38,7 +38,7 @@ export const registerUser = async (req, res) => {
     });
 
     if (exists) {
-        return res.status(409).send("Email sudah terdaftar!");
+        return res.status(409).send("Email is already registered!");
     }
 
     const ref = db.ref("users").push();
@@ -81,7 +81,7 @@ export const loginUser = async (req, res) => {
     } = req.body;
 
     if (!email || !password) {
-        return res.status(400).send("Isi semua field!");
+        return res.status(400).send("Please fill out all fields!");
     }
 
     const snap = await db.ref("users").get();
@@ -97,7 +97,7 @@ export const loginUser = async (req, res) => {
     });
 
     if (!user) {
-        return res.status(401).send("Email atau password salah!");
+        return res.status(401).send("Email or password is incorrect!");
     }
 
     req.session.user = {

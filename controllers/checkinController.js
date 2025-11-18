@@ -10,7 +10,7 @@ export const handleCheckin = async (req, res) => {
         if (code !== "checkin") {
             return res.status(400).json({
                 success: false,
-                message: "QR Code check-in tidak valid!"
+                message: "Invalid check-in QR code."
             });
         }
 
@@ -22,7 +22,7 @@ export const handleCheckin = async (req, res) => {
         if (userData.checkin_dates?.[today]) {
             return res.status(400).json({
                 success: false,
-                message: "Anda sudah check-in hari ini."
+                message: "You have already checked in today."
             });
         }
 
@@ -45,14 +45,14 @@ export const handleCheckin = async (req, res) => {
         // 5. BALIKKAN JSON SUKSES (TANPA URUTAN)
         return res.json({
             success: true,
-            message: "Check-in berhasil!"
+            message: "Check-in successful."
         });
 
     } catch (err) {
         console.error("Checkin error:", err);
         return res.status(500).json({
             success: false,
-            message: "Terjadi kesalahan server"
+            message: "Internal server error."
         });
     }
 };

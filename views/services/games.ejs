@@ -1,7 +1,30 @@
 <%- include("../layouts/header", { title: "Games" }) %>
 
+    <style>
+        .title-lunch {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            /* jarak icon-text */
+        }
+
+        .title-lunch .material-symbols-rounded {
+            font-size: 36px;
+            /* mirip desain */
+            color: #ffffff;
+            font-weight: 400;
+        }
+    </style>
+
     <div class="text-white text-center" style="margin-top: 120px;">
-        <h2>games</h2>
+        <h2 class="title-lunch">
+            <span class="material-symbols-rounded">sports_esports</span>
+            GAMES
+        </h2>
     </div>
 
     <%- include("../layouts/footer") %>

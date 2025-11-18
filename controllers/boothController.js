@@ -64,9 +64,9 @@ export const submitBoothReview = async (req, res) => {
         const { rating, comment } = req.body;
         const user = req.session.user;
 
-        // VALIDASI
-        if (!rating || !comment) {
-            return res.status(400).send("Rating dan komentar wajib diisi");
+        // VALIDASI HANYA RATING
+        if (!rating) {
+            return res.status(400).send("Rating is required.");
         }
 
         // DATA REVIEW
@@ -75,7 +75,7 @@ export const submitBoothReview = async (req, res) => {
             userId: user.id,
             user: user.name,
             rating: Number(rating),
-            comment,
+            comment: comment || "", // comment tidak wajib
             created_at: new Date().toISOString(),
         });
 
@@ -86,3 +86,4 @@ export const submitBoothReview = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+

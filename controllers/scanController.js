@@ -24,85 +24,6 @@ export const showScan = (req, res) => {
     });
 };
 
-// export const handleScanResult = async (req, res) => {
-//     try {
-//         const { boothCode } = req.body;
-//         const user = req.session.user;
-
-//         if (!boothCode) {
-//             return res.status(400).send("QR Code tidak valid");
-//         }
-
-//         const userRef = db.ref(`users/${user.id}`);
-//         const snap = await userRef.get();
-//         const userData = snap.exists() ? snap.val() : {};
-
-//         await userRef.child(`booths_visited/${boothCode}`).set(true);
-
-//         const newSnap = await userRef.child("booths_visited").get();
-//         const visitedCount = newSnap.exists() ? Object.keys(newSnap.val()).length : 0;
-
-//         await userRef.update({
-//             visited_count: visitedCount,
-//             reward_ready: visitedCount >= 5,
-//         });
-
-//         // res.redirect(`/booth/${boothCode}`);
-//         res.redirect(redirectTo);
-//     } catch (err) {
-//         console.error("Error handle scan:", err);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
-
-
-// v2 
-// export const handleScanResult = async (req, res) => {
-//     try {
-//         const { boothCode } = req.body;
-//         const user = req.session.user;
-
-//         if (!boothCode) {
-//             return res.status(400).send("QR Code tidak valid");
-//         }
-
-//         const userRef = db.ref(`users/${user.id}`);
-//         const snap = await userRef.get();
-//         const userData = snap.exists() ? snap.val() : {};
-
-//         await userRef.child(`booths_visited/${boothCode}`).set(true);
-
-//         const newSnap = await userRef.child("booths_visited").get();
-//         const visitedCount = newSnap.exists() ? Object.keys(newSnap.val()).length : 0;
-
-//         await userRef.update({
-//             visited_count: visitedCount,
-//             reward_ready: visitedCount >= 5,
-//         });
-
-//         // 🔥 Ambil redirect jika ada
-//        let redirectTo = req.body.redirect || `/booth/${boothCode}`;
-
-
-//         // safety redirect
-//         if (!redirectTo.startsWith('/')) {
-//             redirectTo = `/booth/${boothCode}`;
-//         }
-
-//         res.redirect(redirectTo);
-
-//     } catch (err) {
-//         console.error("Error handle scan:", err);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
-
-// v3 
-
-
-
 
 export const handleScanResult = async (req, res) => {
     try {
@@ -110,7 +31,7 @@ export const handleScanResult = async (req, res) => {
         const user = req.session.user;
 
         if (!boothCode) {
-            return res.json({ success: false, message: "QR Code tidak valid." });
+            return res.json({ success: false, message: "Invalid QR code." });
         }
 
         // Normalisasi QR
@@ -135,7 +56,7 @@ export const handleScanResult = async (req, res) => {
         if (typeof SCAN_ACTIONS[code] === "string") {
             return res.json({
                 success: true,
-                message: "Arahkan ke halaman...",
+                message: "Redirecting to page...",
                 redirect: SCAN_ACTIONS[code]
             });
         }
@@ -148,7 +69,7 @@ export const handleScanResult = async (req, res) => {
         if (!boothsSnap.exists()) {
             return res.json({
                 success: false,
-                message: "Booth tidak ditemukan."
+                message: "Booth not found."
             });
         }
 
@@ -175,7 +96,7 @@ export const handleScanResult = async (req, res) => {
         // =====================================
         return res.json({
             success: true,
-            message: `Berhasil mengunjungi booth ${boothName}.`,
+            message: `Successfully visited booth ${boothName}.`,
             boothName,
             redirect: `/booth/${boothKey}`
         });
@@ -184,7 +105,7 @@ export const handleScanResult = async (req, res) => {
         console.error("Scan error:", err);
         return res.json({
             success: false,
-            message: "Terjadi kesalahan server."
+            message: "Server error occurred."
         });
     }
 };

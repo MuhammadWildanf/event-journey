@@ -201,13 +201,13 @@
                     try {
                         data = await res.json();
                     } catch (e) {
-                        Swal.fire("Error", "Response tidak valid.", "error");
+                        Swal.fire("Error", "Invalid response.", "error");
                         return startScanner();
                     }
 
                     if (data.success) {
                         return Swal.fire({
-                            title: "Berhasil!",
+                            title: "Success!",
                             text: data.message,
                             icon: "success",
                             confirmButtonText: "OK",

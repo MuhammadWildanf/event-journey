@@ -17,7 +17,8 @@ import {
     userUpdate,
     userExportCSV,
     userReset,
-    userUpdateStatus
+    userUpdateStatus,
+    quotaSettings, quotaUpdate
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -46,5 +47,9 @@ router.post("/users/:id/edit", userUpdate);
 router.get("/users/:id/delete", userDelete);
 router.post("/users/:id/reset", userReset);
 router.post("/users/:id/status", userUpdateStatus);
+
+
+router.get("/quota", quotaSettings);
+router.post("/quota", quotaUpdate);
 
 export default router;

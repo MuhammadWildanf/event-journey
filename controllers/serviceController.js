@@ -50,54 +50,59 @@ export const showGames = (req, res) => {
 export const handleLunchScan = async (req, res) => {
     try {
         const user = req.session.user;
+        if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
+
         const { code } = req.body;
-        const today = new Date().toISOString().slice(0, 10);
+        const today = getToday();
 
         if (code !== "lunch") {
-            return res.json({ success: false, message: "QR Code lunch tidak valid!" });
+            return res.json({ success: false, message: "Invalid lunch QR code." });
         }
 
         const userRef = db.ref("users/" + user.id);
         const userSnap = await userRef.get();
         const userData = userSnap.val() || {};
 
-        // 1️⃣ Check-in wajib
+        // 1️⃣ Must be checked-in today
         if (!userData.checkin_dates?.[today]) {
-            return res.json({ success: false, message: "Silakan check-in terlebih dahulu." });
+            return res.json({ success: false, message: "Please check in first." });
         }
 
-        // 2️⃣ Sudah ambil hari ini?
+        // 2️⃣ Already claimed today?
         if (userData.lunch_claimed_dates?.[today]) {
-            return res.json({ success: false, message: "Anda sudah mengambil lunch hari ini." });
+            return res.json({ success: false, message: "You have already claimed lunch today." });
         }
 
-        // 3️⃣ Cek kuota harian
-        const quotaRef = db.ref(`services/lunch/today_count/${today}`);
-        const quotaSnap = await quotaRef.get();
-        const countToday = quotaSnap.val() || 0;
-
+        // 3️⃣ Get limit
         const limitSnap = await db.ref("services/lunch/QUOTA").get();
         const limit = limitSnap.val() || 300;
 
-        if (countToday >= limit) {
-            return res.json({ success: false, message: "Lunch box sudah habis hari ini!" });
+        // 4️⃣ Atomic increment using transaction to prevent oversubscribe
+        const quotaRef = db.ref(`services/lunch/today_count/${today}`);
+        const txnResult = await quotaRef.transaction(current => {
+            current = current || 0;
+            if (current >= limit) {
+                return; // abort - sold out
+            }
+            return current + 1;
+        }, {});
+
+        if (!txnResult.committed) {
+            return res.json({ success: false, message: "Lunch is sold out for today." });
         }
 
-        // 4️⃣ Berikan lunch
+        // 5️⃣ Mark user as claimed
         await userRef.child(`lunch_claimed_dates/${today}`).set(true);
-
-        // 5️⃣ Update counter
-        await quotaRef.set(countToday + 1);
 
         return res.json({
             success: true,
-            message: "Lunch berhasil di-claim!",
+            message: "Lunch successfully claimed.",
             redirect: "/lunch-success"
         });
 
     } catch (err) {
         console.error("Lunch error:", err);
-        return res.json({ success: false, message: "Terjadi kesalahan server." });
+        return res.json({ success: false, message: "Server error occurred." });
     }
 };
 
@@ -111,65 +116,67 @@ export const handleLunchScan = async (req, res) => {
 export const handleSouvenirScan = async (req, res) => {
     try {
         const user = req.session.user;
+        if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
+
         const { code } = req.body;
-        const today = new Date().toISOString().slice(0, 10);
+        const today = getToday();
 
         if (code !== "souvenir") {
-            return res.json({ success: false, message: "QR Code souvenir tidak valid!" });
+            return res.json({ success: false, message: "Invalid souvenir QR code." });
         }
 
         const userRef = db.ref("users/" + user.id);
         const userSnap = await userRef.get();
         const userData = userSnap.val() || {};
 
-        // 1️⃣ Check-in wajib
+        // 1️⃣ Must be checked-in today
         if (!userData.checkin_dates?.[today]) {
-            return res.json({ success: false, message: "Silakan check-in terlebih dahulu." });
+            return res.json({ success: false, message: "Please check in first." });
         }
 
-        // 2️⃣ Sudah claim hari ini?
+        // 2️⃣ Already claimed today?
         if (userData.souvenir_claimed_dates?.[today]) {
-            return res.json({ success: false, message: "Anda sudah mengambil souvenir hari ini." });
+            return res.json({ success: false, message: "You have already claimed a souvenir today." });
         }
 
-        // 3️⃣ Wajib 5 booth
+        // 3️⃣ Must have visited at least 5 booths
         if ((userData.visited_count || 0) < 5) {
             return res.json({
                 success: false,
-                message: "Anda harus mengunjungi minimal 5 booth."
+                message: "You must visit at least 5 booths to claim a souvenir."
             });
         }
 
-        // 4️⃣ Kuota harian
-        const quotaRef = db.ref(`services/souvenir/today_count/${today}`);
-        const quotaSnap = await quotaRef.get();
-        const countToday = quotaSnap.val() || 0;
-
+        // 4️⃣ Get limit
         const limitSnap = await db.ref("services/souvenir/QUOTA").get();
         const limit = limitSnap.val() || 150;
 
-        if (countToday >= limit) {
-            return res.json({
-                success: false,
-                message: "Souvenir habis hari ini. Coba besok."
-            });
+        // 5️⃣ Atomic increment using transaction
+        const quotaRef = db.ref(`services/souvenir/today_count/${today}`);
+        const txnResult = await quotaRef.transaction(current => {
+            current = current || 0;
+            if (current >= limit) {
+                return; // abort - sold out
+            }
+            return current + 1;
+        }, {});
+
+        if (!txnResult.committed) {
+            return res.json({ success: false, message: "Souvenirs are sold out for today. Please try another day." });
         }
 
-        // 5️⃣ Berikan souvenir
+        // 6️⃣ Mark user as claimed
         await userRef.child(`souvenir_claimed_dates/${today}`).set(true);
-
-        // 6️⃣ Update counter
-        await quotaRef.set(countToday + 1);
 
         return res.json({
             success: true,
-            message: "Souvenir berhasil di-claim!",
+            message: "Souvenir successfully claimed.",
             redirect: "/souvenir-success"
         });
 
     } catch (err) {
         console.error("Souvenir error:", err);
-        return res.json({ success: false, message: "Terjadi kesalahan server." });
+        return res.json({ success: false, message: "Server error occurred." });
     }
 };
 

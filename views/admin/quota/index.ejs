@@ -1,0 +1,45 @@
+<%- include("../../layouts/header-admin", { title: "Quota Settings" }) %>
+
+    <div class="container mt-4">
+
+        <h3 class="mb-4">Quota Management</h3>
+
+        <form action="/admin/quota" method="POST">
+
+            <div class="card mb-4">
+                <div class="card-header">Lunch Quota</div>
+                <div class="card-body">
+                    <label class="form-label">Quota</label>
+                    <input type="number" name="lunchQuota" class="form-control" value="<%= lunchQuota %>">
+
+                    <p class="mt-2">
+                        <strong>Used:</strong>
+                        <%= lunchUsed %> <br>
+                            <strong>Remaining:</strong>
+                            <%= lunchRemaining %>
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="card mb-4">
+                <div class="card-header">Souvenir Quota</div>
+                <div class="card-body">
+                    <label class="form-label">Quota</label>
+                    <input type="number" name="souvenirQuota" class="form-control" value="<%= souvenirQuota %>">
+
+                    <p class="mt-2">
+                        <strong>Used:</strong>
+                        <%= souvenirUsed %><br>
+                            <strong>Remaining:</strong>
+                            <%= souvenirRemaining %>
+                    </p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary">Save Quota</button>
+        </form>
+
+    </div>
+
+    <% - include("../../layouts/footer") %>

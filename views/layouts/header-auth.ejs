@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -23,8 +25,10 @@
             height: 100vh;
             background: url("/assets/img/bg.png") no-repeat center center / cover;
             font-family: "Poppins", sans-serif;
-            overflow: hidden;              /* no scroll */
-            display: flex;                 /* center wrapper */
+            overflow: hidden;
+            /* no scroll */
+            display: flex;
+            /* center wrapper */
             justify-content: center;
             align-items: center;
             text-align: center;
@@ -33,7 +37,8 @@
         /* === WRAPPER YANG DI-SCALE === */
         .auth-wrapper {
             position: relative;
-            width: 390px;                  /* desain dasar mobile */
+            width: 390px;
+            /* desain dasar mobile */
             transform-origin: top center;
         }
 
@@ -213,6 +218,38 @@
                 width: 240px;
                 margin-bottom: 16px;
             }
+        }
+
+
+        /* Ensure Swal is fixed above the layout and can scroll internally */
+        .swal2-backdrop {
+            position: fixed !important;
+            inset: 0 !important;
+            background: rgba(0, 0, 0, 0.45) !important;
+            z-index: 99998 !important;
+        }
+
+        .swal2-container {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999 !important;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            pointer-events: auto;
+        }
+
+        .swal2-popup {
+            max-width: 92vw;
+            width: auto !important;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
     </style>
 </head>

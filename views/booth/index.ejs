@@ -1,106 +1,120 @@
-<%- include("../layouts/header", { title: "Booth", bodyClass: "page-booth" }) %>
+<%- include("../layouts/header", { title: "Booth" , bodyClass: "page-booth" }) %>
 
-<style>
-    .container {
-        max-height: calc(100vh - 180px);
-        overflow-y: auto;
-        padding-top: 1rem;
-    }
+    <style>
+        .booth-list-card {
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #000;
+            font-weight: 600;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
 
-    .booth-list-card {
-        padding: 14px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.92);
-        color: #000;
-        font-weight: 600;
-        margin-bottom: 16px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-    }
+        .booth-visited {
+            background: linear-gradient(135deg, #C65AFF, #8A23D9);
+            color: white;
+            border: 3px solid #F0B6FF;
+        }
 
-    .booth-visited {
-        background: linear-gradient(135deg, #C65AFF, #8A23D9);
-        color: white;
-        border: 3px solid #F0B6FF;
-    }
+        .btn-back-custom {
+            display: block;
+            width: 100%;
+            padding: 14px 0;
+            margin-top: 1.5rem;
+            text-decoration: none;
+            border-radius: 14px;
+            background: #0c2340;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
 
-    .btn-back-custom {
-        display: block;
-        width: 100%;
-        padding: 14px 0;
-        margin-top: 1.5rem;
-
-        border-radius: 14px;
-        background: #0c2340;
-        color: #ffffff;
-        font-size: 1rem;
-        font-weight: 600;
-        text-align: center;
-
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow:
-            0 0 12px rgba(0, 255, 255, 0.2),
-            0 0 20px rgba(0, 255, 255, 0.1);
-    }
-</style>
-
-<header class="d-flex justify-content-between align-items-center">
-    <div>
-        <small>Welcome</small><br>
-        <strong><%= user.name %></strong>
-    </div>
-</header>
-
-<%
-  const visitedSafe = visited || {};
-
-  const sortedBooths = Object.entries(booths).sort((a, b) => {
-      // --------------------------
-      // PRIORITAS 1: visited duluan
-      // --------------------------
-      const visitedA = visitedSafe[a[0]] ? 1 : 0;
-      const visitedB = visitedSafe[b[0]] ? 1 : 0;
-
-      if (visitedA !== visitedB) {
-          return visitedB - visitedA;
-      }
-
-      // --------------------------
-      // PRIORITAS 2: urut nomor booth
-      // Key: "10_scm_regional_4"
-      // Ambil angka sebelum underscore
-      // --------------------------
-      const getNum = (key) => {
-          const match = key.match(/^(\d+)_/);
-          return match ? parseInt(match[1]) : 9999; // fallback kalau tidak ada angka
-      };
-
-      return getNum(a[0]) - getNum(b[0]);
-  });
-%>
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 0 12px rgba(0, 255, 255, 0.2),
+                0 0 20px rgba(0, 255, 255, 0.1);
+        }
 
 
-<main class="text-center page-booth">
-    <div class="container">
-        <div class="row justify-content-center">
+        .disabled-booth {
+            pointer-events: none;
+            opacity: 0.45;
+            filter: grayscale(100%);
+        }
+    </style>
 
-            <% sortedBooths.forEach(([key, booth]) => { %>
-            <% const isVisited = visitedSafe[key] === true; %>
+    <header class="d-flex justify-content-between align-items-center">
+        <div>
+            <small>Welcome</small><br>
+            <strong>
+                <%= user.name %>
+            </strong>
+        </div>
+    </header>
 
-            <div class="col-12">
-                <a href="<%= isVisited ? '/booth/' + key : '/scan?redirect=/booth/' + key %>"
-                    class="text-decoration-none">
-                    <div class="booth-list-card <%= isVisited ? 'booth-visited' : '' %>">
-                        <i class="bi bi-shop"></i> <%= booth.name %>
-                    </div>
-                </a>
+    <% const visitedSafe=visited || {}; const sortedBooths=Object.entries(booths).sort((a, b)=> {
+        // --------------------------
+        // PRIORITAS 1: visited duluan
+        // --------------------------
+        const visitedA = visitedSafe[a[0]] ? 1 : 0;
+        const visitedB = visitedSafe[b[0]] ? 1 : 0;
+
+        if (visitedA !== visitedB) {
+        return visitedB - visitedA;
+        }
+
+        // --------------------------
+        // PRIORITAS 2: urut nomor booth
+        // Key: "10_scm_regional_4"
+        // Ambil angka sebelum underscore
+        // --------------------------
+        const getNum = (key) => {
+        const match = key.match(/^(\d+)_/);
+        return match ? parseInt(match[1]) : 9999; // fallback kalau tidak ada angka
+        };
+
+        return getNum(a[0]) - getNum(b[0]);
+        });
+        %>
+
+
+        <main class="text-center page-booth">
+            <div class="container">
+                <div class="row justify-content-center">
+
+                    <% sortedBooths.forEach(([key, booth])=> { %>
+                        <% const isVisited=visitedSafe[key]===true; %>
+
+                            <div class="col-12">
+                                <% if (isVisited) { %>
+
+                                    <!-- ✔ BOOTH SUDAH DIKUNJUNGI → BISA DIKLIK -->
+                                    <a href="/booth/<%= key %>" class="text-decoration-none">
+                                        <div class="booth-list-card booth-visited">
+                                            <i class="bi bi-shop"></i>
+                                            <%= booth.name %>
+                                        </div>
+                                    </a>
+
+                                    <% } else { %>
+
+                                        <!-- ❌ BOOTH BELUM DIKUNJUNGI → DISABLE -->
+                                        <div class="booth-list-card disabled-booth">
+                                            <i class="bi bi-shop"></i>
+                                            <%= booth.name %>
+                                        </div>
+
+                                        <% } %>
+                            </div>
+
+                            <% }) %>
+
+                </div>
+
+                <a href="/dashboard" class="btn-back-custom">BACK</a>
             </div>
 
-            <% }) %>
+        </main>
 
-        </div>
-
-        <a href="/dashboard" class="btn-back-custom">BACK</a>
-    </div>
-</main>
-
-<%- include("../layouts/footer") %>
+        <%- include("../layouts/footer") %>

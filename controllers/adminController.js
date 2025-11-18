@@ -444,3 +444,45 @@ export const userUpdateStatus = async (req, res) => {
 
     res.redirect("/admin/users/" + id);
 };
+
+
+
+export const quotaSettings = async (req, res) => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    const [lunchQuotaSnap, souvenirQuotaSnap, lunchTodaySnap, souvenirTodaySnap] = await Promise.all([
+        db.ref("services/lunch/QUOTA").get(),
+        db.ref("services/souvenir/QUOTA").get(),
+        db.ref(`services/lunch/today_count/${today}`).get(),
+        db.ref(`services/souvenir/today_count/${today}`).get(),
+    ]);
+
+    const lunchQuota = lunchQuotaSnap.val() || 300;
+    const souvenirQuota = souvenirQuotaSnap.val() || 150;
+    const lunchUsed = lunchTodaySnap.val() || 0;
+    const souvenirUsed = souvenirTodaySnap.val() || 0;
+
+    res.render("admin/quota/index", {
+        lunchQuota,
+        lunchUsed,
+        lunchRemaining: lunchQuota - lunchUsed,
+
+        souvenirQuota,
+        souvenirUsed,
+        souvenirRemaining: souvenirQuota - souvenirUsed,
+    });
+};
+
+
+
+/* =====================================================
+    ✔ UPDATE QUOTA
+===================================================== */
+export const quotaUpdate = async (req, res) => {
+    const { lunchQuota, souvenirQuota } = req.body;
+
+    await db.ref("services/lunch/QUOTA").set(Number(lunchQuota));
+    await db.ref("services/souvenir/QUOTA").set(Number(souvenirQuota));
+
+    res.redirect("/admin/quota");
+};

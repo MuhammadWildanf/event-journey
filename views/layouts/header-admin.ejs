@@ -16,151 +16,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-    <style>
-        body {
-            background: url("/assets/img/bg-dashboard.png") no-repeat center top/cover;
-            font-family: 'Poppins', sans-serif;
-            color: #fff;
-            min-height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 1.2rem 1.5rem;
-            z-index: 10;
-        }
-
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.25);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.2rem;
-        }
-
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 1.2rem;
-            transition: 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding-top: 6rem;
-            padding-bottom: 7rem;
-        }
-
-        .booth-card {
-            height: 120px;
-            border-radius: 16px;
-            color: #fff;
-            font-weight: 600;
-            font-size: 1rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.25s;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-            cursor: pointer;
-        }
-
-        .booth-card i {
-            font-size: 2rem;
-            margin-bottom: 6px;
-        }
-
-        .booth-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .booth-lunch {
-            background: #a7632f;
-        }
-
-        .booth-souvenir {
-            background: #8b60c0;
-        }
-
-        .booth-photo {
-            background: #c94e6d;
-        }
-
-        .booth-games {
-            background: #3c88d9;
-        }
-
-        .booth-main {
-            background: #6d3b9c;
-        }
-
-        .not-visited {
-            opacity: 0.35;
-            filter: grayscale(100%) brightness(80%);
-        }
-
-        .visited {
-            opacity: 1;
-            filter: none;
-        }
-
-
-        .scan-area {
-            position: absolute;
-            bottom: 45px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-        }
-
-        .scan-btn {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: rgba(0, 255, 204, 0.25);
-            border: 2px solid #00ffcc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #00ffcc;
-            font-size: 2rem;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
-            transition: all 0.3s;
-            margin: 0 auto;
-        }
-
-        .scan-btn:hover {
-            background: #00ffcc;
-            color: #000;
-            transform: scale(1.08);
-        }
-
-        .scan-label {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-    </style>
-
     <!-- Datatables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
@@ -202,6 +57,10 @@
 
                     <li class="nav-item">
                         <a class="nav-link <%= active === 'users' ? 'active' : '' %>" href="/admin/users">Users</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link <%= active === 'quota' ? 'active' : '' %>" href="/admin/quota">Quota</a>
                     </li>
 
                 </ul>
