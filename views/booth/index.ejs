@@ -52,25 +52,48 @@
 
 <%
   const visitedSafe = visited || {};
+
   const sortedBooths = Object.entries(booths).sort((a, b) => {
-    return (visitedSafe[b[0]] ? 1 : 0) - (visitedSafe[a[0]] ? 1 : 0);
+      // --------------------------
+      // PRIORITAS 1: visited duluan
+      // --------------------------
+      const visitedA = visitedSafe[a[0]] ? 1 : 0;
+      const visitedB = visitedSafe[b[0]] ? 1 : 0;
+
+      if (visitedA !== visitedB) {
+          return visitedB - visitedA;
+      }
+
+      // --------------------------
+      // PRIORITAS 2: urut nomor booth
+      // Key: "10_scm_regional_4"
+      // Ambil angka sebelum underscore
+      // --------------------------
+      const getNum = (key) => {
+          const match = key.match(/^(\d+)_/);
+          return match ? parseInt(match[1]) : 9999; // fallback kalau tidak ada angka
+      };
+
+      return getNum(a[0]) - getNum(b[0]);
   });
 %>
+
 
 <main class="text-center page-booth">
     <div class="container">
         <div class="row justify-content-center">
 
             <% sortedBooths.forEach(([key, booth]) => { %>
-                <% const isVisited = visitedSafe[key] === true; %>
+            <% const isVisited = visitedSafe[key] === true; %>
 
-                <div class="col-12">
-                    <a href="<%= isVisited ? '/booth/' + key : '/scan?redirect=/booth/' + key %>" class="text-decoration-none">
-                        <div class="booth-list-card <%= isVisited ? 'booth-visited' : '' %>">
-                            <i class="bi bi-shop"></i> <%= booth.name %>
-                        </div>
-                    </a>
-                </div>
+            <div class="col-12">
+                <a href="<%= isVisited ? '/booth/' + key : '/scan?redirect=/booth/' + key %>"
+                    class="text-decoration-none">
+                    <div class="booth-list-card <%= isVisited ? 'booth-visited' : '' %>">
+                        <i class="bi bi-shop"></i> <%= booth.name %>
+                    </div>
+                </a>
+            </div>
 
             <% }) %>
 
