@@ -14,6 +14,11 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        min-width: 0; /* allow flex children to shrink and avoid overflow */
+        white-space: normal; /* wrap long text instead of forcing horizontal scroll */
+        word-break: break-word;
+        box-sizing: border-box;
+        width: 100%;
     }
 
     .booth-list-card i {
@@ -31,10 +36,13 @@
         max-height: calc(100vh - 220px);
         /* leave room for header and back button */
         overflow-y: auto;
+        overflow-x: hidden; /* prevent horizontal scroll on small screens */
         padding-right: 6px;
         /* avoid content hiding behind scrollbar */
         -webkit-overflow-scrolling: touch;
         margin-bottom: 0.75rem;
+        box-sizing: border-box;
+        width: 100%;
     }
 
     .btn-back-custom {
