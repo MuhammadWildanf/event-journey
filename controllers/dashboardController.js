@@ -52,8 +52,8 @@ export const showDashboard = async (req, res) => {
         const boothActive = todayCheckin;
 
         // PHOTBOOTH & GAMES
-        const photoActive = todayCheckin && !d.photobooth_done;
-        const gamesActive = todayCheckin && !d.games_done;
+        const photoActive = todayCheckin && d.photobooth_done;
+        const gamesActive = todayCheckin && d.games_done;
 
         res.render("dashboard", {
             user: {

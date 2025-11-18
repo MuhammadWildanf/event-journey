@@ -18,13 +18,113 @@
             color: #ffffff;
             font-weight: 400;
         }
+
+        .game-card {
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #000;
+            font-weight: 600;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .game-played {
+            background: linear-gradient(135deg, #C65AFF, #8A23D9);
+            color: white;
+            border: 3px solid #F0B6FF;
+        }
+
+        .disabled-game {
+            pointer-events: none;
+            opacity: 0.45;
+            filter: grayscale(100%);
+        }
+
+        .btn-back-custom {
+            display: block;
+            width: 100%;
+            padding: 14px 0;
+            margin-top: 1.5rem;
+            text-decoration: none;
+            border-radius: 14px;
+            background: #0c2340;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 0 12px rgba(0, 255, 255, 0.2),
+                0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .game-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.04);
+            font-size: 20px;
+        }
     </style>
 
-    <div class="text-white text-center" style="margin-top: 120px;">
+    <div class="text-white text-center" style="margin-top: 40px;">
         <h2 class="title-lunch">
-            <span class="material-symbols-rounded">sports_esports</span>
+            <span class="material-symbols-rounded" aria-hidden="true">sports_esports</span>
             GAMES
         </h2>
     </div>
+
+    <main class="text-center page-booth" style="margin-top:24px;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <% // games list (key -> used to check user.games_played and build link)
+                    const gamesList = [
+                    ["contract_dalgona", "Contract Dalgona"],
+                    ["scm_glass_bridge", "SCM Glass Bridge"],
+                    ["memory_game", "Memory Game"]
+                    ];
+                    const played = (user && user.games_played) || {};
+                    %>
+
+                    <% gamesList.forEach(([key, name])=> {
+                        const isPlayed = !!played[key];
+                        %>
+                        <div class="col-12 col-md-8">
+                            <% if (isPlayed) { %>
+                                <a href="/games/<%= key %>" class="text-decoration-none">
+                                    <div class="game-card game-played">
+                                        <div class="game-icon">
+                                            <i class="bi bi-controller"></i>
+                                        </div>
+                                        <div>
+                                            <%= name %>
+                                        </div>
+                                    </div>
+                                </a>
+                                <% } else { %>
+                                    <div class="game-card disabled-game">
+                                        <div class="game-icon">
+                                            <i class="bi bi-controller"></i>
+                                        </div>
+                                        <div>
+                                            <%= name %>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                        </div>
+                        <% }) %>
+            </div>
+
+            <a href="/dashboard" class="btn-back-custom">BACK</a>
+        </div>
+    </main>
 
     <%- include("../layouts/footer") %>
