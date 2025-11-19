@@ -1,0 +1,32 @@
+<%- include("../../layouts/header-admin", { title: "Tambah Service" }) %>
+
+    <div class="container py-4">
+
+        <h3 class="mb-4">Tambah Service</h3>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <form action="/admin/services/create" method="POST">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama Service</label>
+                        <input type="text" class="form-control" name="name" required placeholder="Misal: Photobooth">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Kode (unik)</label>
+                        <input type="text" class="form-control" name="code" required placeholder="photobooth">
+                    </div>
+
+                    <button class="btn btn-primary">Simpan</button>
+                    <a href="/admin/services" class="btn btn-secondary">Kembali</a>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+    <%- include("../../layouts/footer") %>

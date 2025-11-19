@@ -99,6 +99,22 @@ app.use("/", boothRoutes);
 app.use("/", scanRoutes);
 app.use("/", serviceRoutes);
 
+app.get("/event-guide", (req, res) => {
+  // optional: require login
+  if (!req.session?.user) return res.redirect("/login");
+
+  const publicPdfUrl = "/assets/files/QR.pdf";
+
+  res.send(`
+    <html>
+      <head><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+      <body style="margin:0;padding:0;">
+        <iframe src="${publicPdfUrl}" style="width:100vw;height:100vh;border:none;"></iframe>
+      </body>
+    </html>
+  `);
+});
+
 // AUTO SET ACTIVE MENU
 app.use((req, res, next) => {
   const url = req.originalUrl;

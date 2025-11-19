@@ -18,7 +18,13 @@ import {
     userExportCSV,
     userReset,
     userUpdateStatus,
-    quotaSettings, quotaUpdate
+    quotaSettings, quotaUpdate,
+    serviceList,
+    serviceCreateForm,
+    serviceCreate,
+    serviceEditForm,
+    serviceUpdate,
+    serviceDelete
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -51,5 +57,13 @@ router.post("/users/:id/status", userUpdateStatus);
 
 router.get("/quota", quotaSettings);
 router.post("/quota", quotaUpdate);
+
+
+router.get("/services", serviceList);
+router.get("/services/create", serviceCreateForm);
+router.post("/services/create", serviceCreate);
+router.get("/services/:id/edit", serviceEditForm);
+router.post("/services/:id/edit", serviceUpdate);
+router.get("/services/:id/delete", serviceDelete);
 
 export default router;

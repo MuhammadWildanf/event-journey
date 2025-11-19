@@ -10,6 +10,9 @@ import {
 import {
     Parser
 } from "json2csv";
+import moment from "moment-timezone";
+
+moment.locale("id");
 
 // untuk path file QR
 const __filename = fileURLToPath(
@@ -276,12 +279,31 @@ export const boothExportCSV = async (req, res) => {
 ===================================================== */
 export const userList = async (req, res) => {
     const snap = await db.ref("users").get();
-    const users = snap.exists() ? snap.val() : {};
+    const usersRaw = snap.exists() ? snap.val() : {};
+
+    const users = Object.entries(usersRaw)
+        .map(([id, u]) => {
+            const createdAt = u.created_at
+                ? moment(u.created_at).tz("Asia/Jakarta").format("DD MMMM YYYY HH:mm")
+                : "-";
+
+            return {
+                id,
+                ...u,
+                createdAtFormatted: createdAt
+            };
+        })
+        .sort((a, b) => {
+            const dateA = a.created_at ? new Date(a.created_at) : 0;
+            const dateB = b.created_at ? new Date(b.created_at) : 0;
+            return dateB - dateA;
+        });
 
     res.render("admin/users/index", {
         users
     });
 };
+
 
 
 /* =====================================================
@@ -353,29 +375,49 @@ export const userExportCSV = async (req, res) => {
     const snap = await db.ref("users").get();
     const users = snap.exists() ? snap.val() : {};
 
-    const rows = Object.entries(users).map(([id, u]) => {
-        const visitedCount = u.visited_count || (u.booths_visited ? Object.keys(u.booths_visited).length : 0);
-        const lunchClaimed = u.lunch_claimed_dates && Object.keys(u.lunch_claimed_dates).length > 0;
-        const souvenirClaimed = u.souvenir_claimed_dates && Object.keys(u.souvenir_claimed_dates).length > 0;
+    // Ambil tanggal hari ini (WIB)
+    const today = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
 
-        return {
-            id,
-            name: u.name,
-            email: u.email,
-            visited_count: visitedCount,
-            lunch_claimed: lunchClaimed,
-            souvenir_claimed: souvenirClaimed,
-            games_done: !!u.games_done,
-            reward_ready: !!u.reward_ready,
-        };
-    });
+    // Filter user berdasarkan created_at
+    const filtered = Object.entries(users)
+        .filter(([id, u]) => {
+            if (!u.created_at) return false;
+
+            const created = moment(u.created_at)
+                .tz("Asia/Jakarta")
+                .format("YYYY-MM-DD");
+
+            return created === today;
+        })
+        .map(([id, u], index) => {
+            const createdAtFormatted = moment(u.created_at)
+                .tz("Asia/Jakarta")
+                .format("DD MMMM YYYY HH:mm");
+
+            return {
+                no: index + 1,
+                name: u.name || "-",
+                email: u.email || "-",
+                created_at: createdAtFormatted
+            };
+        });
+
+    // Format waktu export
+    const exportTime = moment()
+        .tz("Asia/Jakarta")
+        .format("YYYY-MM-DD_HH-mm-ss");
+
+    // Generate nama file
+    const filename = `users_today_${exportTime}.csv`;
 
     const parser = new Parser();
-    const csv = parser.parse(rows);
+    const csv = parser.parse(filtered);
 
-    res.setHeader("Content-Disposition", "attachment; filename=users.csv");
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+    res.set("Content-Type", "text/csv; charset=utf-8");
     res.send(csv);
 };
+
 
 
 
@@ -485,4 +527,128 @@ export const quotaUpdate = async (req, res) => {
     await db.ref("services/souvenir/QUOTA").set(Number(souvenirQuota));
 
     res.redirect("/admin/quota");
+};
+
+
+
+
+/* =====================================================
+    📦 LIST SEMUA SERVICE
+===================================================== */
+export const serviceList = async (req, res) => {
+    const snap = await db.ref("services").get();
+    const services = snap.exists() ? snap.val() : {};
+
+    res.render("admin/services/index", {
+        services
+    });
+};
+
+
+/* =====================================================
+    ➕ FORM CREATE SERVICE
+===================================================== */
+export const serviceCreateForm = (req, res) => {
+    res.render("admin/services/create");
+};
+
+
+/* =====================================================
+    ✔ CREATE SERVICE + QR
+===================================================== */
+export const serviceCreate = async (req, res) => {
+    const { name, code } = req.body;
+
+    if (!name || !code) return res.send("Nama & Code wajib!");
+
+    const key = slug(code);
+    const fileName = fileNameSafe(key) + ".png";
+
+    const qrDir = path.join(__dirname, "../qr/services");
+    if (!fs.existsSync(qrDir)) fs.mkdirSync(qrDir, { recursive: true });
+
+    const qrPath = path.join(qrDir, fileName);
+
+    // Generate QR dengan payload = key
+    await QRCode.toFile(qrPath, key, { width: 500 });
+
+    await db.ref("services/" + key).set({
+        code: key,
+        name,
+        qrUrl: `/qr/services/${fileName}`,
+    });
+
+    res.redirect("/admin/services");
+};
+
+
+/* =====================================================
+    ✏ FORM EDIT SERVICE
+===================================================== */
+export const serviceEditForm = async (req, res) => {
+    const { id } = req.params;
+
+    const snap = await db.ref("services/" + id).get();
+    if (!snap.exists()) return res.send("Service tidak ditemukan");
+
+    res.render("admin/services/edit", {
+        id,
+        data: snap.val()
+    });
+};
+
+
+/* =====================================================
+    ✔ UPDATE SERVICE + REGENERATE QR
+===================================================== */
+export const serviceUpdate = async (req, res) => {
+    const { id } = req.params;   // old code
+    const { name, code } = req.body;
+
+    const newKey = slug(code);
+    const newFileName = fileNameSafe(newKey) + ".png";
+
+    const qrDir = path.join(__dirname, "../qr/services");
+
+    // Hapus QR lama
+    const oldFile = path.join(qrDir, fileNameSafe(id) + ".png");
+    if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
+
+    // Generate QR baru
+    const newFile = path.join(qrDir, newFileName);
+    await QRCode.toFile(newFile, newKey, { width: 500 });
+
+    const serviceRef = db.ref("services");
+    const oldSnap = await serviceRef.child(id).get();
+    if (!oldSnap.exists()) return res.send("Service tidak ditemukan");
+
+    const oldData = oldSnap.val();
+
+    // Hapus key lama
+    await serviceRef.child(id).remove();
+
+    // Simpan key baru
+    await serviceRef.child(newKey).set({
+        ...oldData,
+        code: newKey,
+        name,
+        qrUrl: `/qr/services/${newFileName}`,
+    });
+
+    res.redirect("/admin/services");
+};
+
+
+/* =====================================================
+    ❌ DELETE SERVICE + QR FILE
+===================================================== */
+export const serviceDelete = async (req, res) => {
+    const { id } = req.params;
+
+    const file = path.join(__dirname, "../qr/services/" + fileNameSafe(id) + ".png");
+    if (fs.existsSync(file)) fs.unlinkSync(file);
+
+    await db.ref("services/" + id).remove();
+
+    res.redirect("/admin/services");
 };

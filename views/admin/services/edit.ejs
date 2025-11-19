@@ -1,0 +1,37 @@
+<%- include("../../layouts/header-admin", { title: "Edit Service" }) %>
+
+    <div class="container py-4">
+
+        <h3 class="mb-4">Edit Service</h3>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <form action="/admin/services/<%= id %>/edit" method="POST">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama Service</label>
+                        <input type="text" class="form-control" name="name" value="<%= data.name %>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Kode</label>
+                        <input type="text" class="form-control" name="code" value="<%= data.code %>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">QR Saat Ini</label>
+                        <img src="<%= data.qrUrl %>" width="120" class="border rounded p-1 bg-white">
+                    </div>
+
+                    <button class="btn btn-primary">Update</button>
+                    <a href="/admin/services" class="btn btn-secondary">Kembali</a>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+    <%- include("../../layouts/footer") %>

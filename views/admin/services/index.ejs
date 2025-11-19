@@ -1,0 +1,48 @@
+<%- include("../../layouts/header-admin", { title: "Data Services" }) %>
+
+    <div class="container py-4">
+
+        <div class="d-flex justify-content-between mb-3">
+            <h3>Daftar Services</h3>
+            <div>
+                <a href="/admin/services/create" class="btn btn-primary">+ Service Baru</a>
+                <a href="/admin/services/export" class="btn btn-success">Export CSV</a>
+            </div>
+        </div>
+
+        <table class="table table-striped table-bordered datatable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Code</th>
+                    <th>Nama</th>
+                    <th>QR</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% Object.entries(services).forEach(([key, s])=> { %>
+                    <tr>
+                        <td>
+                            <%= s.code %>
+                        </td>
+                        <td>
+                            <%= s.name %>
+                        </td>
+                        <td>
+                            <img src="<%= s.qrUrl %>" width="80" class="border rounded p-1 bg-white">
+                        </td>
+                        <td>
+                            <a href="/admin/services/<%= key %>/edit" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="/admin/services/<%= key %>/delete" onclick="return confirm('Hapus service ini?')"
+                                class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <%- include("../../layouts/footer") %>

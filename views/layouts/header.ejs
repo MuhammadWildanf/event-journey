@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title || "SCM Digital Day 2025" %></title>
+    <title>
+        <%= title || "SCM Digital Day 2025" %>
+    </title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -25,7 +27,8 @@
             font-family: "Poppins", sans-serif;
             color: #fff;
             min-height: 100vh;
-            overflow: hidden; /* ⛔ Anti terpotong + tidak scroll */
+            overflow: hidden;
+            /* ⛔ Anti terpotong + tidak scroll */
             display: flex;
             flex-direction: column;
         }
@@ -51,7 +54,8 @@
             padding-bottom: 2rem;
 
             transform-origin: top center;
-            transform: scale(0.78); /* default for small screens */
+            transform: scale(0.78);
+            /* default for small screens */
         }
 
         /* SCREEN HEIGHT BASED SCALE */
@@ -108,7 +112,8 @@
             background-size: contain !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
-            padding: 16px 0; /* agar PNG tidak terpotong */
+            padding: 16px 0;
+            /* agar PNG tidak terpotong */
         }
 
         /* FIX RATIO CARD */
@@ -123,12 +128,29 @@
         /* =======================================
            CARD IMAGES
         ======================================== */
-        .card-scan { background-image: url('/assets/cards/scan.png'); }
-        .card-lunch { background-image: url('/assets/cards/lunch.png'); }
-        .card-souvenir { background-image: url('/assets/cards/souvenir.png'); }
-        .card-photo { background-image: url('/assets/cards/photo.png'); }
-        .card-games { background-image: url('/assets/cards/games.png'); }
-        .card-booth { background-image: url('/assets/cards/booth.png'); }
+        .card-scan {
+            background-image: url('/assets/cards/scan.png');
+        }
+
+        .card-lunch {
+            background-image: url('/assets/cards/lunch.png');
+        }
+
+        .card-souvenir {
+            background-image: url('/assets/cards/souvenir.png');
+        }
+
+        .card-photo {
+            background-image: url('/assets/cards/photo.png');
+        }
+
+        .card-games {
+            background-image: url('/assets/cards/games.png');
+        }
+
+        .card-booth {
+            background-image: url('/assets/cards/booth.png');
+        }
 
         /* =======================================
            NOT VISITED STATE
@@ -170,6 +192,52 @@
 
         .logout-icon {
             font-size: 22px;
+        }
+
+
+
+        .download-guide {
+            grid-column: span 2;
+            text-align: center;
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .download-link {
+            display: inline-block;
+            padding: 14px 28px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 6px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 10px 30px rgba(0, 200, 255, 0.06),
+                0 0 40px rgba(120, 240, 255, 0.04);
+            text-shadow:
+                0 2px 20px rgba(0, 220, 255, 0.12),
+                0 1px 2px rgba(0, 0, 0, 0.6);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .download-link:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 18px 40px rgba(0, 200, 255, 0.12),
+                0 0 60px rgba(120, 240, 255, 0.08);
+        }
+
+        /* Make sure link is readable on small screens */
+        @media (max-width: 480px) {
+            .download-link {
+                padding: 12px 20px;
+                font-size: 0.98rem;
+            }
         }
     </style>
 

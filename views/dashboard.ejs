@@ -1,45 +1,52 @@
 <%- include("./layouts/header", { title: "Dashboard || SCM Digital Day 2025" }) %>
 
-<header class="d-flex justify-content-between align-items-center">
+  <header class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-2">
-        <div>
-            <small>Welcome</small><br>
-            <strong><%= user.name %></strong>
-        </div>
+      <div>
+        <small>Welcome</small><br>
+        <strong>
+          <%= user.name %>
+        </strong>
+      </div>
     </div>
 
     <a href="/logout" class="logout-btn text-white text-decoration-none">
-        <span class="material-symbols-rounded logout-icon">logout</span>
+      <span class="material-symbols-rounded logout-icon">logout</span>
     </a>
-</header>
+  </header>
 
-<% 
-const btn = (url, active, classes, card) => {
-  const href = active ? url : "javascript:void(0)";
-  const nvClass = active ? "" : "not-visited";
-  return `
-     <a href="${href}" class="${classes}">
-        <div class="booth-card ${card} ${nvClass}"></div>
-     </a>
-  `;
-};
-%>
+  <% const btn=(url, active, classes, card)=> {
+    const href = active ? url : "javascript:void(0)";
+    const nvClass = active ? "" : "not-visited";
+    return `
+    <a href="${href}" class="${classes}">
+      <div class="booth-card ${card} ${nvClass}"></div>
+    </a>
+    `;
+    };
+    %>
 
-<main>
-    <div class="dashboard-grid">
+    <main>
+      <div class="dashboard-grid">
 
         <!-- Always active -->
         <a href="/scan" class="grid-item wide">
-            <div class="booth-card card-scan"></div>
+          <div class="booth-card card-scan"></div>
         </a>
 
-        <%- btn('/lunch', user.lunch_active, 'grid-item square', 'card-lunch') %>
-        <%- btn('/souvenir', user.souvenir_active, 'grid-item square', 'card-souvenir') %>
-        <%- btn('/photobooth', user.photobooth_active, 'grid-item square', 'card-photo') %>
-        <%- btn('/games', user.games_active, 'grid-item square', 'card-games') %>
-        <%- btn('/booth', user.booth_active, 'grid-item wide', 'card-booth') %>
+        <%- btn('/lunch', user.lunch_active, 'grid-item square' , 'card-lunch' ) %>
+          <%- btn('/souvenir', user.souvenir_active, 'grid-item square' , 'card-souvenir' ) %>
+            <%- btn('/photobooth', user.photobooth_active, 'grid-item square' , 'card-photo' ) %>
+              <%- btn('/games', user.games_active, 'grid-item square' , 'card-games' ) %>
+                <%- btn('/booth', user.booth_active, 'grid-item wide' , 'card-booth' ) %>
 
-    </div>
-</main>
+                  <div class="download-guide">
+                    <!-- <a class="download-link" href="/assets/files/QR.pdf" download target="_blank" rel="noopener"> -->
+                    <a class="download-link" href="/event-guide" target="_blank" rel="noopener">
+                      DOWNLOAD EVENT GUIDE
+                    </a>
+                  </div>
+      </div>
+    </main>
 
-<%- include("./layouts/footer") %>
+    <%- include("./layouts/footer") %>

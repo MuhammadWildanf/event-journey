@@ -28,4 +28,14 @@
         </h2>
     </div>
 
-    <%- include("../layouts/footer") %>
+
+    <% if (lastPhotoUrl) { %>
+        <div class="photo-container">
+            <img src="<%= lastPhotoUrl %>" alt="Photobooth Photo" class="img-fluid" />
+        </div>
+        <% } else { %>
+            <p>No photo taken yet. Please take a photo!</p>
+            <% } %>
+
+
+                <%- include("../layouts/footer") %>

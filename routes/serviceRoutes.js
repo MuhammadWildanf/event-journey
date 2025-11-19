@@ -5,7 +5,8 @@ import {
     showPhotobooth,
     showGames,
     handleSouvenirScan,
-    handleLunchScan
+    handleLunchScan,
+
 } from "../controllers/serviceController.js";
 
 const router = express.Router();
@@ -17,7 +18,7 @@ function requireLogin(req, res, next) {
 
 router.get("/lunch", requireLogin, showLunch);
 router.get("/souvenir", requireLogin, showSouvenir);
-router.get("/photobooth", requireLogin, showPhotobooth);
+
 router.get("/games", requireLogin, showGames);
 
 // 🔥 HALAMAN SUCCESS (harus ditambahkan!)
@@ -32,5 +33,8 @@ router.get("/souvenir-success", requireLogin, (req, res) => {
 // 🔥 HANDLE SCAN POST
 router.post("/scan-lunch/result", requireLogin, handleLunchScan);
 router.post("/scan-souvenir/result", requireLogin, handleSouvenirScan);
+
+
+router.get("/photobooth", requireLogin, showPhotobooth);
 
 export default router;

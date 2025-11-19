@@ -30,9 +30,19 @@ export const showSouvenir = async (req, res) => {
     });
 };
 
-export const showPhotobooth = (req, res) => {
+export const showPhotobooth = async (req, res) => {
+    const user = req.session.user;
+
+    const snap = await db.ref("users/" + user.id).get();
+    const userData = snap.exists() ? snap.val() : {};
+
+    // Mendapatkan URL foto dari Google Drive yang sudah di-upload
+    const lastPhotoUrl = userData.last_photo_url;  // Jika sudah ada foto yang di-upload
+
     res.render("services/photobooth", {
-        user: req.session.user
+        user,
+        userData,
+        lastPhotoUrl  // Mengirimkan URL foto ke frontend
     });
 };
 
