@@ -68,7 +68,8 @@ async function main() {
     const userId = "<userId>";  // Ini bisa Anda isi dinamis saat generate QR code
 
     // URL photobooth untuk QR Code
-    const photoboothUrl = `https://scmdigitalday2025.com/photobooth?userId=${userId}`;
+    // const photoboothUrl = `https://scmdigitalday2025.com/photobooth?userId=${userId}`;
+    const photoboothUrl = `http://localhost:3000/photobooth?userId=${userId}`;
 
     const fileName = "photobooth.png";
     const filePath = path.join(photoboothDir, fileName);
