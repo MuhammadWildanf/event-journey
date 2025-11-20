@@ -15,6 +15,7 @@ import checkinRoutes from "./routes/checkinRoutes.js";
 import serverless from "serverless-http";
 import { sendEmail } from "./utils/mailer.js";
 import http from "http";
+import https from 'https';
 import { WebSocketServer } from "ws";
 
 
@@ -47,7 +48,7 @@ export { db };
 // ✅ Express App Configuration
 // ==================================================
 const app = express();
-const server = http.createServer(app);
+const server = https.createServer(app);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -170,7 +171,7 @@ wss.on("connection", (ws, req) => {
 
 // Handle the upgrade process for WebSocket connection
 server.on("upgrade", (req, socket, head) => {
-  const url = new URL(req.url, "http://localhost");
+  const url = new URL(req.url, "wss://scmdigitalday2025.com"); // Gunakan wss:// jika server HTTPS
   if (url.pathname === "/ws/booth") {
     const boothId = url.searchParams.get("booth_id");
     wss.handleUpgrade(req, socket, head, (ws) => {
@@ -178,6 +179,7 @@ server.on("upgrade", (req, socket, head) => {
     });
   }
 });
+
 
 const PORT = process.env.PORT || 3002;
 
