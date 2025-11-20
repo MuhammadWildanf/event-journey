@@ -151,46 +151,28 @@ const wss = new WebSocketServer({ server });
 
 export const boothSockets = {};
 
-wss.on("connection", (ws, req, boothIdParam) => {
-  const boothId =
-    boothIdParam ||
-    (() => {
-      try {
-        return new URL(req.url, "http://localhost").searchParams.get("booth_id");
-      } catch (e) {
-        return null;
-      }
-    })();
+wss.on("connection", (ws, req, boothId) => {
+  console.log(`Connected to booth ${boothId}`);  // Verifikasi boothId yang diterima
+  boothSockets[boothId] = ws;
 
-  console.log("WS connection opened. req.url:", req.url, "boothIdParam:", boothIdParam, "resolvedBoothId:", boothId);
-
-  if (boothId) {
-    boothSockets[boothId] = ws;
-    console.log(`Registered booth socket -> ${boothId}`);
-  }
-
-  ws.on("message", (message) => {
-    console.log(`Received from ${boothId || "unknown"}: ${message}`);
-  });
+  ws.send(JSON.stringify({ event: "connected" }));
 
   ws.on("close", () => {
-    console.log(`WS closed for booth: ${boothId}`);
-    if (boothId && boothSockets[boothId] === ws) delete boothSockets[boothId];
+    delete boothSockets[boothId];
   });
 });
 
-// upgrade handler — pass boothId into connection
+
 server.on("upgrade", (req, socket, head) => {
-  const url = new URL(req.url, `http://localhost`);
+  const url = new URL(req.url, "http://localhost");
   if (url.pathname === "/ws/booth") {
     const boothId = url.searchParams.get("booth_id");
     wss.handleUpgrade(req, socket, head, (ws) => {
       wss.emit("connection", ws, req, boothId);
     });
-  } else {
-    socket.destroy();
   }
 });
+
 
 
 const PORT = process.env.PORT || 3002;

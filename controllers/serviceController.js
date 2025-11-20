@@ -53,10 +53,72 @@ export const showGames = (req, res) => {
 };
 
 /* ---------------------------------------
+v1
    🔥 HANDLE LUNCH SCAN
    - QR harus bernilai: "lunch"
    - Lunch hanya untuk 300 pengunjung pertama
 ---------------------------------------- */
+// export const handleLunchScan = async (req, res) => {
+//     try {
+//         const user = req.session.user;
+//         if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
+
+//         const { code } = req.body;
+//         const today = getToday();
+
+//         if (code !== "lunch") {
+//             return res.json({ success: false, message: "Invalid lunch QR code." });
+//         }
+
+//         const userRef = db.ref("users/" + user.id);
+//         const userSnap = await userRef.get();
+//         const userData = userSnap.val() || {};
+
+//         // 1️⃣ Must be checked-in today
+//         if (!userData.checkin_dates?.[today]) {
+//             return res.json({ success: false, message: "Please check in first." });
+//         }
+
+//         // 2️⃣ Already claimed today?
+//         if (userData.lunch_claimed_dates?.[today]) {
+//             return res.json({ success: false, message: "You have already claimed lunch today." });
+//         }
+
+//         // 3️⃣ Get limit
+//         const limitSnap = await db.ref("services/lunch/QUOTA").get();
+//         const limit = limitSnap.val() || 300;
+
+//         // 4️⃣ Atomic increment using transaction to prevent oversubscribe
+//         const quotaRef = db.ref(`services/lunch/today_count/${today}`);
+//         const txnResult = await quotaRef.transaction(current => {
+//             current = current || 0;
+//             if (current >= limit) {
+//                 return; // abort - sold out
+//             }
+//             return current + 1;
+//         }, {});
+
+//         if (!txnResult.committed) {
+//             return res.json({ success: false, message: "Lunch is sold out for today." });
+//         }
+
+//         // 5️⃣ Mark user as claimed
+//         await userRef.child(`lunch_claimed_dates/${today}`).set(true);
+
+//         return res.json({
+//             success: true,
+//             message: "Lunch successfully claimed.",
+//             redirect: "/lunch-success"
+//         });
+
+//     } catch (err) {
+//         console.error("Lunch error:", err);
+//         return res.json({ success: false, message: "Server error occurred." });
+//     }
+// };
+
+
+
 export const handleLunchScan = async (req, res) => {
     try {
         const user = req.session.user;
@@ -87,7 +149,7 @@ export const handleLunchScan = async (req, res) => {
         const limitSnap = await db.ref("services/lunch/QUOTA").get();
         const limit = limitSnap.val() || 300;
 
-        // 4️⃣ Atomic increment using transaction to prevent oversubscribe
+        // 4️⃣ Atomic increment using transaction
         const quotaRef = db.ref(`services/lunch/today_count/${today}`);
         const txnResult = await quotaRef.transaction(current => {
             current = current || 0;
@@ -95,11 +157,16 @@ export const handleLunchScan = async (req, res) => {
                 return; // abort - sold out
             }
             return current + 1;
-        }, {});
-
-        if (!txnResult.committed) {
-            return res.json({ success: false, message: "Lunch is sold out for today." });
-        }
+        }, (error, committed, snapshot) => {
+            if (error) {
+                console.error("Transaction failed:", error);
+                return res.json({ success: false, message: "Transaction failed." });
+            }
+            if (!committed) {
+                return res.json({ success: false, message: "Lunch is sold out for today." });
+            }
+            console.log("Transaction completed, new value:", snapshot.val());
+        });
 
         // 5️⃣ Mark user as claimed
         await userRef.child(`lunch_claimed_dates/${today}`).set(true);
@@ -117,12 +184,80 @@ export const handleLunchScan = async (req, res) => {
 };
 
 
-
 /* ---------------------------------------
+v1
    🔥 HANDLE SOUVENIR SCAN
    - QR harus bernilai: "souvenir"
    - Souvenir hanya untuk yang visit ≥ 5 booth
 ---------------------------------------- */
+// export const handleSouvenirScan = async (req, res) => {
+//     try {
+//         const user = req.session.user;
+//         if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
+
+//         const { code } = req.body;
+//         const today = getToday();
+
+//         if (code !== "souvenir") {
+//             return res.json({ success: false, message: "Invalid souvenir QR code." });
+//         }
+
+//         const userRef = db.ref("users/" + user.id);
+//         const userSnap = await userRef.get();
+//         const userData = userSnap.val() || {};
+
+//         // 1️⃣ Must be checked-in today
+//         if (!userData.checkin_dates?.[today]) {
+//             return res.json({ success: false, message: "Please check in first." });
+//         }
+
+//         // 2️⃣ Already claimed today?
+//         if (userData.souvenir_claimed_dates?.[today]) {
+//             return res.json({ success: false, message: "You have already claimed a souvenir today." });
+//         }
+
+//         // 3️⃣ Must have visited at least 5 booths
+//         if ((userData.visited_count || 0) < 5) {
+//             return res.json({
+//                 success: false,
+//                 message: "You must visit at least 5 booths to claim a souvenir."
+//             });
+//         }
+
+//         // 4️⃣ Get limit
+//         const limitSnap = await db.ref("services/souvenir/QUOTA").get();
+//         const limit = limitSnap.val() || 150;
+
+//         // 5️⃣ Atomic increment using transaction
+//         const quotaRef = db.ref(`services/souvenir/today_count/${today}`);
+//         const txnResult = await quotaRef.transaction(current => {
+//             current = current || 0;
+//             if (current >= limit) {
+//                 return; // abort - sold out
+//             }
+//             return current + 1;
+//         }, {});
+
+//         if (!txnResult.committed) {
+//             return res.json({ success: false, message: "Souvenirs are sold out for today. Please try another day." });
+//         }
+
+//         // 6️⃣ Mark user as claimed
+//         await userRef.child(`souvenir_claimed_dates/${today}`).set(true);
+
+//         return res.json({
+//             success: true,
+//             message: "Souvenir successfully claimed.",
+//             redirect: "/souvenir-success"
+//         });
+
+//     } catch (err) {
+//         console.error("Souvenir error:", err);
+//         return res.json({ success: false, message: "Server error occurred." });
+//     }
+// };
+
+
 export const handleSouvenirScan = async (req, res) => {
     try {
         const user = req.session.user;
@@ -169,11 +304,16 @@ export const handleSouvenirScan = async (req, res) => {
                 return; // abort - sold out
             }
             return current + 1;
-        }, {});
-
-        if (!txnResult.committed) {
-            return res.json({ success: false, message: "Souvenirs are sold out for today. Please try another day." });
-        }
+        }, (error, committed, snapshot) => {
+            if (error) {
+                console.error("Transaction failed:", error);
+                return res.json({ success: false, message: "Transaction failed." });
+            }
+            if (!committed) {
+                return res.json({ success: false, message: "Souvenirs are sold out for today. Please try another day." });
+            }
+            console.log("Transaction completed, new value:", snapshot.val());
+        });
 
         // 6️⃣ Mark user as claimed
         await userRef.child(`souvenir_claimed_dates/${today}`).set(true);
@@ -189,5 +329,4 @@ export const handleSouvenirScan = async (req, res) => {
         return res.json({ success: false, message: "Server error occurred." });
     }
 };
-
 

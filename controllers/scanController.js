@@ -68,7 +68,11 @@ export const handleScanResult = async (req, res) => {
 
         if (isPhotobooth) {
             // coba ambil socket dengan beberapa kemungkinan key
+            console.log("Looking for socket with boothKey:", boothKey);
             const socket = boothSockets["photobooth"] || boothSockets[boothKey];
+            if (!socket) {
+                console.log("Socket not found for boothKey:", boothKey);
+            }
             if (socket) {
                 socket.send(JSON.stringify({
                     event: "userLinked",
