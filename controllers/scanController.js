@@ -1,6 +1,13 @@
-import { handleLunchScan, handleSouvenirScan } from "./serviceController.js";
-import { handleCheckin } from "./checkinController.js";
-import { boothSockets } from "../server.js";
+import {
+    handleLunchScan,
+    handleSouvenirScan
+} from "./serviceController.js";
+import {
+    handleCheckin
+} from "./checkinController.js";
+import {
+    boothSockets
+} from "../server.js";
 import {
     db
 } from "../server.js";
@@ -8,12 +15,12 @@ import {
 function normalizeBoothKey(str) {
     return str
         .toLowerCase()
-        .normalize("NFD")                    // hilangkan karakter aneh
-        .replace(/[\u0300-\u036f]/g, "")     //
-        .replace(/&/g, "and")                // ganti karakter simbol
-        .replace(/[^a-z0-9]+/g, "_")         // semua non alfanumerik jadi _
-        .replace(/_+/g, "_")                 // fix underscore berlebih
-        .replace(/^_+|_+$/g, "");            // trim underscore
+        .normalize("NFD") // hilangkan karakter aneh
+        .replace(/[\u0300-\u036f]/g, "") //
+        .replace(/&/g, "and") // ganti karakter simbol
+        .replace(/[^a-z0-9]+/g, "_") // semua non alfanumerik jadi _
+        .replace(/_+/g, "_") // fix underscore berlebih
+        .replace(/^_+|_+$/g, ""); // trim underscore
 }
 
 
@@ -28,11 +35,17 @@ export const showScan = (req, res) => {
 
 export const handleScanResult = async (req, res) => {
     try {
-        const { boothCode, redirect } = req.body;
+        const {
+            boothCode,
+            redirect
+        } = req.body;
         const user = req.session.user;
 
         if (!boothCode) {
-            return res.json({ success: false, message: "Invalid QR code." });
+            return res.json({
+                success: false,
+                message: "Invalid QR code."
+            });
         }
 
         // Normalisasi QR
@@ -46,50 +59,36 @@ export const handleScanResult = async (req, res) => {
             games: "/games"
         };
 
-        // --- Service scan seperti checkin/lunch/souvenir
         if (typeof SCAN_ACTIONS[code] === "function") {
             req.body.code = code;
             return SCAN_ACTIONS[code](req, res);
         }
 
-        // --- Direct redirect services (photobooth / games)
-        /*  if (typeof SCAN_ACTIONS[code] === "string") {
-             return res.json({
-                 success: true,
-                 message: "Redirecting to page...",
-                 redirect: SCAN_ACTIONS[code]
-             });
-         } */
-
-
-        const isPhotobooth = code === "photobooth"
-            || boothKey === "photobooth"
-            || code.includes("photobooth");
+          const isPhotobooth = boothKey === "photobooth";  // Cek jika photobooth
 
         if (isPhotobooth) {
-            // coba ambil socket dengan beberapa kemungkinan key
-            console.log("Looking for socket with boothKey:", boothKey);
+            console.log("Photobooth detected. Searching for socket...");
+
+            // Coba ambil socket dengan boothKey
             const socket = boothSockets["photobooth"] || boothSockets[boothKey];
             if (!socket) {
-                console.log("Socket not found for boothKey:", boothKey);
-            }
-            if (socket) {
-                socket.send(JSON.stringify({
-                    event: "userLinked",
-                    user_id: user.id
-                }));
-                return res.json({
-                    success: true,
-                    message: "Redirecting to Photobooth...",
-                    redirect: "/photobooth"
-                });
-            } else {
-                console.log("Photobooth socket not found for keys:", ["photobooth", boothKey]);
                 return res.json({
                     success: false,
-                    message: "Photobooth not available."
+                    message: "Photobooth socket not found."
                 });
             }
+
+            // Kirim user_id ke Unity melalui WebSocket
+            socket.send(JSON.stringify({
+                event: "userLinked",
+                user_id: user.id  // Kirim user_id yang diterima dari QR
+            }));
+
+            return res.json({
+                success: true,
+                message: "Redirecting to Photobooth...",
+                redirect: "/photobooth"
+            });
         }
 
         // =====================================
@@ -140,4 +139,3 @@ export const handleScanResult = async (req, res) => {
         });
     }
 };
-

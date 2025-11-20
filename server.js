@@ -142,43 +142,57 @@ app.get("/test-email", async (req, res) => {
   res.send(ok ? "Sukses" : "Gagal");
 });
 
-
-// Default Redirect
-app.get("*", (req, res) => res.redirect("/login"));
+// // Default Redirect
+// app.get("*", (req, res) => res.redirect("/login"));
 
 
 const wss = new WebSocketServer({ server });
 
+// Simpan socket berdasarkan boothId
 export const boothSockets = {};
 
-wss.on("connection", (ws, req, boothId) => {
-  console.log(`Connected to booth ${boothId}`);  // Verifikasi boothId yang diterima
-  boothSockets[boothId] = ws;
-
-  ws.send(JSON.stringify({ event: "connected" }));
-
-  ws.on("close", () => {
-    delete boothSockets[boothId];
-  });
-});
-
-
-server.on("upgrade", (req, socket, head) => {
-  const url = new URL(req.url, "http://localhost");
-  if (url.pathname === "/ws/booth") {
+// Ketika ada koneksi WebSocket masuk, ambil boothId dari query string pada req.url
+wss.on("connection", (ws, req) => {
+  try {
+    const url = new URL(req.url, "http://localhost");
     const boothId = url.searchParams.get("booth_id");
-    wss.handleUpgrade(req, socket, head, (ws) => {
-      wss.emit("connection", ws, req, boothId);
+
+    console.log(`Upgrade request for boothId: ${boothId}`);
+
+    // Pastikan permintaan ke "/ws/booth"
+    if (url.pathname !== "/ws/booth") {
+      console.log("Invalid WebSocket path requested:", url.pathname);
+      ws.close();
+      return;
+    }
+
+    if (!boothId) {
+      console.log("No booth_id provided in WebSocket connection");
+      ws.close();
+      return;
+    }
+
+    console.log(`Connected to booth: ${boothId}`);
+    boothSockets[boothId] = ws;
+
+    // Kirim pesan setelah koneksi terbuka
+    ws.send(JSON.stringify({ event: "connected", boothId }));
+
+    ws.on("close", () => {
+      console.log(`Connection closed for booth: ${boothId}`);
+      delete boothSockets[boothId];
     });
+  } catch (err) {
+    console.error("WebSocket connection handling error:", err);
+    ws.close();
   }
 });
-
-
 
 const PORT = process.env.PORT || 3002;
 
 if (!process.env.VERCEL) {
-  app.listen(PORT, () => {
+  // Start the HTTP server that the WebSocketServer is attached to
+  server.listen(PORT, () => {
     console.log(`🚀 Local server running at http://localhost:${PORT}`);
   });
 }
