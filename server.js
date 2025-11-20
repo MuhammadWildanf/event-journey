@@ -15,7 +15,6 @@ import checkinRoutes from "./routes/checkinRoutes.js";
 import serverless from "serverless-http";
 import { sendEmail } from "./utils/mailer.js";
 import http from "http";
-import https from 'https';
 import { WebSocketServer } from "ws";
 
 
@@ -48,7 +47,7 @@ export { db };
 // ✅ Express App Configuration
 // ==================================================
 const app = express();
-const server = https.createServer(app);
+const server = http.createServer(app);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -152,31 +151,44 @@ const wss = new WebSocketServer({ server });
 
 export const boothSockets = {};
 
-wss.on("connection", (ws, req) => {
-  const boothId = req.url.split("?booth_id=")[1];  // Parse booth_id from URL
+wss.on("connection", (ws, req, boothIdParam) => {
+  const boothId =
+    boothIdParam ||
+    (() => {
+      try {
+        return new URL(req.url, "http://localhost").searchParams.get("booth_id");
+      } catch (e) {
+        return null;
+      }
+    })();
 
-  boothSockets[boothId] = ws; // Store WebSocket for this booth
+  console.log("WS connection opened. req.url:", req.url, "boothIdParam:", boothIdParam, "resolvedBoothId:", boothId);
 
-  console.log(`New connection: Booth ID = ${boothId}`);
+  if (boothId) {
+    boothSockets[boothId] = ws;
+    console.log(`Registered booth socket -> ${boothId}`);
+  }
 
   ws.on("message", (message) => {
-    console.log(`Received: ${message}`);
+    console.log(`Received from ${boothId || "unknown"}: ${message}`);
   });
 
   ws.on("close", () => {
-    console.log(`Connection closed: Booth ID = ${boothId}`);
-    delete boothSockets[boothId];
+    console.log(`WS closed for booth: ${boothId}`);
+    if (boothId && boothSockets[boothId] === ws) delete boothSockets[boothId];
   });
 });
 
-// Handle the upgrade process for WebSocket connection
+// upgrade handler — pass boothId into connection
 server.on("upgrade", (req, socket, head) => {
-  const url = new URL(req.url, "wss://scmdigitalday2025.com"); // Gunakan wss:// jika server HTTPS
+  const url = new URL(req.url, `http://localhost`);
   if (url.pathname === "/ws/booth") {
     const boothId = url.searchParams.get("booth_id");
     wss.handleUpgrade(req, socket, head, (ws) => {
       wss.emit("connection", ws, req, boothId);
     });
+  } else {
+    socket.destroy();
   }
 });
 

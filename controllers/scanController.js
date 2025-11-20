@@ -43,7 +43,6 @@ export const handleScanResult = async (req, res) => {
             checkin: handleCheckin,
             lunch: handleLunchScan,
             souvenir: handleSouvenirScan,
-            photobooth: "/photobooth",
             games: "/games"
         };
 
@@ -54,31 +53,34 @@ export const handleScanResult = async (req, res) => {
         }
 
         // --- Direct redirect services (photobooth / games)
-        if (typeof SCAN_ACTIONS[code] === "string") {
-            return res.json({
-                success: true,
-                message: "Redirecting to page...",
-                redirect: SCAN_ACTIONS[code]
-            });
-        }
+        /*  if (typeof SCAN_ACTIONS[code] === "string") {
+             return res.json({
+                 success: true,
+                 message: "Redirecting to page...",
+                 redirect: SCAN_ACTIONS[code]
+             });
+         } */
 
 
-        if (code === "photobooth") {
-            // Pastikan photobooth socket ada
-            if (boothSockets["photobooth"]) {
-                // Kirim user_id ke WebSocket photobooth
-                boothSockets["photobooth"].send(
-                    JSON.stringify({
-                        event: "userLinked",
-                        user_id: user.id
-                    })
-                );
+        const isPhotobooth = code === "photobooth"
+            || boothKey === "photobooth"
+            || code.includes("photobooth");
+
+        if (isPhotobooth) {
+            // coba ambil socket dengan beberapa kemungkinan key
+            const socket = boothSockets["photobooth"] || boothSockets[boothKey];
+            if (socket) {
+                socket.send(JSON.stringify({
+                    event: "userLinked",
+                    user_id: user.id
+                }));
                 return res.json({
                     success: true,
-                    message: `Redirecting to Photobooth...`,
+                    message: "Redirecting to Photobooth...",
                     redirect: "/photobooth"
                 });
             } else {
+                console.log("Photobooth socket not found for keys:", ["photobooth", boothKey]);
                 return res.json({
                     success: false,
                     message: "Photobooth not available."
