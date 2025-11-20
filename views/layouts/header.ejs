@@ -20,87 +20,38 @@
 
     <style>
         /* =======================================
-           BASE LAYOUT — FIXED ANTI TERPOTONG
-        ======================================== */
+   BASE LAYOUT — FIXED ANTI TERPOTONG
+======================================== */
         body {
-            background: url("/assets/img/bg-dashboard.png") no-repeat center top/cover;
-            font-family: "Poppins", sans-serif;
+            background: url("/assets/img/bgnew.png") no-repeat center top/cover;
+            font-family: "Montserrat", sans-serif;
             color: #fff;
             min-height: 100vh;
             overflow: hidden;
-            /* ⛔ Anti terpotong + tidak scroll */
             display: flex;
             flex-direction: column;
         }
 
-        header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 1.2rem 1.5rem;
-            z-index: 10;
-        }
-
         /* =======================================
-           MAIN WRAPPER — AUTO SCALE
-        ======================================== */
-        main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 6rem;
-            padding-bottom: 2rem;
-
-            transform-origin: top center;
-            transform: scale(0.78);
-            /* default for small screens */
-        }
-
-        /* SCREEN HEIGHT BASED SCALE */
-        @media (min-height: 700px) {
-            main {
-                transform: scale(0.88);
-            }
-        }
-
-        @media (min-height: 850px) {
-            main {
-                transform: scale(1);
-            }
-        }
-
-        @media (min-height: 950px) {
-            main {
-                transform: scale(1.12);
-            }
-        }
-
-        @media (min-height: 1080px) {
-            main {
-                transform: scale(1.22);
-            }
-        }
-
-        /* =======================================
-           GRID WRAPPER
-        ======================================== */
+   GRID WRAPPER
+======================================== */
         .dashboard-grid {
             width: 100%;
-            max-width: 390px;
+            max-width: 450px;
+            /* Adjust grid max-width for proper fit */
             margin: 0 auto;
             display: grid;
-            gap: 12px;
+            gap: 16px;
             grid-template-columns: repeat(2, 1fr);
-            padding: 20px 12px 40px;
+            padding: 30px 16px 40px;
         }
 
         /* =======================================
-           CARD BASE
-        ======================================== */
+   CARD BASE
+======================================== */
         .grid-item {
             width: 100%;
+            padding: 0;
         }
 
         .grid-item.wide {
@@ -109,52 +60,64 @@
 
         .booth-card {
             width: 100%;
-            background-size: contain !important;
-            background-position: center !important;
+            background-size: cover !important;
+            background-position: center center !important;
             background-repeat: no-repeat !important;
-            padding: 16px 0;
-            /* agar PNG tidak terpotong */
-        }
-
-        /* FIX RATIO CARD */
-        .grid-item.wide .booth-card {
-            aspect-ratio: 18 / 7;
-        }
-
-        .grid-item.square .booth-card {
-            aspect-ratio: 1 / 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            overflow: hidden;
+            border-radius: 8px;
         }
 
         /* =======================================
-           CARD IMAGES
-        ======================================== */
+   FIX CARD ASPECT RATIO TO MATCH IMAGES
+======================================== */
         .card-scan {
             background-image: url('/assets/cards/scan.png');
+            aspect-ratio: 998 / 248;
+            /* Aspect ratio for the scan image */
         }
 
         .card-lunch {
             background-image: url('/assets/cards/lunch.png');
+            /* Add background image */
+            aspect-ratio: 490 / 330;
+            /* Aspect ratio for the lunch card */
         }
 
         .card-souvenir {
             background-image: url('/assets/cards/souvenir.png');
+            /* Add background image */
+            aspect-ratio: 490 / 330;
+            /* Aspect ratio for the souvenir card */
         }
 
         .card-photo {
             background-image: url('/assets/cards/photo.png');
+            /* Add background image */
+            aspect-ratio: 490 / 330;
+            /* Aspect ratio for the photo card */
         }
 
         .card-games {
             background-image: url('/assets/cards/games.png');
+            /* Add background image */
+            aspect-ratio: 490 / 330;
+            /* Aspect ratio for the games card */
         }
 
         .card-booth {
             background-image: url('/assets/cards/booth.png');
+            aspect-ratio: 998 / 248;
+            /* Keeping booth card aspect ratio like the scan image */
         }
 
         /* =======================================
-           NOT VISITED STATE
-        ======================================== */
+   NOT VISITED STATE
+======================================== */
         .not-visited {
             pointer-events: none;
             filter: grayscale(25%) brightness(80%);
@@ -168,34 +131,9 @@
             background: rgba(0, 45, 90, 0.45);
         }
 
-        /* Hover only for desktop */
-        @media (hover:hover) {
-            .booth-card:hover {
-                transform: translateY(-4px);
-                transition: 0.25s;
-            }
-        }
-
-        /* Logout button */
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 42px;
-            height: 42px;
-            transition: 0.25s ease;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .logout-icon {
-            font-size: 22px;
-        }
-
-
-
+        /* =======================================
+   DOWNLOAD BUTTON
+======================================== */
         .download-guide {
             grid-column: span 2;
             text-align: center;

@@ -24,36 +24,32 @@
 
                 <!-- PASSWORD -->
                 <div class="input-group-with-info" style="width: 100%; text-align:left;">
-
                     <small class="password-info mb-1 d-block">
-                        Password must be at least 6 characters.
+                        Password must be at least 6 characters in numeric.
                     </small>
-
                     <div class="input-box">
                         <i class="bi bi-lock"></i>
-                        <input type="password" id="password" name="password" placeholder="Password">
+                        <input type="password" id="password" name="password" placeholder="Password" pattern="\d+"
+                            inputmode="numeric">
                         <button type="button" class="togglePassword" data-target="password">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
                 </div>
 
-
                 <!-- REPEAT PASSWORD -->
                 <div class="input-box">
                     <i class="bi bi-lock-fill"></i>
-                    <input type="password" id="repeatpassword" name="repeatpassword" placeholder="Confirm Password">
+                    <input type="password" id="repeatpassword" name="repeatpassword" placeholder="Confirm Password"
+                        pattern="\d+" inputmode="numeric">
                     <button type="button" class="togglePassword" data-target="repeatpassword">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
 
+
                 <button type="submit" class="btn-auth">CREATE ACCOUNT</button>
             </form>
-
-            <p class="auth-link">
-                Already have an account? <a href="/login">Login to Account</a>
-            </p>
         </section>
     </div>
 
@@ -100,6 +96,27 @@
                     icon: "warning",
                     title: "Attention",
                     text: "All fields are required!",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            if (!/^\d+$/.test(password)) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Invalid Password",
+                    text: "Password must be numeric.",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            // Validasi untuk memastikan konfirmasi password hanya berisi angka
+            if (!/^\d+$/.test(repeat)) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Invalid Confirm Password",
+                    text: "Confirm password must be numeric.",
                     confirmButtonColor: "#3af0af",
                 });
                 return;
@@ -186,7 +203,7 @@
                         text: "Your account has been created. Redirecting to dashboard...",
                         confirmButtonColor: "#3af0af",
                     }).then(() => {
-                        window.location.href = "/dashboard";
+                        window.location.href = "/comingsoon";
                     });
                 } else {
                     const text = await res.text();

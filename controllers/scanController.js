@@ -1,5 +1,6 @@
 import { handleLunchScan, handleSouvenirScan } from "./serviceController.js";
 import { handleCheckin } from "./checkinController.js";
+import { boothSockets } from "../server.js";
 import {
     db
 } from "../server.js";
@@ -59,6 +60,30 @@ export const handleScanResult = async (req, res) => {
                 message: "Redirecting to page...",
                 redirect: SCAN_ACTIONS[code]
             });
+        }
+
+
+        if (code === "photobooth") {
+            // Pastikan photobooth socket ada
+            if (boothSockets["photobooth"]) {
+                // Kirim user_id ke WebSocket photobooth
+                boothSockets["photobooth"].send(
+                    JSON.stringify({
+                        event: "userLinked",
+                        user_id: user.id
+                    })
+                );
+                return res.json({
+                    success: true,
+                    message: `Redirecting to Photobooth...`,
+                    redirect: "/photobooth"
+                });
+            } else {
+                return res.json({
+                    success: false,
+                    message: "Photobooth not available."
+                });
+            }
         }
 
         // =====================================

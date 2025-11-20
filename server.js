@@ -14,6 +14,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import checkinRoutes from "./routes/checkinRoutes.js";
 import serverless from "serverless-http";
 import { sendEmail } from "./utils/mailer.js";
+import http from "http";
+import { WebSocketServer } from "ws";
 
 
 
@@ -45,7 +47,7 @@ export { db };
 // ✅ Express App Configuration
 // ==================================================
 const app = express();
-
+const server = http.createServer(app);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -141,16 +143,42 @@ app.get("/test-email", async (req, res) => {
 });
 
 
-
-
-
-
 // Default Redirect
 app.get("*", (req, res) => res.redirect("/login"));
 
-// ==================================================
-// ✅ Dual Mode: Local (dev) + Serverless (Vercel)
-// ==================================================
+
+const wss = new WebSocketServer({ server });
+
+export const boothSockets = {};
+
+wss.on("connection", (ws, req) => {
+  const boothId = req.url.split("?booth_id=")[1];  // Parse booth_id from URL
+
+  boothSockets[boothId] = ws; // Store WebSocket for this booth
+
+  console.log(`New connection: Booth ID = ${boothId}`);
+
+  ws.on("message", (message) => {
+    console.log(`Received: ${message}`);
+  });
+
+  ws.on("close", () => {
+    console.log(`Connection closed: Booth ID = ${boothId}`);
+    delete boothSockets[boothId];
+  });
+});
+
+// Handle the upgrade process for WebSocket connection
+server.on("upgrade", (req, socket, head) => {
+  const url = new URL(req.url, "http://localhost");
+  if (url.pathname === "/ws/booth") {
+    const boothId = url.searchParams.get("booth_id");
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit("connection", ws, req, boothId);
+    });
+  }
+});
+
 const PORT = process.env.PORT || 3002;
 
 if (!process.env.VERCEL) {

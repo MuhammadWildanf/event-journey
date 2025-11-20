@@ -1,18 +1,16 @@
 <%- include("./layouts/header", { title: "Dashboard || SCM Digital Day 2025" }) %>
-
-  <header class="d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center gap-2">
-      <div>
-        <small>Welcome</small><br>
-        <strong>
-          <%= user.name %>
-        </strong>
-      </div>
+  <header class="d-flex flex-column justify-content-center align-items-center py-4">
+    <!-- Logo Section -->
+    <div class="logo-container text-center">
+      <img src="/assets/img/logo.png" alt="SCM Digital Day 2025 Logo" class="logo-img" />
     </div>
 
-    <a href="/logout" class="logout-btn text-white text-decoration-none">
-      <span class="material-symbols-rounded logout-icon">logout</span>
-    </a>
+    <!-- User Name Section -->
+    <div class="user-info text-center">
+      <strong>
+        Welcome <%= user.name %>
+      </strong>
+    </div>
   </header>
 
   <% const btn=(url, active, classes, card)=> {
