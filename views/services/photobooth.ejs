@@ -16,6 +16,12 @@
             color: #ffffff;
             font-weight: 400;
         }
+
+        .photobooth-wrapper {
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            padding-bottom: 120px;
+        }
     </style>
 
     <div class="text-white text-center" style="margin-top: 120px;">
@@ -25,88 +31,106 @@
         </h2>
     </div>
 
-    <!-- Row SELALU dibuat agar realtime listener bekerja -->
-    <div class="row mt-4 px-3" id="photosRow">
-
-        <% if (photos && photos.length> 0) { %>
-            <% photos.forEach((url, i)=> { %>
-                <div class="col-6 mb-3 text-center">
-                    <a href="<%= url %>" target="_blank">
-                        <img src="<%= thumbnails[i] %>" class="img-fluid rounded shadow" alt="Photo" />
-                    </a>
-                </div>
-                <% }) %>
-                    <% } %>
-
+    <div class="photobooth-wrapper">
+        <div class="row mt-4 px-3" id="photosRow">
+            <% if (photos && photos.length> 0) { %>
+                <% photos.forEach((url)=> { %>
+                    <div class="col-6 mb-3 text-center" data-url="<%= url %>">
+                        <a href="<%= url %>" target="_blank">
+                            <img class="img-fluid rounded shadow photo-img" data-src="<%= url %>" alt="Photo" />
+                        </a>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <p class="text-center">No photos available.</p>
+                            <% } %>
+        </div>
     </div>
 
-    <!-- Jika tidak ada foto, tampilkan teks -->
-    <% if (!photos || photos.length===0) { %>
-        <p class="text-center">No photos available.</p>
-        <% } %>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG7V8hgvDVa7cSYrkjWOLsBnwOv_5WVyc",
+            authDomain: "gustbook-test.firebaseapp.com",
+            databaseURL: "https://gustbook-test-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "gustbook-test",
+            storageBucket: "gustbook-test.appspot.com",
+            messagingSenderId: "756925029571",
+            appId: "1:756925029571:web:562ee8486d4bba2be95676"
+        };
+        firebase.initializeApp(firebaseConfig);
 
-            <script>
-                // Firebase
-                const firebaseConfig = {
-                    apiKey: "AIzaSyDG7V8hgvDVa7cSYrkjWOLsBnwOv_5WVyc",
-                    authDomain: "gustbook-test.firebaseapp.com",
-                    databaseURL: "https://gustbook-test-default-rtdb.asia-southeast1.firebasedatabase.app",
-                    projectId: "gustbook-test",
-                    storageBucket: "gustbook-test.appspot.com",      // FIXED
-                    messagingSenderId: "756925029571",
-                    appId: "1:756925029571:web:562ee8486d4bba2be95676",
-                    measurementId: "G-WF53R29NX8"
-                };
-                firebase.initializeApp(firebaseConfig);
+        const userId = "<%= user.id %>";
+        const photosRow = document.getElementById("photosRow");
 
-                // Thumbnail builder
-                function driveThumbnail(url) {
-                    if (!url) return null;
-                    if (url.includes("googleusercontent")) return url;
+        // Fungsi untuk konversi Google Drive URL ke thumbnail
+        function driveThumbnail(url) {
+            if (!url) return null;
 
-                    const patterns = [
-                        /\/d\/([^/]+)/,       // FIXED (disamakan dengan backend)
-                        /id=([^&]+)/,
-                        /\/uc\?id=([^&]+)/,
-                        /download\?id=([^&]+)/
-                    ];
+            let fileId = null;
 
-                    for (const p of patterns) {
-                        const match = url.match(p);
-                        if (match) {
-                            return `https://drive.google.com/thumbnail?id=${match[1]}&t=${Date.now()}`;
-                        }
-                    }
+            // /file/d/FILE_ID/view
+            let match = url.match(/\/file\/d\/([^/]+)/);
+            if (match) fileId = match[1];
 
-                    return url;
-                }
+            // id=FILE_ID
+            match = url.match(/id=([^&]+)/);
+            if (!fileId && match) fileId = match[1];
 
-                const userId = "<%= user.id %>";
+            // /d/FILE_ID
+            match = url.match(/\/d\/([^/]+)/);
+            if (!fileId && match) fileId = match[1];
 
-                // Realtime listener
-                firebase.database().ref("users/" + userId + "/photos")
-                    .on("child_added", snap => {
-                        const url = snap.val();
-                        const thumb = driveThumbnail(url);
+            if (!fileId) return url;
 
-                        const row = document.getElementById("photosRow");
-                        if (!row) return;
+            // solusi ke-2 (yang Anda minta)
+            return `https://drive.google.com/thumbnail?id=${fileId}`;
+        }
 
-                        const div = document.createElement("div");
-                        div.classList.add("col-6", "mb-3", "text-center");
 
-                        div.innerHTML = `
-                <a href="${url}" target="_blank">
-                    <img src="${thumb}" class="img-fluid rounded shadow" alt="Photo" />
-                </a>
-            `;
 
-                        row.prepend(div);
-                    });
-            </script>
 
-            <%- include("../layouts/footer") %>
+
+        window.onload = function () {
+            document.querySelectorAll(".photo-img").forEach(img => {
+                const src = img.getAttribute("data-src");
+                const thumbUrl = driveThumbnail(src); // Memastikan variabel terdefinisi
+                console.log("Setting Image URL:", thumbUrl); // Debug log untuk memastikan nilai
+                img.src = thumbUrl; // Memastikan thumbnail ditetapkan ke src gambar
+            });
+        };
+
+        // Cek URL yang sudah ada untuk mencegah duplikasi
+        const existingPhotos = new Set();
+        document.querySelectorAll('#photosRow [data-url]').forEach(el => {
+            existingPhotos.add(el.getAttribute('data-url'));
+        });
+
+        // Fungsi tambah foto baru realtime
+        function addPhoto(url) {
+            if (existingPhotos.has(url)) return;
+            existingPhotos.add(url);
+
+            const thumb = driveThumbnail(url);
+            const div = document.createElement("div");
+            div.classList.add("col-6", "mb-3", "text-center");
+            div.setAttribute("data-url", url);
+
+            div.innerHTML = `
+            <a href="${url}" target="_blank">
+                <img src="${thumb}" class="img-fluid rounded shadow" alt="Photo" />
+            </a>
+        `;
+
+            photosRow.prepend(div);
+        }
+
+        // Listener realtime untuk foto baru
+        firebase.database().ref(`users/${userId}/photos`).on("child_added", snap => {
+            addPhoto(snap.val());
+        });
+    </script>
+
+    <%- include("../layouts/footer") %>

@@ -30,44 +30,21 @@ export const showSouvenir = async (req, res) => {
     });
 };
 
-function driveThumbnail(url) {
-    if (!url) return null;
-
-    // pola umum GDrive
-    const regexList = [
-        /\/d\/([^/]+)/,
-        /id=([^&]+)/,
-        /\/uc\?id=([^&]+)/,
-    ];
-
-    for (const reg of regexList) {
-        const match = url.match(reg);
-        if (match) {
-            return `https://drive.google.com/thumbnail?id=${match[1]}&t=${Date.now()}`;
-        }
-    }
-
-    return url; // jika gagal tetap tampilkan URL asli
-}
-
 
 export const showPhotobooth = async (req, res) => {
     const user = req.session.user;
 
+    // Ambil data user
     const snap = await db.ref("users/" + user.id).get();
     const userData = snap.exists() ? snap.val() : {};
 
     const photosObj = userData.photos || {};
     const photos = Object.values(photosObj);
 
-    const thumbnails = photos.map(url => driveThumbnail(url));
-
+    // Hanya kirim URL asli, thumbnail akan dibuat di frontend
     res.render("services/photobooth", {
         user,
-        userData,
-        photos,
-        thumbnails,
-        driveThumbnail
+        photos
     });
 };
 
