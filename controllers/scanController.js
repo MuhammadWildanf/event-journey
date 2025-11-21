@@ -1,6 +1,6 @@
 import {
     handleLunchScan,
-    handleSouvenirScan
+    handleSouvenirScan,handleGameScan
 } from "./serviceController.js";
 import {
     handleCheckin
@@ -56,7 +56,9 @@ export const handleScanResult = async (req, res) => {
             checkin: handleCheckin,
             lunch: handleLunchScan,
             souvenir: handleSouvenirScan,
-            games: "/games"
+            contract_dalgona: handleGameScan,
+            scm_glass_bridge: handleGameScan,
+            memory_game: handleGameScan
         };
 
         if (typeof SCAN_ACTIONS[code] === "function") {

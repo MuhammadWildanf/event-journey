@@ -18,13 +18,35 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        @font-face {
+            font-family: 'Montserrat-Regular';
+            src: url('/assets/fonts/Montserrat-Regular.otf');
+        }
+
+
+        @font-face {
+            font-family: 'Montserrat-SemiBold';
+            src: url('/assets/fonts/Montserrat-SemiBold.otf');
+        }
+
+        @font-face {
+            font-family: 'Montserrat-ExtraBold';
+            src: url('/assets/fonts/Montserrat-ExtraBold.otf');
+        }
+
+        @font-face {
+            font-family: 'Montserrat-Bold';
+            src: url('/assets/fonts/Montserrat-Bold.otf');
+        }
+
+
         /* === BACKGROUND & BODY === */
         body {
             margin: 0;
             padding: 0;
             height: 100vh;
             background: url("/assets/img/bg.png") no-repeat center center / cover;
-            font-family: "Poppins", sans-serif;
+            font-family: "Montserrat-Regular", sans-serif;
             overflow: hidden;
             /* no scroll */
             display: flex;
@@ -143,7 +165,8 @@
             color: #003300;
             font-weight: 700;
             font-size: 1rem;
-
+            font-family: 'Montserrat-ExtraBold', sans-serif;
+            /* Apply ExtraBold font */
             box-shadow: 0 0 16px rgba(180, 255, 48, 0.4);
             transition: 0.2s ease;
         }

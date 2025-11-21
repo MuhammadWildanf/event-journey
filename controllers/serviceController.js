@@ -52,6 +52,51 @@ export const showGames = (req, res) => {
     });
 };
 
+
+export const handleGameScan = async (req, res) => {
+    try {
+        const { code } = req.body;
+        const user = req.session.user;
+        const today = getToday();
+
+        const userRef = db.ref("users/" + user.id);
+        const userSnap = await userRef.get();
+        const userData = userSnap.val() || {};
+
+        // Check if game has been completed
+        const games_done = userData.games_done || {};
+        const gameKey = code; // Using the QR code as the game identifier
+
+        if (games_done[gameKey]) {
+            return res.json({
+                success: false,
+                message: "You have already completed this game."
+            });
+        }
+
+        // Mark game as completed
+        games_done[gameKey] = true;
+
+        await userRef.update({
+            games_done: games_done,
+            games_done_count: (userData.games_done_count || 0) + 1
+        });
+
+        return res.json({
+            success: true,
+            message: `You won the ${gameKey}!`,
+            redirect: `/games/${gameKey}`
+        });
+
+    } catch (err) {
+        console.error("Game scan error:", err);
+        return res.json({
+            success: false,
+            message: "Error scanning game QR."
+        });
+    }
+};
+
 /* ---------------------------------------
 v1
    🔥 HANDLE LUNCH SCAN
