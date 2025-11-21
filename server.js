@@ -154,7 +154,7 @@ export const boothSockets = {};
 // Ketika ada koneksi WebSocket masuk, ambil boothId dari query string pada req.url
 wss.on("connection", (ws, req) => {
   try {
-    const url = new URL(req.url, "http://localhost");
+    const url = new URL(req.url, "https://scmdigitalday2025.com");
     const boothId = url.searchParams.get("booth_id");
 
     console.log(`Upgrade request for boothId: ${boothId}`);
