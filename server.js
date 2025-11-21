@@ -190,12 +190,9 @@ wss.on("connection", (ws, req) => {
 
 const PORT = process.env.PORT || 3002;
 
-if (!process.env.VERCEL) {
-  // Start the HTTP server that the WebSocketServer is attached to
-  server.listen(PORT, () => {
-    console.log(`🚀 Local server running at http://localhost:${PORT}`);
-  });
-}
+server.listen(PORT, () => {
+  console.log(`🚀 Local server running at http://localhost:${PORT}`);
+});
 
 // Export untuk Vercel
 export default serverless(app);

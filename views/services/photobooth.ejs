@@ -9,17 +9,14 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            /* jarak icon-text */
         }
 
         .title-lunch .material-symbols-rounded {
             font-size: 36px;
-            /* mirip desain */
             color: #ffffff;
             font-weight: 400;
         }
     </style>
-
 
     <div class="text-white text-center" style="margin-top: 120px;">
         <h2 class="title-lunch">
@@ -28,14 +25,88 @@
         </h2>
     </div>
 
+    <!-- Row SELALU dibuat agar realtime listener bekerja -->
+    <div class="row mt-4 px-3" id="photosRow">
 
-    <% if (lastPhotoUrl) { %>
-        <div class="photo-container">
-            <img src="<%= lastPhotoUrl %>" alt="Photobooth Photo" class="img-fluid" />
-        </div>
-        <% } else { %>
-            <p>No photo taken yet. Please take a photo!</p>
-            <% } %>
+        <% if (photos && photos.length> 0) { %>
+            <% photos.forEach((url, i)=> { %>
+                <div class="col-6 mb-3 text-center">
+                    <a href="<%= url %>" target="_blank">
+                        <img src="<%= thumbnails[i] %>" class="img-fluid rounded shadow" alt="Photo" />
+                    </a>
+                </div>
+                <% }) %>
+                    <% } %>
 
+    </div>
 
-                <%- include("../layouts/footer") %>
+    <!-- Jika tidak ada foto, tampilkan teks -->
+    <% if (!photos || photos.length===0) { %>
+        <p class="text-center">No photos available.</p>
+        <% } %>
+
+            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+            <script>
+                // Firebase
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDG7V8hgvDVa7cSYrkjWOLsBnwOv_5WVyc",
+                    authDomain: "gustbook-test.firebaseapp.com",
+                    databaseURL: "https://gustbook-test-default-rtdb.asia-southeast1.firebasedatabase.app",
+                    projectId: "gustbook-test",
+                    storageBucket: "gustbook-test.appspot.com",      // FIXED
+                    messagingSenderId: "756925029571",
+                    appId: "1:756925029571:web:562ee8486d4bba2be95676",
+                    measurementId: "G-WF53R29NX8"
+                };
+                firebase.initializeApp(firebaseConfig);
+
+                // Thumbnail builder
+                function driveThumbnail(url) {
+                    if (!url) return null;
+                    if (url.includes("googleusercontent")) return url;
+
+                    const patterns = [
+                        /\/d\/([^/]+)/,       // FIXED (disamakan dengan backend)
+                        /id=([^&]+)/,
+                        /\/uc\?id=([^&]+)/,
+                        /download\?id=([^&]+)/
+                    ];
+
+                    for (const p of patterns) {
+                        const match = url.match(p);
+                        if (match) {
+                            return `https://drive.google.com/thumbnail?id=${match[1]}&t=${Date.now()}`;
+                        }
+                    }
+
+                    return url;
+                }
+
+                const userId = "<%= user.id %>";
+
+                // Realtime listener
+                firebase.database().ref("users/" + userId + "/photos")
+                    .on("child_added", snap => {
+                        const url = snap.val();
+                        const thumb = driveThumbnail(url);
+
+                        const row = document.getElementById("photosRow");
+                        if (!row) return;
+
+                        const div = document.createElement("div");
+                        div.classList.add("col-6", "mb-3", "text-center");
+
+                        div.innerHTML = `
+                <a href="${url}" target="_blank">
+                    <img src="${thumb}" class="img-fluid rounded shadow" alt="Photo" />
+                </a>
+            `;
+
+                        row.prepend(div);
+                    });
+            </script>
+
+            <%- include("../layouts/footer") %>
