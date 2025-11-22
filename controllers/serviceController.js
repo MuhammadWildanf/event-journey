@@ -73,6 +73,58 @@ export const handledoorprize = async (req, res) => {
 };
 
 
+export const showGrandprize = (req, res) => {
+    res.render("services/grandprize", {
+        qrUrl: "/qr/services/grandprize.png"
+    });
+};
+
+
+export const handlegrandprize = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect("/login");
+    }
+
+    const { code } = req.body;
+
+    if (code !== "grandprize") {
+        return res.json({ success: false, message: "Invalid Grandprize QR code." });
+    }
+
+    const userRef = db.ref("users/" + user.id);
+    const userSnap = await userRef.get();
+    const userData = userSnap.val() || {};
+
+    // 1️⃣ Already joined grandprize?
+    if (userData.grandprize_joined === true) {
+        return res.json({
+            success: false,
+            message: "You have already registered for the door prize."
+        });
+    }
+
+    // 2️⃣ Save entry to /grandprize
+    const grandprizeRef = db.ref("grandprize");
+    await grandprizeRef.push({
+        name: userData.name,
+        timestamp: Date.now(),
+        userId: user.id
+    });
+
+    // 3️⃣ Mark user as joined
+    await userRef.update({
+        grandprize_joined: true
+    });
+
+    return res.json({
+        success: true,
+        message: "Door prize entry submitted successfully.",
+        redirect: "/dashboard"
+    });
+};
+
+
 export const handleguesbook = async (req, res) => {
     const user = req.session.user;
     if (!user) {

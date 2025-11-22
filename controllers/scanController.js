@@ -1,7 +1,7 @@
 import {
     handleLunchScan,
     handleSouvenirScan, handleGameScan,
-    showguestbook, handledoorprize
+    showguestbook, handledoorprize, handlegrandprize
 } from "./serviceController.js";
 import {
     handleCheckin
@@ -61,7 +61,8 @@ export const handleScanResult = async (req, res) => {
             scm_glass_bridge: handleGameScan,
             memory_game: handleGameScan,
             guestbook: showguestbook,
-            doorprize: handledoorprize
+            doorprize: handledoorprize,
+            grandprize: handlegrandprize
         };
 
 
