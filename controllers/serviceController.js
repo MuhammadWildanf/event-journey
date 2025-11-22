@@ -6,6 +6,100 @@ import { getToday } from "../utils/date.js";
 /* ---------------------------------------
    PAGE VIEW (Lunch, Souvenir, Photobooth, Games)
 ---------------------------------------- */
+
+export const showguestbook = async (req, res) => {
+    const user = req.session.user; // Ambil data user yang sedang login
+    if (!user) {
+        return res.redirect("/login"); // Jika user belum login, arahkan ke halaman login
+    }
+
+    // Mengambil data user dari Firebase
+    const snap = await db.ref("users/" + user.id).get();
+    const userData = snap.exists() ? snap.val() : {};
+
+    // Render halaman guestbook dengan data user
+    res.render("services/guestbook", { user, userData });
+};
+
+export const showDoorprize = (req, res) => {
+    res.render("services/doorprize", {
+        qrUrl: "/qr/services/doorprize.png"
+    });
+};
+
+
+export const handledoorprize = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect("/login");
+    }
+
+    const { code } = req.body;
+
+    if (code !== "doorprize") {
+        return res.json({ success: false, message: "Invalid Doorprize QR code." });
+    }
+
+    const userRef = db.ref("users/" + user.id);
+    const userSnap = await userRef.get();
+    const userData = userSnap.val() || {};
+
+    // 1️⃣ Already joined doorprize?
+    if (userData.doorprize_joined === true) {
+        return res.json({
+            success: false,
+            message: "You have already registered for the door prize."
+        });
+    }
+
+    // 2️⃣ Save entry to /doorprize
+    const doorprizeRef = db.ref("doorprize");
+    await doorprizeRef.push({
+        name: userData.name,
+        timestamp: Date.now(),
+        userId: user.id
+    });
+
+    // 3️⃣ Mark user as joined
+    await userRef.update({
+        doorprize_joined: true
+    });
+
+    return res.json({
+        success: true,
+        message: "Door prize entry submitted successfully.",
+        redirect: "/dashboard"
+    });
+};
+
+
+export const handleguesbook = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect("/login"); // Jika user belum login, arahkan ke halaman login
+    }
+
+    const snap = await db.ref("users/" + user.id).get();
+    const userData = snap.exists() ? snap.val() : {};
+
+    const { comment, char } = req.body;
+
+    const charNumber = Number(char);
+
+    // Simpan data guestbook ke Firebase
+    const guestbookRef = db.ref("guestbook");
+    const newEntryRef = await guestbookRef.push({
+        name: userData.name, // Gunakan nama dari data user yang sedang login
+        char: charNumber,  // Karakter yang dipilih
+        comment, // Komentar dari form
+        timestamp: Date.now(),
+    });
+
+    // Setelah data disubmit, arahkan ke dashboard
+    res.redirect("/dashboard");
+};
+
+
 export const showLunch = async (req, res) => {
     const user = req.session.user;
 
@@ -67,9 +161,6 @@ export const uploadPhoto = async (req, res) => {
 
     res.json({ success: true });
 };
-
-
-
 
 
 export const showGames = async (req, res) => {
@@ -507,7 +598,6 @@ v1
 //         return res.json({ success: false, message: "Server error occurred." });
 //     }
 // };
-
 
 
 

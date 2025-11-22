@@ -6,7 +6,11 @@ import {
     showGames,
     handleSouvenirScan,
     handleLunchScan,
-    uploadPhoto
+    uploadPhoto,
+    showguestbook,
+    handleguesbook,
+    showDoorprize,
+    handledoorprize
 
 } from "../controllers/serviceController.js";
 
@@ -39,5 +43,12 @@ router.post("/scan-souvenir/result", requireLogin, handleSouvenirScan);
 router.get("/photobooth", requireLogin, showPhotobooth);
 router.post("/photobooth/upload", uploadPhoto);
 
+
+router.get("/guestbook", requireLogin, showguestbook);
+router.post("/guestbook/submit-form", requireLogin, handleguesbook);
+
+
+router.get("/doorprize", showDoorprize);
+router.post("/doorprize", requireLogin, handledoorprize);
 
 export default router;
