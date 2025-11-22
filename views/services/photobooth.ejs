@@ -20,6 +20,34 @@
             height: 36px;
             /* Mengatur tinggi gambar */
         }
+
+
+        .btn-back-custom {
+            position: fixed;
+            bottom: 50px;
+            /* Letakkan tombol di bagian bawah layar */
+            left: 50%;
+            transform: translateX(-50%);
+            /* Posisikan tombol ke tengah */
+            width: 80%;
+            padding: 12px 28px;
+            text-decoration: none;
+            border-radius: 12px;
+            background: #0c2340;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.15), 0 0 16px rgba(0, 255, 255, 0.06);
+            z-index: 999;
+            /* Pastikan tombol tetap berada di atas */
+        }
+
+        .btn-back-custom:hover {
+            background: #1e3651;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15), 0 0 25px rgba(0, 255, 255, 0.06);
+        }
     </style>
 
     <div class="text-white text-center mt-5 mb-2">
@@ -43,6 +71,9 @@
                             <% } %>
         </div>
     </div>
+
+    <a href="/dashboard" class="btn-back-custom">BACK</a>
+
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
