@@ -1,4 +1,4 @@
-import { db } from "../server.js";
+import { db } from "../config/firebase.js";
 
 // 🧩 Menampilkan daftar semua booth
 export const showBoothList = async (req, res) => {

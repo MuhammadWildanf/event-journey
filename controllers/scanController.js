@@ -9,9 +9,8 @@ import {
 import {
     boothSockets
 } from "../server.js";
-import {
-    db
-} from "../server.js";
+import { db } from "../config/firebase.js";
+
 
 function normalizeBoothKey(str) {
     return str

@@ -1,4 +1,4 @@
-import { db } from "../server.js";
+import { db } from "../config/firebase.js";
 import { getToday } from "../utils/date.js";
 
 export const showDashboard = async (req, res) => {

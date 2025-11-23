@@ -1,6 +1,6 @@
 import {
     db
-} from "../server.js";
+} from "../config/firebase.js";
 import QRCode from "qrcode";
 import fs from "fs";
 import path from "path";

@@ -16,6 +16,7 @@ import serverless from "serverless-http";
 import { sendEmail } from "./utils/mailer.js";
 import http from "http";
 import { WebSocketServer } from "ws";
+import { db } from "./config/firebase.js";
 
 
 
@@ -40,8 +41,8 @@ if (!admin.apps.length) {
   });
 }
 
-const db = admin.database();
-export { db };
+// const db = admin.database();
+// export { db };
 
 // ==================================================
 // ✅ Express App Configuration
@@ -105,7 +106,7 @@ app.get("/event-guide", (req, res) => {
   // optional: require login
   if (!req.session?.user) return res.redirect("/login");
 
-  const publicPdfUrl = "/assets/files/QR.pdf";
+  const publicPdfUrl = "/assets/files/e-book.pdf";
 
   res.send(`
     <html>

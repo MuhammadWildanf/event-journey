@@ -1,6 +1,4 @@
-import {
-    db
-} from "../server.js";
+import { db } from "../config/firebase.js";
 import {
     getToday
 } from "../utils/date.js";
@@ -399,79 +397,6 @@ export const handleLunchScan = async (req, res) => {
 };
 
 
-// export const handleSouvenirScan = async (req, res) => {
-//     try {
-//         const user = req.session.user;
-//         if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
-
-//         const { code } = req.body;
-//         const today = getToday();
-
-//         if (code !== "souvenir") {
-//             return res.json({ success: false, message: "Invalid souvenir QR code." });
-//         }
-
-//         const userRef = db.ref("users/" + user.id);
-//         const userSnap = await userRef.get();
-//         const userData = userSnap.val() || {};
-
-//         // 1️⃣ Must be checked-in today
-//         if (!userData.checkin_dates?.[today]) {
-//             return res.json({ success: false, message: "Please check in first." });
-//         }
-
-//         // 2️⃣ Already claimed today?
-//         if (userData.souvenir_claimed === true) {
-//             return res.json({ success: false, message: "You have already claimed a souvenir." });
-//         }
-
-//         // 3️⃣ Must have visited at least 5 booths
-//         if ((userData.visited_count || 0) < 5) {
-//             return res.json({
-//                 success: false,
-//                 message: "You must visit at least 5 booths to claim a souvenir."
-//             });
-//         }
-
-//         // 4️⃣ Get limit
-//         const limitSnap = await db.ref("services/souvenir/QUOTA").get();
-//         const limit = limitSnap.val() || 150;
-
-//         // 5️⃣ Atomic increment using transaction
-//         const quotaRef = db.ref(`services/souvenir/today_count/${today}`);
-//         const txnResult = await quotaRef.transaction(current => {
-//             current = current || 0;
-//             if (current >= limit) {
-//                 return; // abort - sold out
-//             }
-//             return current + 1;
-//         }, (error, committed, snapshot) => {
-//             if (error) {
-//                 console.error("Transaction failed:", error);
-//                 return res.json({ success: false, message: "Transaction failed." });
-//             }
-//             if (!committed) {
-//                 return res.json({ success: false, message: "Souvenirs are sold out for today. Please try another day." });
-//             }
-//             console.log("Transaction completed, new value:", snapshot.val());
-//         });
-
-//         // 6️⃣ Mark user as claimed
-//         await userRef.child(`souvenir_claimed_dates/${today}`).set(true);
-
-//         return res.json({
-//             success: true,
-//             message: "Souvenir successfully claimed.",
-//             redirect: "/souvenir-success"
-//         });
-
-//     } catch (err) {
-//         console.error("Souvenir error:", err);
-//         return res.json({ success: false, message: "Server error occurred." });
-//     }
-// };
-
-
 export const handleSouvenirScan = async (req, res) => {
     try {
         const user = req.session.user;
@@ -565,6 +490,79 @@ export const handleSouvenirScan = async (req, res) => {
         });
     }
 };
+
+
+// export const handleSouvenirScan = async (req, res) => {
+//     try {
+//         const user = req.session.user;
+//         if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
+
+//         const { code } = req.body;
+//         const today = getToday();
+
+//         if (code !== "souvenir") {
+//             return res.json({ success: false, message: "Invalid souvenir QR code." });
+//         }
+
+//         const userRef = db.ref("users/" + user.id);
+//         const userSnap = await userRef.get();
+//         const userData = userSnap.val() || {};
+
+//         // 1️⃣ Must be checked-in today
+//         if (!userData.checkin_dates?.[today]) {
+//             return res.json({ success: false, message: "Please check in first." });
+//         }
+
+//         // 2️⃣ Already claimed today?
+//         if (userData.souvenir_claimed === true) {
+//             return res.json({ success: false, message: "You have already claimed a souvenir." });
+//         }
+
+//         // 3️⃣ Must have visited at least 5 booths
+//         if ((userData.visited_count || 0) < 5) {
+//             return res.json({
+//                 success: false,
+//                 message: "You must visit at least 5 booths to claim a souvenir."
+//             });
+//         }
+
+//         // 4️⃣ Get limit
+//         const limitSnap = await db.ref("services/souvenir/QUOTA").get();
+//         const limit = limitSnap.val() || 150;
+
+//         // 5️⃣ Atomic increment using transaction
+//         const quotaRef = db.ref(`services/souvenir/today_count/${today}`);
+//         const txnResult = await quotaRef.transaction(current => {
+//             current = current || 0;
+//             if (current >= limit) {
+//                 return; // abort - sold out
+//             }
+//             return current + 1;
+//         }, (error, committed, snapshot) => {
+//             if (error) {
+//                 console.error("Transaction failed:", error);
+//                 return res.json({ success: false, message: "Transaction failed." });
+//             }
+//             if (!committed) {
+//                 return res.json({ success: false, message: "Souvenirs are sold out for today. Please try another day." });
+//             }
+//             console.log("Transaction completed, new value:", snapshot.val());
+//         });
+
+//         // 6️⃣ Mark user as claimed
+//         await userRef.child(`souvenir_claimed_dates/${today}`).set(true);
+
+//         return res.json({
+//             success: true,
+//             message: "Souvenir successfully claimed.",
+//             redirect: "/souvenir-success"
+//         });
+
+//     } catch (err) {
+//         console.error("Souvenir error:", err);
+//         return res.json({ success: false, message: "Server error occurred." });
+//     }
+// };
 
 
 /* ---------------------------------------

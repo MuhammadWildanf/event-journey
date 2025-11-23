@@ -1,6 +1,6 @@
 import {
     db
-} from "../server.js";
+} from "../config/firebase.js";
 import {
     sendRegistrationEmail
 } from "../utils/sendRegistrationEmail.js";
