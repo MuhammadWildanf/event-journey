@@ -1,0 +1,49 @@
+<%- include("../../layouts/header-admin", { title: "Lunch Quota Detail" }) %>
+
+<div class="container mt-4">
+
+    <h3>Lunch Quota Detail</h3>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <p><strong>Quota:</strong> <%= quota %></p>
+            <p><strong>Used:</strong> <%= used %></p>
+            <p><strong>Remaining:</strong> <%= remaining %></p>
+
+            <h5 class="mt-4">Users Who Took Lunch Today</h5>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (lunchUsers.length === 0) { %>
+                    <tr>
+                        <td colspan="5" class="text-center">No users found</td>
+                    </tr>
+                    <% } else { %>
+                    <% lunchUsers.forEach((u, i) => { %>
+                    <tr>
+                        <td><%= i+1 %></td>
+                        <td><%= u.date %></td>
+                        <td><%= u.name %></td>
+                        <td><%= u.email %></td>
+                        <td><%= u.phone %></td>
+                    </tr>
+                    <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<%- include("../../layouts/footer") %>

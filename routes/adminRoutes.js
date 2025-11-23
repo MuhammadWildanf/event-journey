@@ -24,7 +24,7 @@ import {
     serviceCreate,
     serviceEditForm,
     serviceUpdate,
-    serviceDelete
+    serviceDelete, quotaLunchDetail,quotaSouvenirDetail
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -57,6 +57,8 @@ router.post("/users/:id/status", userUpdateStatus);
 
 router.get("/quota", quotaSettings);
 router.post("/quota", quotaUpdate);
+router.get("/quota/lunch/detail", quotaLunchDetail);
+router.get("/quota/souvenir/detail", quotaSouvenirDetail);
 
 
 router.get("/services", serviceList);

@@ -499,21 +499,23 @@ export const quotaSettings = async (req, res) => {
         db.ref(`services/souvenir/today_count/${today}`).get(),
     ]);
 
-    const lunchQuota = lunchQuotaSnap.val() || 300;
-    const souvenirQuota = souvenirQuotaSnap.val() || 150;
-    const lunchUsed = lunchTodaySnap.val() || 0;
-    const souvenirUsed = souvenirTodaySnap.val() || 0;
+    const lunchQuota = Number(lunchQuotaSnap.val()) || 0;
+    const souvenirQuota = Number(souvenirQuotaSnap.val()) || 0;
+
+    const lunchUsed = Number(lunchTodaySnap.val()) || 0;
+    const souvenirUsed = Number(souvenirTodaySnap.val()) || 0;
 
     res.render("admin/quota/index", {
         lunchQuota,
         lunchUsed,
-        lunchRemaining: lunchQuota - lunchUsed,
+        lunchRemaining: Math.max(lunchQuota - lunchUsed, 0),
 
         souvenirQuota,
         souvenirUsed,
-        souvenirRemaining: souvenirQuota - souvenirUsed,
+        souvenirRemaining: Math.max(souvenirQuota - souvenirUsed, 0),
     });
 };
+
 
 
 
@@ -528,6 +530,74 @@ export const quotaUpdate = async (req, res) => {
 
     res.redirect("/admin/quota");
 };
+
+
+export const quotaLunchDetail = async (req, res) => {
+    const [quotaSnap, todayCountSnap, usersSnap] = await Promise.all([
+        db.ref("services/lunch/QUOTA").get(),
+        db.ref("services/lunch/today_count").get(),
+        db.ref("users").get()
+    ]);
+
+    const quota = Number(quotaSnap.val()) || 0;
+    const todayCount = todayCountSnap.val() || {};
+    const used = Object.values(todayCount).reduce((a, b) => a + Number(b), 0); // total semua hari
+
+    const users = usersSnap.val() || {};
+
+    // Ambil semua user yang punya service_taken.lunch (tanpa filter tanggal)
+    const lunchUsers = Object.entries(users)
+        .filter(([uid, u]) => u?.service_taken?.lunch)
+        .map(([uid, u]) => ({
+            id: uid,
+            date: u.service_taken.lunch,
+            name: u.name || "-",
+            email: u.email || "-",
+            phone: u.phone || "-"
+        }));
+
+    res.render("admin/quota/lunch-detail", {
+        quota,
+        used,
+        remaining: quota - used,
+        lunchUsers
+    });
+};
+
+
+
+
+export const quotaSouvenirDetail = async (req, res) => {
+    const [quotaSnap, todayCountSnap, usersSnap] = await Promise.all([
+        db.ref("services/souvenir/QUOTA").get(),
+        db.ref("services/souvenir/today_count").get(),
+        db.ref("users").get()
+    ]);
+
+    const quota = Number(quotaSnap.val()) || 0;
+    const todayCount = todayCountSnap.val() || {};
+    const used = Object.values(todayCount).reduce((a, b) => a + Number(b), 0);
+
+    const users = usersSnap.val() || {};
+
+    const souvenirUsers = Object.entries(users)
+        .filter(([uid, u]) => u?.service_taken?.souvenir)
+        .map(([uid, u]) => ({
+            id: uid,
+            date: u.service_taken.souvenir,
+            name: u.name || "-",
+            email: u.email || "-",
+            phone: u.phone || "-"
+        }));
+
+    res.render("admin/quota/souvenir-detail", {
+        quota,
+        used,
+        remaining: quota - used,
+        souvenirUsers
+    });
+};
+
 
 
 

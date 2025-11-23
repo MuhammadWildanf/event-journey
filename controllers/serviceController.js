@@ -1,7 +1,9 @@
 import {
     db
 } from "../server.js";
-import { getToday } from "../utils/date.js";
+import {
+    getToday
+} from "../utils/date.js";
 
 /* ---------------------------------------
    PAGE VIEW (Lunch, Souvenir, Photobooth, Games)
@@ -30,7 +32,6 @@ export const showSouvenir = async (req, res) => {
     });
 };
 
-
 export const showPhotobooth = async (req, res) => {
     const user = req.session.user;
 
@@ -48,12 +49,16 @@ export const showPhotobooth = async (req, res) => {
     });
 };
 
-
 export const uploadPhoto = async (req, res) => {
-    const { user_id, photo_url } = req.body;
+    const {
+        user_id,
+        photo_url
+    } = req.body;
 
     if (!user_id || !photo_url) {
-        return res.status(400).json({ message: "Missing fields" });
+        return res.status(400).json({
+            message: "Missing fields"
+        });
     }
 
     // Masukkan photo_url ke list
@@ -65,12 +70,10 @@ export const uploadPhoto = async (req, res) => {
         photobooth_done: true
     });
 
-    res.json({ success: true });
+    res.json({
+        success: true
+    });
 };
-
-
-
-
 
 export const showGames = async (req, res) => {
     // Ambil user ID dari session
@@ -92,7 +95,9 @@ export const showGames = async (req, res) => {
 
 export const handleGameScan = async (req, res) => {
     try {
-        const { code } = req.body;
+        const {
+            code
+        } = req.body;
         const user = req.session.user;
 
         if (!user) {
@@ -160,13 +165,21 @@ export const handleGameScan = async (req, res) => {
 export const handleLunchScan = async (req, res) => {
     try {
         const user = req.session.user;
-        if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
+        if (!user) return res.status(401).json({
+            success: false,
+            message: "Authentication required."
+        });
 
-        const { code } = req.body;
+        const {
+            code
+        } = req.body;
         const today = getToday();
 
         if (code !== "lunch") {
-            return res.json({ success: false, message: "Invalid lunch QR code." });
+            return res.json({
+                success: false,
+                message: "Invalid lunch QR code."
+            });
         }
 
         const userRef = db.ref("users/" + user.id);
@@ -174,18 +187,24 @@ export const handleLunchScan = async (req, res) => {
         const userData = userSnap.val() || {};
 
         // 1️⃣ Must be checked-in today
-        if (!userData.checkin_dates?.[today]) {
-            return res.json({ success: false, message: "Please check in first." });
+        if (!userData.checkin_dates ?. [today]) {
+            return res.json({
+                success: false,
+                message: "Please check in first."
+            });
         }
 
         // 2️⃣ Already claimed today?
-        if (userData.lunch_claimed_dates?.[today]) {
-            return res.json({ success: false, message: "You have already claimed lunch today." });
+        if (userData.lunch_claimed_dates ?. [today]) {
+            return res.json({
+                success: false,
+                message: "You have already claimed lunch today."
+            });
         }
 
         // 3️⃣ Get limit
         const limitSnap = await db.ref("services/lunch/QUOTA").get();
-        const limit = limitSnap.val() || 300;
+        const limit = Number(limitSnap.val()) || 0;
 
         // 4️⃣ Atomic increment using transaction
         const quotaRef = db.ref(`services/lunch/today_count/${today}`);
@@ -198,10 +217,16 @@ export const handleLunchScan = async (req, res) => {
         }, (error, committed, snapshot) => {
             if (error) {
                 console.error("Transaction failed:", error);
-                return res.json({ success: false, message: "Transaction failed." });
+                return res.json({
+                    success: false,
+                    message: "Transaction failed."
+                });
             }
             if (!committed) {
-                return res.json({ success: false, message: "Lunch is sold out for today." });
+                return res.json({
+                    success: false,
+                    message: "Lunch is sold out for today."
+                });
             }
             console.log("Transaction completed, new value:", snapshot.val());
         });
@@ -217,7 +242,10 @@ export const handleLunchScan = async (req, res) => {
 
     } catch (err) {
         console.error("Lunch error:", err);
-        return res.json({ success: false, message: "Server error occurred." });
+        return res.json({
+            success: false,
+            message: "Server error occurred."
+        });
     }
 };
 
@@ -298,13 +326,21 @@ export const handleLunchScan = async (req, res) => {
 export const handleSouvenirScan = async (req, res) => {
     try {
         const user = req.session.user;
-        if (!user) return res.status(401).json({ success: false, message: "Authentication required." });
+        if (!user) return res.status(401).json({
+            success: false,
+            message: "Authentication required."
+        });
 
-        const { code } = req.body;
+        const {
+            code
+        } = req.body;
         const today = getToday();
 
         if (code !== "souvenir") {
-            return res.json({ success: false, message: "Invalid souvenir QR code." });
+            return res.json({
+                success: false,
+                message: "Invalid souvenir QR code."
+            });
         }
 
         const userRef = db.ref("users/" + user.id);
@@ -312,13 +348,19 @@ export const handleSouvenirScan = async (req, res) => {
         const userData = userSnap.val() || {};
 
         // 1️⃣ MUST check-in today (supaya tidak ambil tanpa hadir)
-        if (!userData.checkin_dates?.[today]) {
-            return res.json({ success: false, message: "Please check in first." });
+        if (!userData.checkin_dates ?. [today]) {
+            return res.json({
+                success: false,
+                message: "Please check in first."
+            });
         }
 
         // 2️⃣ Already claimed souvenir ANY DAY?
         if (userData.souvenir_claimed === true) {
-            return res.json({ success: false, message: "You have already claimed your souvenir." });
+            return res.json({
+                success: false,
+                message: "You have already claimed your souvenir."
+            });
         }
 
         // 3️⃣ Must have visited at least 5 booths (boleh dicapai hari sebelumnya)
@@ -331,7 +373,8 @@ export const handleSouvenirScan = async (req, res) => {
 
         // 4️⃣ GLOBAL QUOTA (total 150, tidak reset)
         const limitSnap = await db.ref("services/souvenir/QUOTA").get();
-        const limit = limitSnap.val() || 150;
+        const limit = Number(limitSnap.val()) || 0;
+
 
         const quotaRef = db.ref(`services/souvenir/total_count`);
 
@@ -342,7 +385,10 @@ export const handleSouvenirScan = async (req, res) => {
         }, (error, committed, snapshot) => {
             if (error) {
                 console.error("Transaction failed:", error);
-                return res.json({ success: false, message: "Transaction failed." });
+                return res.json({
+                    success: false,
+                    message: "Transaction failed."
+                });
             }
             if (!committed) {
                 // ❗ Kuota habis hari ini, tapi besok tetap boleh coba lagi
@@ -364,7 +410,10 @@ export const handleSouvenirScan = async (req, res) => {
 
     } catch (err) {
         console.error("Souvenir error:", err);
-        return res.json({ success: false, message: "Server error occurred." });
+        return res.json({
+            success: false,
+            message: "Server error occurred."
+        });
     }
 };
 
@@ -507,7 +556,3 @@ v1
 //         return res.json({ success: false, message: "Server error occurred." });
 //     }
 // };
-
-
-
-
