@@ -87,21 +87,18 @@
                     ], ["memory_game", "Memory Game" ] ]; const played=(user && user.games_done) || {}; %>
 
                     <% gamesList.forEach(([key, name])=> {
-                        const isPlayed = !!played[key];
+                        const isPlayed = !!played[key]; // Check if the user has played the game
                         %>
-
                         <div class="col-12 col-md-8">
                             <% if (isPlayed) { %>
-                                <a href="/games/<%= key %>" class="text-decoration-none">
-                                    <div class="game-card game-played">
-                                        <div class="game-icon">
-                                            <i class="bi bi-controller"></i>
-                                        </div>
-                                        <div>
-                                            <%= name %>
-                                        </div>
+                                <div class="game-card game-played" onclick="showGameAlert('<%= name %>')">
+                                    <div class="game-icon">
+                                        <i class="bi bi-controller"></i>
                                     </div>
-                                </a>
+                                    <div>
+                                        <%= name %>
+                                    </div>
+                                </div>
                                 <% } else { %>
                                     <div class="game-card disabled-game">
                                         <div class="game-icon">
@@ -113,7 +110,6 @@
                                     </div>
                                     <% } %>
                         </div>
-
                         <% }) %>
 
             </div>
@@ -123,3 +119,17 @@
     </main>
 
     <%- include("../layouts/footer") %>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            // Function to show SweetAlert when game is clicked
+            function showGameAlert(gameName) {
+                Swal.fire({
+                    title: 'You have already played this game!',
+                    text: `You have already completed the ${gameName}.`,
+                    icon: 'info',
+                    confirmButtonText: 'OK'
+                });
+            }
+        </script>

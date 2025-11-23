@@ -232,7 +232,6 @@ export const showGames = async (req, res) => {
     });
 };
 
-
 export const handleGameScan = async (req, res) => {
     try {
         const { code } = req.body;

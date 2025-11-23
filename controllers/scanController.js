@@ -69,7 +69,7 @@ export const handleScanResult = async (req, res) => {
         if (code === "guestbook") {
             return res.json({
                 success: true,
-                message: "Opening guestbook...",
+                message: "Redirecting to guestbook...",
                 redirect: "/guestbook"
             });
         }
