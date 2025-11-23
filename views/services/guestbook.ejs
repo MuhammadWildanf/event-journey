@@ -1,0 +1,230 @@
+<%- include("../layouts/header", { title: "Guestbook || SCM Digital Day 2025" }) %>
+
+    <style>
+        /* Importing Montserrat font */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
+        /* General Styling */
+        body {
+            background: url("/assets/img/bg-dashboard.png") no-repeat center top/cover;
+
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .text-white.text-center .guestbook-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .text-white.text-center .guestbook-icon img {
+            width: auto;
+            height: 36px;
+        }
+
+        /* Form Styling */
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* Short Message Textarea */
+        #comment {
+            border-radius: 10px;
+            padding: 10px;
+            width: 100%;
+            height: 100px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Character Card Styling */
+        .character-selection {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .character-card {
+            width: 100px;
+            height: 160px;
+            margin: 10px;
+            border-radius: 15px;
+            background-color: white;
+            border: 2px solid #ccc;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Highlight the card when selected */
+        .character-card.selected {
+            background-color: #c2ff37;
+            /* Base background color */
+            background-image: radial-gradient(circle, rgba(194, 255, 55, 0.25) 50%, rgba(194, 255, 55, 0) 100%);
+            /* Radial gradient */
+            border-color: #66b800;
+            /* Border color */
+            box-shadow: 0 0 15px rgba(0, 200, 0, 0.7);
+            /* Soft green shadow */
+            border-radius: 15px;
+            /* Rounded corners */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .character-card img {
+            width: 100%;
+            height: 100%;
+            /* Ensures the image fills the card height */
+            object-fit: contain;
+        }
+
+        /* Custom Send Button */
+        .btn-send {
+            background-color: #c2ff37;
+            /* Base background color */
+            background-image: radial-gradient(circle, rgba(194, 255, 55, 0.25) 50%, rgba(194, 255, 55, 0) 100%);
+            /* Radial gradient */
+            color: black;
+            /* Text color */
+            border: 2px solid #66b800;
+            /* Border to match the character card */
+            padding: 15px 30px;
+            /* Larger padding for better aesthetics */
+            font-size: 18px;
+            /* Larger font size */
+            font-weight: bold;
+            /* Bold text */
+            border-radius: 30px;
+            /* Rounded corners for the button */
+            cursor: pointer;
+            /* Pointer cursor on hover */
+            width: 100%;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            /* Smooth transitions for hover */
+            margin-top: 20px;
+        }
+
+        /* Button hover effect */
+        .btn-send:hover {
+            background-color: #66b800;
+            /* Darker green when hovered */
+            transform: scale(1.05);
+            /* Slightly enlarge the button on hover */
+            box-shadow: 0 0 15px rgba(102, 184, 0, 0.7);
+            /* Green shadow effect */
+        }
+
+        /* Responsive Adjustments */
+        @media screen and (max-width: 600px) {
+            .character-card {
+                width: 90px;
+                height: 140px;
+            }
+
+            .character-selection {
+                justify-content: center;
+            }
+
+            .btn-send {
+                padding: 12px;
+            }
+        }
+
+        @media screen and (max-width: 400px) {
+            form {
+                padding: 15px;
+            }
+
+            .character-card {
+                width: 70px;
+                height: 120px;
+            }
+
+            .btn-send {
+                padding: 10px;
+            }
+        }
+    </style>
+
+    <div class="text-white text-center mt-5 mb-2">
+        <div class="guestbook-icon">
+            <img src="assets/icon/guestbook.png" alt="Guestbook">
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <form action="/guestbook/submit-form" method="POST">
+            <div class="form-group mb-3">
+                <label for="comment">Short Message</label>
+                <textarea class="form-control" name="comment" id="comment" rows="3" maxlength="80"></textarea>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="char">Choose Avatar</label>
+                <div class="character-selection">
+                    <div class="character-card" id="char-1" onclick="selectCharacter(1)">
+                        <img src="assets/char/1.png" alt="Character 1">
+                    </div>
+                    <div class="character-card" id="char-2" onclick="selectCharacter(2)">
+                        <img src="assets/char/2.png" alt="Character 2">
+                    </div>
+                    <div class="character-card" id="char-3" onclick="selectCharacter(3)">
+                        <img src="assets/char/3.png" alt="Character 3">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-send">SEND</button>
+        </form>
+    </div>
+
+    <script>
+        let selectedCharacter = null;
+
+        // Handle character selection
+        function selectCharacter(charId) {
+            // Deselect previous character
+            if (selectedCharacter) {
+                document.getElementById(`char-${selectedCharacter}`).classList.remove("selected");
+            }
+
+            // Select the new character
+            selectedCharacter = charId;
+            document.getElementById(`char-${charId}`).classList.add("selected");
+
+            // Optional: you can also update a hidden input field with the selected character id
+            // Create or update a hidden input field with the selected character id
+            let hiddenInput = document.getElementById("selected-char-id");
+            if (!hiddenInput) {
+                hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.id = "selected-char-id";
+                hiddenInput.name = "char";
+                document.forms[0].appendChild(hiddenInput);
+            }
+            hiddenInput.value = charId; // Set the hidden field value
+        }
+
+        // Initialize the character selection to make sure no character is selected initially
+        document.addEventListener("DOMContentLoaded", function () {
+            selectCharacter(1);  // Default selection if needed
+        });
+
+    </script>
+
+    <%- include("../layouts/footer") %>

@@ -29,6 +29,7 @@
             min-height: 100vh;
             overflow: hidden;
             display: flex;
+            overflow-y: auto;
             flex-direction: column;
         }
 
@@ -37,7 +38,7 @@
 ======================================== */
         .dashboard-grid {
             width: 100%;
-            max-width: 450px;
+            max-width: 300px;
             /* Adjust grid max-width for proper fit */
             margin: 0 auto;
             display: grid;
@@ -129,6 +130,12 @@
             position: absolute;
             inset: 0;
             background: rgba(0, 45, 90, 0.45);
+        }
+
+        .disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            filter: grayscale(25%) brightness(80%);
         }
 
         /* =======================================

@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Door Prize Spin Wheel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #020617 url('/assets/img/background.png') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+        }
+
+
+        #open-qr-btn {
+            background: linear-gradient(145deg, #6b7bff, #2a4bd0);
+            /* Gradient background */
+            color: white;
+            /* Text color */
+            padding: 12px 24px;
+            /* Add padding for better size */
+            font-size: 16px;
+            /* Font size */
+            font-weight: bold;
+            /* Bold text */
+            border: none;
+            /* Remove default border */
+            border-radius: 30px;
+            /* Rounded corners */
+            cursor: pointer;
+            /* Change cursor to pointer on hover */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            /* Add shadow */
+            transition: all 0.3s ease;
+            /* Smooth transition */
+        }
+
+        #open-qr-btn:hover {
+            background: linear-gradient(145deg, #2a4bd0, #6b7bff);
+            /* Reverse gradient on hover */
+            transform: scale(1.05);
+            /* Slightly enlarge button on hover */
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+            /* Darker shadow on hover */
+        }
+
+        #open-qr-btn:focus {
+            outline: none;
+            /* Remove focus outline */
+        }
+
+        #open-qr-btn:active {
+            transform: scale(1);
+            /* Reset size when clicked */
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            /* Lighter shadow when clicked */
+        }
+
+
+
+        .qr-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .qr-modal.show {
+            display: flex;
+        }
+
+        .qr-modal .qr-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .qr-modal img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .qr-modal .close-btn {
+            position: absolute;
+            top: 10px;
+            /* Adjusted for better spacing from the top */
+            right: 10px;
+            /* Adjusted for better spacing from the right edge */
+            font-size: 36px;
+            /* Increased size for better visibility */
+            color: #fff;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1100;
+            /* Ensures it is above other content */
+            padding: 15px;
+            /* Adjust padding to make the button large enough */
+            border-radius: 50%;
+            /* Makes the button round */
+            background-color: rgba(0, 0, 0, 0.6);
+            /* Background for contrast */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            /* Slight shadow for emphasis */
+            width: 60px;
+            /* Set width for a consistent round button */
+            height: 60px;
+            /* Set height to match width */
+            display: flex;
+            justify-content: center;
+            /* Center the text inside */
+            align-items: center;
+            /* Center the text vertically */
+        }
+
+        .qr-modal .close-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+            /* Darken on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            /* Darker shadow on hover */
+        }
+
+        .qr-modal .close-btn:focus {
+            outline: none;
+            /* Remove focus outline for better appearance */
+        }
+
+
+
+        /* Top logo outside the main container */
+        .top-logo {
+            position: fixed;
+            /* always on top, does not scroll with container */
+            top: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            /* above container & background */
+            pointer-events: none;
+            /* so it doesn't block clicks below */
+        }
+
+        .top-logo-img {
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            display: block;
+            max-width: 200px;
+            /* adjust to your logo file */
+            /* width: min(260px, 60vw); */
+            height: auto;
+        }
+
+        /* Slightly smaller logo on small screens */
+        @media (max-width: 640px) {
+            .top-logo {
+                top: 10px;
+            }
+
+            .top-logo-img {
+                max-width: 210px;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            max-height: 760px;
+            margin: 0 auto;
+            padding: 20px 20px 24px;
+            border-radius: 18px;
+            background: radial-gradient(circle at top left,
+                    rgba(30, 64, 175, 0.4),
+                    rgba(15, 23, 42, 0.96));
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #f9fafb;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .layout {
+            display: grid;
+            gap: 20px;
+        }
+
+        @media (min-width: 900px) {
+            .layout {
+                grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr);
+                align-items: center;
+            }
+        }
+
+        /* LEFT: main wheel */
+        .wheel-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pointer-wrapper {
+            width: 100%;
+            max-width: 520px;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 50%;
+            border: 6px solid #0f172a;
+            background: radial-gradient(circle at 30% 30%, #f9fafb, #d1d5db);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .pointer-wrapper::after {
+            content: "";
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-bottom: 26px solid #4f46e5;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
+        }
+
+        #spin-btn {
+            position: absolute;
+            z-index: 2;
+
+            /* circular button */
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+
+            /* center text inside the circle */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            /* text styling */
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+
+            /* visual styling */
+            border: none;
+            cursor: pointer;
+            background: radial-gradient(circle at 30% 20%, #fde68a, #f97316);
+            color: #111827;
+            box-shadow:
+                0 10px 24px rgba(0, 0, 0, 0.7),
+                0 0 0 3px rgba(248, 250, 252, 0.9);
+            transition:
+                transform 0.15s ease,
+                box-shadow 0.15s ease,
+                filter 0.15s ease;
+        }
+
+        #spin-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow:
+                0 16px 36px rgba(0, 0, 0, 0.85),
+                0 0 0 3px rgba(248, 250, 252, 1);
+            filter: brightness(1.05);
+        }
+
+        #spin-btn:active:not(:disabled) {
+            transform: translateY(1px);
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.75),
+                0 0 0 3px rgba(248, 250, 252, 0.8);
+        }
+
+        #spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* RIGHT: sidebar */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .panel {
+            background: rgba(15, 23, 42, 0.94);
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            padding: 10px 12px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #9ca3af;
+        }
+
+        .panel-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.2);
+            color: #e0f2fe;
+        }
+
+        .qr-panel {
+            text-align: center;
+        }
+
+        .qr-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .qr-wrapper img {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            border-radius: 12px;
+            background: #ffffff;
+            padding: 8px;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.8);
+        }
+
+        .qr-caption {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .participants-list {
+            max-height: 230px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        #participant-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #participant-list li {
+            font-size: 13px;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px dashed rgba(55, 65, 81, 0.7);
+            gap: 6px;
+        }
+
+        #participant-list li:last-child {
+            border-bottom: none;
+        }
+
+        .participant-index {
+            font-size: 11px;
+            color: #6b7280;
+            width: 22px;
+        }
+
+        .participant-name {
+            flex: 1;
+            text-align: left;
+            color: #e5e7eb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .participant-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.24);
+            color: #c7d2fe;
+        }
+
+        .winner-panel {
+            margin-top: 4px;
+        }
+
+        .winner-box {
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(22, 163, 74, 0.14), rgba(37, 99, 235, 0.2));
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
+        }
+
+        .winner-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: #6ee7b7;
+        }
+
+        .winner-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 4px;
+            color: #f9fafb;
+        }
+
+        .winner-box.winner-active {
+            animation: winner-pulse 0.7s ease-out 2;
+        }
+
+        @keyframes winner-pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
+            }
+
+            50% {
+                transform: scale(1.04);
+                box-shadow: 0 12px 30px rgba(59, 130, 246, 0.7);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
+            }
+        }
+
+        /* Confetti */
+        .confetti-piece {
+            position: fixed;
+            top: -10px;
+            width: 8px;
+            height: 14px;
+            background: #facc15;
+            opacity: 0.95;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translate3d(0, -100vh, 0) rotateZ(0deg);
+            }
+
+            100% {
+                transform: translate3d(0, 110vh, 0) rotateZ(720deg);
+            }
+        }
+
+        /* Winner modal (similar to wheelofnames) */
+        .winner-modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.8);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out;
+        }
+
+        .winner-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .winner-dialog {
+            min-width: 260px;
+            max-width: 480px;
+            background: #111827;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+        }
+
+        .winner-dialog-header {
+            background: #3b82f6;
+            color: #e5e7eb;
+            padding: 8px 12px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .winner-dialog-header span {
+            font-weight: 600;
+        }
+
+        .winner-dialog-close-btn {
+            background: transparent;
+            border: none;
+            color: #e5e7eb;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .winner-dialog-body {
+            padding: 18px 18px 16px;
+            text-align: center;
+            color: #f9fafb;
+        }
+
+        .winner-dialog-name {
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .winner-dialog-footer {
+            padding: 10px 14px 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            background: #020617;
+        }
+
+        .btn {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #111827;
+            color: #e5e7eb;
+            border: 1px solid #4b5563;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #f9fafb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 14px 10px 18px;
+                border-radius: 14px;
+            }
+
+            .header-title {
+                font-size: 18px;
+            }
+
+            .pointer-wrapper {
+                max-width: 380px;
+            }
+
+            .winner-dialog-name {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <img src="/assets/img/logo.png" alt="SCM Digital Day 2025" class="top-logo-img">
+            <div class="header-title">Door Prize</div>
+            <div class="header-subtitle">
+                Scan the QR code to join • Spin the wheel to pick a winner
+            </div>
+        </div>
+
+        <div class="layout">
+            <!-- LEFT: WHEEL -->
+            <div class="wheel-panel">
+                <div class="pointer-wrapper">
+                    <canvas id="wheel" width="400" height="400"></canvas>
+                    <button id="spin-btn">SPIN</button>
+                </div>
+            </div>
+
+            <!-- RIGHT: SIDEBAR -->
+            <div class="side-panel">
+
+                <!-- QR -->
+                <div class="panel qr-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Scan to Join Door Prize</div>
+                    </div>
+                    <div class="qr-wrapper">
+                        <!-- Add a button to open the QR code modal -->
+                        <button id="open-qr-btn">Open QR Code</button>
+                    </div>
+                </div>
+
+                <!-- PARTICIPANTS LIST -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Participants</div>
+                        <div class="panel-badge" id="participants-count">0 Participants</div>
+                    </div>
+                    <div class="participants-list">
+                        <ul id="participant-list"></ul>
+                    </div>
+                </div>
+
+                <!-- LAST WINNER -->
+                <div class="panel winner-panel">
+                    <div class="winner-box" id="winner-box">
+                        <div class="winner-label">Last Winner</div>
+                        <div class="winner-name" id="winner-name">Not drawn yet</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="qr-modal" id="qr-modal">
+        <div class="qr-content">
+            <button class="close-btn" id="close-qr-btn">&times;</button>
+            <img src="<%= qrUrl %>" alt="Door Prize QR">
+        </div>
+    </div>
+
+    <!-- WINNER MODAL -->
+    <div class="winner-modal" id="winner-modal">
+        <div class="winner-dialog">
+            <div class="winner-dialog-header">
+                <span>We have a winner!</span>
+                <button class="winner-dialog-close-btn" id="modal-x">&times;</button>
+            </div>
+            <div class="winner-dialog-body">
+                <div>Winner:</div>
+                <div class="winner-dialog-name" id="winner-modal-name">Name</div>
+            </div>
+            <div class="winner-dialog-footer">
+                <button class="btn btn-secondary" id="winner-close">Close</button>
+                <button class="btn btn-danger" id="winner-remove">Remove</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        let participants = [];
+
+        console.log("Participants:", participants);
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG7V8hgvDVa7cSYrkjWOLsBnwOv_5WVyc",
+            authDomain: "gustbook-test.firebaseapp.com",
+            databaseURL: "https://gustbook-test-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "gustbook-test",
+            storageBucket: "gustbook-test.appspot.com",
+            messagingSenderId: "756925029571",
+            appId: "1:756925029571:web:562ee8486d4bba2be95676"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+
+
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spin-btn');
+        const winnerNameEl = document.getElementById('winner-name');
+        const winnerBoxEl = document.getElementById('winner-box');
+        const participantListEl = document.getElementById('participant-list');
+        const participantsCountEl = document.getElementById('participants-count');
+
+        const winnerModal = document.getElementById('winner-modal');
+        const winnerModalNameEl = document.getElementById('winner-modal-name');
+        const winnerCloseBtn = document.getElementById('winner-close');
+        const winnerRemoveBtn = document.getElementById('winner-remove');
+        const winnerXBtn = document.getElementById('modal-x');
+
+        let rotation = 0;
+        let spinning = false;
+        let lastWinnerIndex = null;
+
+        function renderParticipants() {
+            if (!participantListEl) return;
+
+            participantListEl.innerHTML = "";
+            participants.forEach((p, idx) => {
+                const li = document.createElement('li');
+
+                const indexSpan = document.createElement('span');
+                indexSpan.className = 'participant-index';
+                indexSpan.textContent = (idx + 1) + '.';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'participant-name';
+                nameSpan.textContent = p.name || ('Participant ' + (idx + 1));
+
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'participant-tag';
+                tagSpan.textContent = 'Registered';
+
+                li.appendChild(indexSpan);
+                li.appendChild(nameSpan);
+                li.appendChild(tagSpan);
+                participantListEl.appendChild(li);
+            });
+
+            if (participantsCountEl) {
+                participantsCountEl.textContent = `${participants.length} Participant${participants.length === 1 ? '' : 's'}`;
+            }
+
+            // if 0 participants, disable spin
+            spinBtn.disabled = participants.length <= 0;
+        }
+
+        function drawWheel() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const cx = width / 2;
+            const cy = height / 2;
+            const radius = Math.min(width, height) / 2 - 20;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (!participants.length) {
+                ctx.fillStyle = "#9ca3af";
+                ctx.font = "18px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("No participants yet", cx, cy);
+                return;
+            }
+
+            const sliceAngle = 2 * Math.PI / participants.length;
+
+            // Menyesuaikan ukuran font berdasarkan jumlah peserta
+            const fontSize = Math.max(radius * 0.05, 10); // Menyesuaikan ukuran font
+            ctx.font = `${fontSize}px sans-serif`;
+
+            participants.forEach((p, i) => {
+                const startAngle = rotation + i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, radius, startAngle, endAngle);
+                ctx.closePath();
+
+                ctx.fillStyle = `hsl(${i * (360 / participants.length)}, 75%, 55%)`;
+                ctx.fill();
+                ctx.strokeStyle = "#f9fafb";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.save();
+                const midAngle = startAngle + sliceAngle / 2;
+                const textRadius = radius * 0.65;
+                ctx.translate(
+                    cx + Math.cos(midAngle) * textRadius,
+                    cy + Math.sin(midAngle) * textRadius
+                );
+                ctx.rotate(midAngle);
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#111827";
+
+                // Memotong teks jika terlalu panjang
+                const label = (p.name || "Participant " + (i + 1)).toString();
+                const trimmed = label.length > 18 ? label.slice(0, 18) + "…" : label;
+                ctx.fillText(trimmed, 0, 0);
+                ctx.restore();
+            });
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, Math.max(radius * 0.18, 40), 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(249, 250, 251, 0.9)";
+            ctx.fill();
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function resizeCanvas() {
+            if (spinning) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const size = Math.min(rect.width, 520);
+            canvas.width = size;
+            canvas.height = size;
+            drawWheel();
+        }
+
+        function launchConfetti() {
+            const confettiCount = 90;
+            for (let i = 0; i < confettiCount; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                piece.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+                piece.style.transform = `translate3d(0, -100vh, 0) rotateZ(${Math.random() * 360}deg)`;
+                document.body.appendChild(piece);
+                setTimeout(() => piece.remove(), 3500);
+            }
+        }
+
+        function highlightWinnerBox() {
+            if (!winnerBoxEl) return;
+            winnerBoxEl.classList.remove('winner-active');
+            void winnerBoxEl.offsetWidth;
+            winnerBoxEl.classList.add('winner-active');
+        }
+
+        function openWinnerModal(name) {
+            winnerModalNameEl.textContent = name;
+            winnerModal.classList.add('show');
+        }
+
+        function closeWinnerModal() {
+            winnerModal.classList.remove('show');
+        }
+
+        function removeWinner() {
+            if (lastWinnerIndex == null) {
+                closeWinnerModal();
+                return;
+            }
+            participants.splice(lastWinnerIndex, 1);
+            lastWinnerIndex = null;
+            renderParticipants();
+            drawWheel();
+            closeWinnerModal();
+        }
+
+        function spin() {
+            if (spinning || !participants.length) return;
+            spinning = true;
+            spinBtn.disabled = true;
+            winnerNameEl.textContent = "Spinning...";
+
+            const sliceAngle = 2 * Math.PI / participants.length;
+            const winnerIndex = Math.floor(Math.random() * participants.length);
+            lastWinnerIndex = winnerIndex;
+
+            const extraSpins = 5 + Math.floor(Math.random() * 3);
+
+            // pointer at TOP (12 o'clock) → angle -π/2
+            const pointerAngle = -Math.PI / 2;
+
+            // we want: pointerAngle = finalRotation + winnerIndex*sliceAngle + sliceAngle/2
+            const baseTarget = pointerAngle - (winnerIndex * sliceAngle + sliceAngle / 2);
+
+            // add several full spins for drama
+            const targetRotation = baseTarget - 2 * Math.PI * extraSpins;
+
+            const duration = 15000;
+            const start = performance.now();
+            const startRotation = rotation;
+
+            function animate(now) {
+                const elapsed = now - start;
+                const t = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - t, 3);
+
+                rotation = startRotation + (targetRotation - startRotation) * eased;
+                drawWheel();
+
+                if (t < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    spinning = false;
+                    spinBtn.disabled = participants.length <= 0;
+                    const winner = participants[winnerIndex];
+                    const winnerName = winner?.name || "Unknown";
+                    winnerNameEl.textContent = winnerName;
+                    highlightWinnerBox();
+                    launchConfetti();
+                    openWinnerModal(winnerName);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+
+        // 🔥 Realtime listener from Firebase Realtime Database
+        const doorprizeRef = rtdb.ref("doorprize");
+
+        doorprizeRef.on("value", (snapshot) => {
+            const data = snapshot.val() || {};
+
+            participants = Object.entries(data).map(([id, value]) => ({
+                id,
+                name: value.name || "Participant",
+                timestamp: value.timestamp || null
+            }));
+
+            console.log("Realtime participants:", participants);
+
+            renderParticipants();
+            resizeCanvas(); // ini akan panggil drawWheel di dalam
+        });
+
+
+        spinBtn.addEventListener('click', spin);
+        window.addEventListener('resize', resizeCanvas);
+
+        winnerCloseBtn.addEventListener('click', closeWinnerModal);
+        winnerXBtn.addEventListener('click', closeWinnerModal);
+        winnerRemoveBtn.addEventListener('click', removeWinner);
+
+        // init: biarkan Firebase yang isi participants pertama kali
+        resizeCanvas();
+
+    </script>
+    <script>
+        // Get the modal and buttons
+        const qrModal = document.getElementById('qr-modal');
+        const openQrBtn = document.getElementById('open-qr-btn');
+        const closeQrBtn = document.getElementById('close-qr-btn');
+
+        // Open QR modal when button is clicked
+        openQrBtn.addEventListener('click', function () {
+            qrModal.classList.add('show');
+        });
+
+        // Close QR modal when close button is clicked
+        closeQrBtn.addEventListener('click', function () {
+            qrModal.classList.remove('show');
+        });
+    </script>
+</body>
+
+</html>

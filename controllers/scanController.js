@@ -1,6 +1,7 @@
 import {
     handleLunchScan,
-    handleSouvenirScan,handleGameScan
+    handleSouvenirScan, handleGameScan,
+    showguestbook, handledoorprize, handlegrandprize
 } from "./serviceController.js";
 import {
     handleCheckin
@@ -58,15 +59,27 @@ export const handleScanResult = async (req, res) => {
             souvenir: handleSouvenirScan,
             contract_dalgona: handleGameScan,
             scm_glass_bridge: handleGameScan,
-            memory_game: handleGameScan
+            memory_game: handleGameScan,
+            guestbook: showguestbook,
+            doorprize: handledoorprize,
+            grandprize: handlegrandprize
         };
+
+
+        if (code === "guestbook") {
+            return res.json({
+                success: true,
+                message: "Redirecting to guestbook...",
+                redirect: "/guestbook"
+            });
+        }
 
         if (typeof SCAN_ACTIONS[code] === "function") {
             req.body.code = code;
             return SCAN_ACTIONS[code](req, res);
         }
 
-          const isPhotobooth = boothKey === "photobooth";  // Cek jika photobooth
+        const isPhotobooth = boothKey === "photobooth";  // Cek jika photobooth
 
         if (isPhotobooth) {
             console.log("Photobooth detected. Searching for socket...");

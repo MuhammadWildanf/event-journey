@@ -48,6 +48,7 @@ export const showDashboard = async (req, res) => {
             souvenirCount < souvenirLimit &&
             !d.souvenir_claimed_dates?.[today];
 
+        const souvenirDisabled = d.souvenir_claimed;
         // BOOTH
         const boothActive = todayCheckin;
 
@@ -67,6 +68,7 @@ export const showDashboard = async (req, res) => {
 
                 lunch_active: lunchActive,
                 souvenir_active: souvenirActive,
+                souvenir_disabled: souvenirDisabled,
                 booth_active: boothActive,
                 photobooth_active: photoActive,
                 games_active: gamesActive,
