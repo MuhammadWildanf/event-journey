@@ -255,7 +255,7 @@ app.get("/seed-guestbook", async (req, res) => {
   try {
     for (let i = 0; i < 50; i++) {
       await guestbookRef.push({
-        char: i + 1,
+        char: Math.floor(Math.random() * 3) + 1,
         name: names[i % names.length],
         comment: comments[Math.floor(Math.random() * comments.length)],
         timestamp: Date.now() + i * 15000 // beda timestamp biar realistis

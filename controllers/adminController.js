@@ -419,8 +419,6 @@ export const userExportCSV = async (req, res) => {
 };
 
 
-
-
 export const userReset = async (req, res) => {
     const {
         id
@@ -444,7 +442,6 @@ export const userReset = async (req, res) => {
 
     res.redirect("/admin/users/" + id);
 };
-
 
 
 export const userUpdateStatus = async (req, res) => {
@@ -488,7 +485,6 @@ export const userUpdateStatus = async (req, res) => {
 };
 
 
-
 export const quotaSettings = async (req, res) => {
     const today = new Date().toISOString().slice(0, 10);
 
@@ -517,8 +513,6 @@ export const quotaSettings = async (req, res) => {
 };
 
 
-
-
 /* =====================================================
     ✔ UPDATE QUOTA
 ===================================================== */
@@ -541,20 +535,23 @@ export const quotaLunchDetail = async (req, res) => {
 
     const quota = Number(quotaSnap.val()) || 0;
     const todayCount = todayCountSnap.val() || {};
-    const used = Object.values(todayCount).reduce((a, b) => a + Number(b), 0); // total semua hari
+    const used = Object.values(todayCount).reduce((a, b) => a + Number(b), 0);
 
     const users = usersSnap.val() || {};
 
-    // Ambil semua user yang punya service_taken.lunch (tanpa filter tanggal)
+    // Cari user yang memiliki lunch_claimed_dates
     const lunchUsers = Object.entries(users)
-        .filter(([uid, u]) => u?.service_taken?.lunch)
-        .map(([uid, u]) => ({
-            id: uid,
-            date: u.service_taken.lunch,
-            name: u.name || "-",
-            email: u.email || "-",
-            phone: u.phone || "-"
-        }));
+        .flatMap(([uid, u]) => {
+            if (!u.lunch_claimed_dates) return [];
+
+            return Object.keys(u.lunch_claimed_dates).map(date => ({
+                id: uid,
+                date,
+                name: u.name || "-",
+                email: u.email || "-",
+                phone: u.phone || "-"
+            }));
+        });
 
     res.render("admin/quota/lunch-detail", {
         quota,
@@ -563,8 +560,6 @@ export const quotaLunchDetail = async (req, res) => {
         lunchUsers
     });
 };
-
-
 
 
 export const quotaSouvenirDetail = async (req, res) => {
@@ -581,14 +576,17 @@ export const quotaSouvenirDetail = async (req, res) => {
     const users = usersSnap.val() || {};
 
     const souvenirUsers = Object.entries(users)
-        .filter(([uid, u]) => u?.service_taken?.souvenir)
-        .map(([uid, u]) => ({
-            id: uid,
-            date: u.service_taken.souvenir,
-            name: u.name || "-",
-            email: u.email || "-",
-            phone: u.phone || "-"
-        }));
+        .flatMap(([uid, u]) => {
+            if (!u.souvenir_claimed_dates) return [];
+
+            return Object.keys(u.souvenir_claimed_dates).map(date => ({
+                id: uid,
+                date,
+                name: u.name || "-",
+                email: u.email || "-",
+                phone: u.phone || "-"
+            }));
+        });
 
     res.render("admin/quota/souvenir-detail", {
         quota,
@@ -597,8 +595,6 @@ export const quotaSouvenirDetail = async (req, res) => {
         souvenirUsers
     });
 };
-
-
 
 
 
