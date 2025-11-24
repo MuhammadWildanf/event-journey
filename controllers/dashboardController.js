@@ -71,6 +71,9 @@ export const showDashboard = async (req, res) => {
                 booth_active: boothActive,
                 photobooth_active: photoActive,
                 games_active: gamesActive,
+
+                souvenir_claimed: d.souvenir_claimed ? true : false,
+                souvenir_quota_left: Math.max(souvenirLimit - souvenirCount, 0),
             },
         });
 
