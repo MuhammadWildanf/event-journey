@@ -533,7 +533,7 @@ export const userUpdateStatus = async (req, res) => {
         : 0;
 
     updates.visited_count = visitedCount;
-    updates.reward_ready = visitedCount >= 5;
+    updates.reward_ready = visitedCount >= 8; // Updated to match souvenir requirement
 
     await userRef.update(updates);
 

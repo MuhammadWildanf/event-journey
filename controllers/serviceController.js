@@ -394,8 +394,8 @@ export const handleSouvenirScan = async (req, res) => {
       return res.json({ success: false, message: "Please check in first." });
     }
 
-    if ((userData.visited_count || 0) < 5) {
-      return res.json({ success: false, message: "You must visit at least 5 booths to claim a souvenir." });
+    if ((userData.visited_count || 0) < 8) {
+      return res.json({ success: false, message: "You must visit at least 8 booths to claim a souvenir." });
     }
 
     const limitSnap = await db.ref("services/souvenir/QUOTA").get();

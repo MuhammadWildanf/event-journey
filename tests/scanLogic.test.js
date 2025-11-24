@@ -54,7 +54,7 @@ beforeEach(() => {
       checkin_dates: { "2025-11-24": true },
       checkin_order: { "2025-11-24": i }, // Set checkin order untuk test lunch
       lunch_claimed_dates: {},
-      visited_count: 5,
+      visited_count: 8, // Updated to 8 booths for souvenir requirement
       souvenir_claimed: false
     };
   }
@@ -86,7 +86,7 @@ describe("SCAN LOGIC 10 USERS (testing)", () => {
     expect(mockDB["services"].lunch.today_count["2025-11-24"]).toBe(10);
   });
 
-  test("Souvenir – each user can claim once if visited ≥ 5 booths", async () => {
+  test("Souvenir – each user can claim once if visited ≥ 8 booths", async () => {
     for (let i = 1; i <= 10; i++) {
       const req = fakeReq({ id: `U${i}` }, { code: "souvenir" });
       const res = fakeRes();
@@ -105,13 +105,13 @@ describe("SCAN LOGIC 10 USERS (testing)", () => {
     expect(mockDB["services"].souvenir.today_count["2025-11-24"]).toBe(10);
   });
 
-  test("Souvenir – fail if visited < 5 booths", async () => {
-    mockDB["users"]["U1"].visited_count = 3;
+  test("Souvenir – fail if visited < 8 booths", async () => {
+    mockDB["users"]["U1"].visited_count = 5;
     const req = fakeReq({ id: "U1" }, { code: "souvenir" });
     const res = fakeRes();
     await handleSouvenirScan(req, res);
     expect(res.data.success).toBe(false);
-    expect(res.data.message).toMatch(/at least 5 booths/i);
+    expect(res.data.message).toMatch(/at least 8 booths/i);
   });
 
   test("Lunch – fail if checkin order > quota", async () => {
@@ -131,6 +131,9 @@ describe("SCAN LOGIC 10 USERS (testing)", () => {
     mockDB["services"].souvenir.QUOTA = 5;
     mockDB["services"].souvenir.today_count["2025-11-24"] = 5;
     
+    // Ensure user has visited 8 booths (requirement met)
+    mockDB["users"]["U1"].visited_count = 8;
+    
     const req = fakeReq({ id: "U1" }, { code: "souvenir" });
     const res = fakeRes();
     await handleSouvenirScan(req, res);
@@ -148,7 +151,7 @@ describe("SCAN LOGIC 10 USERS (testing)", () => {
       checkin_dates: { "2025-11-24": true },
       checkin_order: { "2025-11-24": 11 },
       lunch_claimed_dates: {},
-      visited_count: 5,
+      visited_count: 8, // Updated to 8 booths
       souvenir_claimed: false
     };
     
@@ -164,11 +167,11 @@ describe("SCAN LOGIC 10 USERS (testing)", () => {
     mockDB["services"].souvenir.QUOTA = 10;
     mockDB["services"].souvenir.today_count["2025-11-24"] = 10;
     
-    // User U11 belum pernah claim, sudah visit 5 booth
+    // User U11 belum pernah claim, sudah visit 8 booth
     mockDB["users"]["U11"] = {
       checkin_dates: { "2025-11-24": true },
       checkin_order: { "2025-11-24": 11 },
-      visited_count: 5,
+      visited_count: 8, // Updated to 8 booths
       souvenir_claimed: false
     };
     

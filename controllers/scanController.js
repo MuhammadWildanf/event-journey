@@ -132,7 +132,7 @@ export const handleScanResult = async (req, res) => {
 
         await userRef.update({
             visited_count: count,
-            reward_ready: count >= 5
+            reward_ready: count >= 8 // Updated to match souvenir requirement
         });
 
         // =====================================

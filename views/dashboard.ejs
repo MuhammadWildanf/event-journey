@@ -1,19 +1,19 @@
 <%- include("./layouts/header", { title: "Dashboard || SCM Digital Day 2025" }) %>
-  <header class="d-flex flex-column justify-content-center align-items-center py-4">
-    <!-- Logo Section -->
-    <div class="logo-container text-center">
-      <img src="/assets/img/logo.png" alt="SCM Digital Day 2025 Logo" class="logo-img" />
-    </div>
+<header class="d-flex flex-column justify-content-center align-items-center py-4">
+  <!-- Logo Section -->
+  <div class="logo-container text-center">
+    <img src="/assets/img/logo.png" alt="SCM Digital Day 2025 Logo" class="logo-img" />
+  </div>
 
-    <!-- User Name Section -->
-    <div class="user-info text-center">
-      <strong>
-        Welcome <%= user.name %>
-      </strong>
-    </div>
-  </header>
+  <!-- User Name Section -->
+  <div class="user-info text-center">
+    <strong>
+      Welcome <%= user.name %>
+    </strong>
+  </div>
+</header>
 
-  <% const btn=(url, active, classes, card, disabled)=> {
+<% const btn=(url, active, classes, card, disabled)=> {
     const href = active ? url : "javascript:void(0)";
     const nvClass = active ? "" : "not-visited";
     const disabledClass = disabled ? "disabled" : ""; // Menambahkan kelas disabled jika parameter disabled true
@@ -26,28 +26,103 @@
     %>
 
 
-    <main>
-      <div class="dashboard-grid">
+<main>
+  <div class="dashboard-grid">
 
-        <!-- Always active -->
-        <a href="/scan" class="grid-item wide">
-          <div class="booth-card card-scan"></div>
-        </a>
+    <!-- Always active -->
+    <a href="/scan" class="grid-item wide">
+      <div class="booth-card card-scan"></div>
+    </a>
 
-        <%- btn('/lunch', user.lunch_active, 'grid-item square' , 'card-lunch' ) %>
-          <%- btn('/souvenir', user.souvenir_active, 'grid-item square' , 'card-souvenir' ) %>
+    <%- btn('/lunch', user.lunch_active, 'grid-item square' , 'card-lunch' ) %>
+    <a href="javascript:void(0)" class="grid-item square <%= user.souvenir_active ? '' : 'not-visited' %>"
+      id="souvenir-btn" data-active="<%= user.souvenir_active %>" data-visited="<%= user.visited_count || 0 %>"
+      data-checkin="<%= user.today_checkin %>" data-quota-left="<%= user.souvenir_quota_left %>"
+      data-claimed="<%= user.souvenir_claimed ? 'true' : 'false' %>">
 
-            <%- btn('/photobooth', user.photobooth_active, 'grid-item square' , 'card-photo' ) %>
-              <%- btn('/games', user.games_active, 'grid-item square' , 'card-games' ) %>
-                <%- btn('/booth', user.booth_active, 'grid-item wide' , 'card-booth' ) %>
+      <div class="booth-card card-souvenir <%= user.souvenir_active ? '' : 'not-visited' %>"></div>
+    </a>
 
-                  <div class="download-guide">
-                    <!-- <a class="download-link" href="/assets/files/QR.pdf" download target="_blank" rel="noopener"> -->
-                    <a class="download-link" href="/event-guide" rel="noopener">
-                      EVENT GUIDE
-                    </a>
-                  </div>
-      </div>
-    </main>
 
-    <%- include("./layouts/footer") %>
+
+    <%- btn('/photobooth', user.photobooth_active, 'grid-item square' , 'card-photo' ) %>
+    <%- btn('/games', user.games_active, 'grid-item square' , 'card-games' ) %>
+    <%- btn('/booth', user.booth_active, 'grid-item wide' , 'card-booth' ) %>
+
+    <div class="download-guide">
+      <!-- <a class="download-link" href="/assets/files/QR.pdf" download target="_blank" rel="noopener"> -->
+      <a class="download-link" href="/event-guide" rel="noopener">
+        EVENT GUIDE
+      </a>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Handle click on souvenir button when not active
+  document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('souvenir-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', function (e) {
+      const isActive = btn.dataset.active === "true";
+      if (isActive) return;
+
+      e.preventDefault();
+
+      const visited = parseInt(btn.dataset.visited);
+      const checkin = btn.dataset.checkin === "true";
+      const quotaLeft = parseInt(btn.dataset.quotaLeft);
+      const claimed = btn.dataset.claimed === "true";
+
+      // 1️⃣ Sudah pernah klaim souvenir
+      if (claimed) {
+        Swal.fire({
+          icon: "warning",
+          title: "Souvenir Already Claimed",
+          text: "You have already taken your souvenir.",
+          confirmButtonColor: "#c2ff37"
+        });
+        return;
+      }
+
+      // 2️⃣ Belum check-in
+      if (!checkin) {
+        Swal.fire({
+          icon: "warning",
+          title: "Check-in Required",
+          text: "Please check-in first before claiming your souvenir.",
+          confirmButtonColor: "#c2ff37"
+        });
+        return;
+      }
+
+      // 3️⃣ Kuota habis
+      if (quotaLeft <= 0) {
+        Swal.fire({
+          icon: "error",
+          title: "Souvenir Out of Stock",
+          text: "Sorry, the souvenir quota has been fully claimed.",
+          confirmButtonColor: "#c2ff37"
+        });
+        return;
+      }
+
+      // 4️⃣ Visit booth kurang dari 8
+      if (visited < 8) {
+        Swal.fire({
+          icon: "info",
+          title: "Need More Booth Visits",
+          html: `
+                    You must visit <strong>8 booths</strong>.<br><br>
+                    Visited: <strong>${visited}</strong><br>
+                    Remaining: <strong>${8 - visited}</strong>
+                `,
+        });
+        return;
+      }
+    });
+  });
+</script>
+
+<%- include("./layouts/footer") %>

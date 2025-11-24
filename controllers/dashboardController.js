@@ -46,7 +46,7 @@ export const showDashboard = async (req, res) => {
         // SOUVENIR
         const souvenirActive =
             todayCheckin &&
-            visitCount >= 5 &&
+            visitCount >= 8 &&
             souvenirCount < souvenirLimit &&
             !d.souvenir_claimed;
         // BOOTH
