@@ -15,6 +15,7 @@ import {
     userDetail,
     userDelete,
     userUpdate,
+    userUpdatePassword,
     userExportCSV,
     userReset,
     userUpdateStatus,
@@ -50,6 +51,7 @@ router.get("/users", userList);
 router.get("/users/export", userExportCSV);
 router.get("/users/:id", userDetail);
 router.post("/users/:id/edit", userUpdate);
+router.post("/users/:id/password", userUpdatePassword);
 router.get("/users/:id/delete", userDelete);
 router.post("/users/:id/reset", userReset);
 router.post("/users/:id/status", userUpdateStatus);

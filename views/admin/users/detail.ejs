@@ -71,6 +71,25 @@
     </div>
   </div>
 
+  <!-- UPDATE PASSWORD -->
+  <div class="card mb-4">
+    <div class="card-header">Update Password</div>
+    <div class="card-body">
+      <form method="POST" action="/admin/users/<%= id %>/password"
+            onsubmit="return confirm('Yakin update password user ini?')">
+        <div class="mb-3">
+          <label class="form-label">Password Baru</label>
+          <input type="password" class="form-control" name="password" 
+                 placeholder="Minimal 6 karakter, maksimal 32 karakter" 
+                 minlength="6" maxlength="32" required>
+          <small class="form-text text-muted">Password harus 6-32 karakter</small>
+        </div>
+
+        <button class="btn btn-warning">Update Password</button>
+      </form>
+    </div>
+  </div>
+
   <!-- RESET USER -->
   <div class="card mb-4">
     <div class="card-header">Reset Data User</div>

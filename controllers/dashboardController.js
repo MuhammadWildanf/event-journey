@@ -25,9 +25,11 @@ export const showDashboard = async (req, res) => {
         const checkinCountSnap = await db.ref(`services/checkin/today_count/${today}`).get();
         const checkinCountToday = checkinCountSnap.val() || 0;
 
-        // Ambil kuota lunch & souvenir
-        const lunchLimit = (await db.ref("services/lunch/QUOTA").get()).val() || 300;
-        const souvenirLimit = (await db.ref("services/souvenir/QUOTA").get()).val() || 150;
+        // Ambil kuota lunch & souvenir dari database
+        const lunchLimitSnap = await db.ref("services/lunch/QUOTA").get();
+        const souvenirLimitSnap = await db.ref("services/souvenir/QUOTA").get();
+        const lunchLimit = Number(lunchLimitSnap.val()) || 0;
+        const souvenirLimit = Number(souvenirLimitSnap.val()) || 0;
 
         const lunchCount = (await db.ref(`services/lunch/today_count/${today}`).get()).val() || 0;
         const souvenirCount = (await db.ref(`services/souvenir/today_count/${today}`).get()).val() || 0;
@@ -46,9 +48,7 @@ export const showDashboard = async (req, res) => {
             todayCheckin &&
             visitCount >= 5 &&
             souvenirCount < souvenirLimit &&
-            !d.souvenir_claimed_dates?.[today];
-
-        const souvenirDisabled = d.souvenir_claimed;
+            !d.souvenir_claimed;
         // BOOTH
         const boothActive = todayCheckin;
 
@@ -68,7 +68,6 @@ export const showDashboard = async (req, res) => {
 
                 lunch_active: lunchActive,
                 souvenir_active: souvenirActive,
-                souvenir_disabled: souvenirDisabled,
                 booth_active: boothActive,
                 photobooth_active: photoActive,
                 games_active: gamesActive,

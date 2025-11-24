@@ -74,15 +74,16 @@
         .character-card.selected {
             background-color: #c2ff37;
             /* Base background color */
-            background-image: radial-gradient(circle, rgba(194, 255, 55, 0.25) 50%, rgba(194, 255, 55, 0) 100%);
-            /* Radial gradient */
+            background-image: radial-gradient(circle at center, rgba(194, 255, 55, 1) 0%, rgba(194, 255, 55, 0.8) 30%, rgba(194, 255, 55, 0.5) 60%, rgba(194, 255, 55, 0.2) 80%, rgba(194, 255, 55, 0) 100%);
+            /* Enhanced radial gradient */
             border-color: #66b800;
             /* Border color */
-            box-shadow: 0 0 15px rgba(0, 200, 0, 0.7);
-            /* Soft green shadow */
+            box-shadow: 0 0 20px rgba(102, 184, 0, 0.8), inset 0 0 30px rgba(194, 255, 55, 0.3);
+            /* Enhanced green shadow with inset glow */
             border-radius: 15px;
             /* Rounded corners */
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            transform: scale(1.05);
         }
 
         .character-card img {
@@ -96,8 +97,8 @@
         .btn-send {
             background-color: #c2ff37;
             /* Base background color */
-            background-image: radial-gradient(circle, rgba(194, 255, 55, 0.25) 50%, rgba(194, 255, 55, 0) 100%);
-            /* Radial gradient */
+            background-image: radial-gradient(circle at center, rgba(194, 255, 55, 1) 0%, rgba(194, 255, 55, 0.9) 40%, rgba(194, 255, 55, 0.6) 70%, rgba(194, 255, 55, 0.3) 90%, rgba(194, 255, 55, 0) 100%);
+            /* Enhanced radial gradient */
             color: black;
             /* Text color */
             border: 2px solid #66b800;
@@ -114,19 +115,21 @@
             /* Pointer cursor on hover */
             width: 100%;
             text-align: center;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: all 0.3s ease;
             /* Smooth transitions for hover */
             margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(102, 184, 0, 0.4), inset 0 2px 10px rgba(255, 255, 255, 0.2);
         }
 
         /* Button hover effect */
         .btn-send:hover {
             background-color: #66b800;
-            /* Darker green when hovered */
+            background-image: radial-gradient(circle at center, rgba(102, 184, 0, 1) 0%, rgba(102, 184, 0, 0.9) 40%, rgba(102, 184, 0, 0.6) 70%, rgba(102, 184, 0, 0.3) 90%, rgba(102, 184, 0, 0) 100%);
+            /* Enhanced radial gradient on hover */
             transform: scale(1.05);
             /* Slightly enlarge the button on hover */
-            box-shadow: 0 0 15px rgba(102, 184, 0, 0.7);
-            /* Green shadow effect */
+            box-shadow: 0 6px 20px rgba(102, 184, 0, 0.6), inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            /* Enhanced green shadow effect */
         }
 
         /* Responsive Adjustments */
@@ -168,7 +171,7 @@
     </div>
 
     <div class="text-center mt-5">
-        <form action="/guestbook/submit-form" method="POST">
+        <form id="guestbookForm" action="/guestbook/submit-form" method="POST">
             <div class="form-group mb-3">
                 <label for="comment">Short Message</label>
                 <textarea class="form-control" name="comment" id="comment" rows="3" maxlength="80"></textarea>
@@ -187,6 +190,8 @@
                         <img src="assets/char/3.png" alt="Character 3">
                     </div>
                 </div>
+                <!-- Hidden input untuk character, akan di-update oleh JavaScript -->
+                <input type="hidden" name="char" id="char-input" value="1">
             </div>
 
             <button type="submit" class="btn-send">SEND</button>
@@ -207,22 +212,94 @@
             selectedCharacter = charId;
             document.getElementById(`char-${charId}`).classList.add("selected");
 
-            // Optional: you can also update a hidden input field with the selected character id
-            // Create or update a hidden input field with the selected character id
-            let hiddenInput = document.getElementById("selected-char-id");
-            if (!hiddenInput) {
-                hiddenInput = document.createElement("input");
-                hiddenInput.type = "hidden";
-                hiddenInput.id = "selected-char-id";
-                hiddenInput.name = "char";
-                document.forms[0].appendChild(hiddenInput);
+            // Update hidden input field with the selected character id
+            const hiddenInput = document.getElementById("char-input");
+            if (hiddenInput) {
+                hiddenInput.value = charId;
             }
-            hiddenInput.value = charId; // Set the hidden field value
         }
 
-        // Initialize the character selection to make sure no character is selected initially
+        // Handle form submission with AJAX
+        document.getElementById("guestbookForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            // Get form data
+            const formData = new FormData(this);
+            
+            // Check if character is selected (from hidden input)
+            const charValue = formData.get("char");
+            const commentValue = formData.get("comment");
+            
+            // Debug: log form data
+            console.log("Form data:", {
+                char: charValue,
+                comment: commentValue,
+                charType: typeof charValue
+            });
+            
+            if (!charValue || charValue === "" || charValue === "0") {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Character Required",
+                    text: "Please select a character first!",
+                    confirmButtonColor: "#c2ff37",
+                });
+                return;
+            }
+            
+            try {
+                // Send as JSON to ensure proper parsing
+                // Convert char to number (not string)
+                const response = await fetch("/guestbook/submit-form", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        char: Number(charValue), // Convert to number
+                        comment: commentValue
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show success alert
+                    Swal.fire({
+                        icon: "success",
+                        title: "Thank You!",
+                        text: data.message || "Thank you for participating!",
+                        confirmButtonColor: "#c2ff37",
+                        confirmButtonText: "OK",
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Redirect to dashboard after alert
+                        window.location.href = data.redirect || "/dashboard";
+                    });
+                } else {
+                    // Show error alert
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: data.message || "Something went wrong. Please try again.",
+                        confirmButtonColor: "#c2ff37",
+                    });
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An error occurred. Please try again.",
+                    confirmButtonColor: "#c2ff37",
+                });
+            }
+        });
+
+        // Initialize the character selection to make sure character 1 is selected by default
         document.addEventListener("DOMContentLoaded", function () {
-            selectCharacter(1);  // Default selection if needed
+            selectCharacter(1);  // Default selection
         });
 
     </script>

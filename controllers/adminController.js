@@ -205,7 +205,7 @@ export const boothDelete = async (req, res) => {
 
 
 /* =====================================================
-    📄 DETAIL BOOTH (Visited + Review)
+    📄 DETAIL BOOTH (Visited + Review + Report)
 ===================================================== */
 export const boothDetail = async (req, res) => {
     const {
@@ -216,7 +216,24 @@ export const boothDetail = async (req, res) => {
     const booth = boothSnap.exists() ? boothSnap.val() : {};
 
     const reviewSnap = await db.ref("reviews/" + id).get();
-    const reviews = reviewSnap.exists() ? Object.values(reviewSnap.val()) : [];
+    const reviewsRaw = reviewSnap.exists() ? reviewSnap.val() : {};
+    const reviews = Object.values(reviewsRaw);
+
+    // Hitung rata-rata rating
+    let averageRating = 0;
+    if (reviews.length > 0) {
+        const totalRating = reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0);
+        averageRating = (totalRating / reviews.length).toFixed(2);
+    }
+
+    // Distribusi rating (1-5)
+    const ratingDistribution = {
+        5: reviews.filter(r => Number(r.rating) === 5).length,
+        4: reviews.filter(r => Number(r.rating) === 4).length,
+        3: reviews.filter(r => Number(r.rating) === 3).length,
+        2: reviews.filter(r => Number(r.rating) === 2).length,
+        1: reviews.filter(r => Number(r.rating) === 1).length,
+    };
 
     const usersSnap = await db.ref("users").get();
     const users = usersSnap.exists() ? usersSnap.val() : {};
@@ -228,11 +245,22 @@ export const boothDetail = async (req, res) => {
             ...u
         }));
 
+    // Sort reviews by created_at (newest first)
+    const sortedReviews = reviews.sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at) : 0;
+        const dateB = b.created_at ? new Date(b.created_at) : 0;
+        return dateB - dateA;
+    });
+
     res.render("admin/booths/detail", {
         id,
         booth,
-        reviews,
-        visitedUsers
+        reviews: sortedReviews,
+        visitedUsers,
+        totalVisitors: visitedUsers.length,
+        totalReviews: reviews.length,
+        averageRating,
+        ratingDistribution
     });
 };
 
@@ -347,6 +375,34 @@ export const userUpdate = async (req, res) => {
     await db.ref("users/" + id).update({
         name,
         email
+    });
+
+    res.redirect("/admin/users/" + id);
+};
+
+
+/* =====================================================
+    🔑 UPDATE USER PASSWORD
+===================================================== */
+export const userUpdatePassword = async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+        return res.status(400).send("Password is required!");
+    }
+
+    // Validasi password sama seperti register
+    if (password.length < 6) {
+        return res.status(400).send("Password must be at least 6 characters!");
+    }
+
+    if (password.length > 32) {
+        return res.status(400).send("Password must be at most 32 characters!");
+    }
+
+    await db.ref("users/" + id).update({
+        password
     });
 
     res.redirect("/admin/users/" + id);
