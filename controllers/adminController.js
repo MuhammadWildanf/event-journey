@@ -774,3 +774,55 @@ export const serviceDelete = async (req, res) => {
 
     res.redirect("/admin/services");
 };
+
+
+/* =====================================================
+    🏆 DOORPRIZE WINNERS
+===================================================== */
+export const doorprizeWinners = async (req, res) => {
+    const winnersSnap = await db.ref("doorprize_winners").get();
+    const winners = winnersSnap.exists() ? winnersSnap.val() : {};
+    
+    // Convert to array and sort by wonAt (newest first)
+    const winnersList = Object.entries(winners)
+        .map(([id, winner]) => ({
+            id,
+            name: winner.name || "Unknown",
+            email: winner.email || "",
+            userId: winner.userId || id,
+            timestamp: winner.timestamp || null,
+            wonAt: winner.wonAt || winner.timestamp || Date.now()
+        }))
+        .sort((a, b) => b.wonAt - a.wonAt); // Sort by wonAt descending
+    
+    res.render("admin/doorprize-winners", {
+        winners: winnersList,
+        totalWinners: winnersList.length
+    });
+};
+
+
+/* =====================================================
+    ⚙️ DOORPRIZE SETTINGS
+===================================================== */
+export const doorprizeSettings = async (req, res) => {
+    const settingsSnap = await db.ref("doorprize_settings").get();
+    const settings = settingsSnap.exists() ? settingsSnap.val() : {};
+    
+    res.render("admin/doorprize-settings", {
+        spinDuration: settings.spin_duration || 5
+    });
+};
+
+export const doorprizeSettingsUpdate = async (req, res) => {
+    const { spinDuration } = req.body;
+    
+    // Validate spin duration (2-30 seconds)
+    const duration = Math.max(2, Math.min(30, parseFloat(spinDuration) || 5));
+    
+    await db.ref("doorprize_settings").update({
+        spin_duration: duration
+    });
+    
+    res.redirect("/admin/doorprize/settings");
+};

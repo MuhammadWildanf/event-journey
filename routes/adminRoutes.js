@@ -25,7 +25,9 @@ import {
     serviceCreate,
     serviceEditForm,
     serviceUpdate,
-    serviceDelete, quotaLunchDetail,quotaSouvenirDetail
+    serviceDelete, quotaLunchDetail,quotaSouvenirDetail,
+    doorprizeWinners,
+    doorprizeSettings, doorprizeSettingsUpdate
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -69,5 +71,10 @@ router.post("/services/create", serviceCreate);
 router.get("/services/:id/edit", serviceEditForm);
 router.post("/services/:id/edit", serviceUpdate);
 router.get("/services/:id/delete", serviceDelete);
+
+/* DOORPRIZE */
+router.get("/doorprize/winners", doorprizeWinners);
+router.get("/doorprize/settings", doorprizeSettings);
+router.post("/doorprize/settings", doorprizeSettingsUpdate);
 
 export default router;

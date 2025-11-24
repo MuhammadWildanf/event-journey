@@ -35,7 +35,7 @@
     </a>
 
     <%- btn('/lunch', user.lunch_active, 'grid-item square' , 'card-lunch' ) %>
-    <a href="javascript:void(0)" class="grid-item square <%= user.souvenir_active ? '' : 'not-visited' %>"
+    <a href="<%= user.souvenir_active ? '/souvenir' : 'javascript:void(0)' %>" class="grid-item square <%= user.souvenir_active ? '' : 'not-visited' %>"
       id="souvenir-btn" data-active="<%= user.souvenir_active %>" data-visited="<%= user.visited_count || 0 %>"
       data-checkin="<%= user.today_checkin %>" data-quota-left="<%= user.souvenir_quota_left %>"
       data-claimed="<%= user.souvenir_claimed ? 'true' : 'false' %>">

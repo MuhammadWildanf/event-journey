@@ -1,0 +1,61 @@
+<%- include("../layouts/header-admin", { title: "Doorprize Winners" }) %>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Doorprize Winners</h3>
+        <div>
+            <span class="badge bg-primary me-2">Total Winners: <%= totalWinners %></span>
+            <a href="/admin/doorprize/settings" class="btn btn-sm btn-outline-primary">Spin Settings</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <% if (winners.length === 0) { %>
+                <div class="alert alert-info text-center">
+                    <p class="mb-0">No winners yet. Winners will appear here after they are selected from the doorprize spin.</p>
+                </div>
+            <% } else { %>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Won At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% winners.forEach((winner, index) => { %>
+                                <tr>
+                                    <td><%= index + 1 %></td>
+                                    <td><strong><%= winner.name %></strong></td>
+                                    <td><%= winner.email || "-" %></td>
+                                    <td>
+                                        <% 
+                                            const wonDate = new Date(winner.wonAt);
+                                            const formattedDate = wonDate.toLocaleString('id-ID', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            });
+                                        %>
+                                        <%= formattedDate %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+</div>
+
+<%- include("../layouts/footer") %>
+

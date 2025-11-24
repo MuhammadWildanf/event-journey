@@ -22,9 +22,15 @@ export const showguestbook = async (req, res) => {
 };
 
 export const showDoorprize = (req, res) => {
-    res.render("services/doorprize", {
-        qrUrl: "/qr/services/doorprize.png"
-    });
+    try {
+        console.log("Rendering doorprize page...");
+        res.render("services/doorprize", {
+            qrUrl: "/qr/services/doorprize.png"
+        });
+    } catch (err) {
+        console.error("Error rendering doorprize page:", err);
+        res.status(500).send(`Error loading doorprize page: ${err.message}`);
+    }
 };
 
 
@@ -52,13 +58,25 @@ export const handledoorprize = async (req, res) => {
         });
     }
 
-    // 2️⃣ Save entry to /doorprize
+    // 2️⃣ Get email from database or session (fallback)
+    const userEmail = userData.email || user.email || "";
+    const userName = userData.name || user.name || "";
+
+    console.log("Doorprize scan - User ID:", user.id);
+    console.log("Doorprize scan - Email from DB:", userData.email);
+    console.log("Doorprize scan - Email from session:", user.email);
+    console.log("Doorprize scan - Final email:", userEmail);
+
+    // 3️⃣ Save entry to /doorprize (include email)
     const doorprizeRef = db.ref("doorprize");
-    await doorprizeRef.push({
-        name: userData.name,
+    const newEntry = await doorprizeRef.push({
+        name: userName,
+        email: userEmail,
         timestamp: Date.now(),
         userId: user.id
     });
+    
+    console.log("Doorprize entry saved with ID:", newEntry.key);
 
     // 3️⃣ Mark user as joined
     await userRef.update({
@@ -408,9 +426,19 @@ export const handleSouvenirScan = async (req, res) => {
       return current + 1;
     });
 
-    if (!txnResult) return res.json({ success: false, message: "Souvenir quota is finished for today. Please try again tomorrow." });
+    // Check if transaction was committed
+    // Firebase Admin SDK v13 returns TransactionResult object with committed property
+    const isCommitted = txnResult?.committed !== false && txnResult !== null && txnResult !== undefined;
+    
+    if (!isCommitted) {
+      return res.json({ success: false, message: "Souvenir quota is finished for today. Please try again tomorrow." });
+    }
 
-    await userRef.child(`souvenir_claimed`).set(true);
+    // Mark user as claimed - use update instead of child().set() for consistency
+    await userRef.update({
+      souvenir_claimed: true
+    });
+    
     return res.json({ success: true, message: "Souvenir successfully claimed.", redirect: "/souvenir-success" });
 
   } catch (err) {

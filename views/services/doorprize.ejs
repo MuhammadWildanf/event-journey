@@ -878,18 +878,81 @@
                 closeWinnerModal();
                 return;
             }
-            participants.splice(lastWinnerIndex, 1);
+            
+            const winner = participants[lastWinnerIndex];
+            
+            // Pindahkan pemenang ke winners di Firebase
+            if (winner && winner.id) {
+                // Pastikan email ada, jika tidak ada coba ambil dari user database
+                let winnerEmail = winner.email || "";
+                
+                // Jika email kosong, coba ambil dari user database
+                if (!winnerEmail && winner.userId) {
+                    const userRef = rtdb.ref(`users/${winner.userId}`);
+                    userRef.once("value", (userSnap) => {
+                        const userData = userSnap.val() || {};
+                        winnerEmail = userData.email || "";
+                        
+                        // Simpan dengan email yang sudah diambil
+                        saveWinnerToFirebase(winner, winnerEmail);
+                    });
+                } else {
+                    // Langsung simpan jika email sudah ada
+                    saveWinnerToFirebase(winner, winnerEmail);
+                }
+            }
+            
             lastWinnerIndex = null;
-            renderParticipants();
-            drawWheel();
             closeWinnerModal();
         }
+        
+        function saveWinnerToFirebase(winner, email) {
+            const winnerData = {
+                name: winner.name || "Unknown",
+                email: email || "",
+                userId: winner.userId || winner.id,
+                timestamp: winner.timestamp || Date.now(),
+                wonAt: Date.now()
+            };
+            
+            console.log("Saving winner to Firebase:", winnerData);
+            
+            // Simpan ke winners
+            const winnersRef = rtdb.ref("doorprize_winners");
+            winnersRef.push(winnerData).then(() => {
+                console.log("Winner saved to doorprize_winners with email:", email);
+                // Setelah berhasil simpan ke winners, hapus dari doorprize
+                const doorprizeRef = rtdb.ref(`doorprize/${winner.id}`);
+                doorprizeRef.remove().then(() => {
+                    console.log("Winner removed from doorprize list");
+                }).catch((error) => {
+                    console.error("Error removing from doorprize:", error);
+                });
+            }).catch((error) => {
+                console.error("Error saving to winners:", error);
+            });
+        }
+
+        // Variable untuk menyimpan durasi spin dari Firebase
+        let spinDuration = 5; // Default 5 detik
+
+        // Load spin duration dari Firebase
+        const doorprizeSettingsRef = rtdb.ref("doorprize_settings");
+        doorprizeSettingsRef.on("value", (snapshot) => {
+            const settings = snapshot.val() || {};
+            spinDuration = settings.spin_duration || 5;
+        });
 
         function spin() {
             if (spinning || !participants.length) return;
             spinning = true;
             spinBtn.disabled = true;
+            
             winnerNameEl.textContent = "Spinning...";
+
+            // Ambil durasi dari Firebase settings (dalam detik, convert ke milliseconds)
+            const durationSeconds = Math.max(2, Math.min(30, spinDuration || 5));
+            const duration = durationSeconds * 1000; // Convert to milliseconds
 
             const sliceAngle = 2 * Math.PI / participants.length;
             const winnerIndex = Math.floor(Math.random() * participants.length);
@@ -906,14 +969,21 @@
             // add several full spins for drama
             const targetRotation = baseTarget - 2 * Math.PI * extraSpins;
 
-            const duration = 15000;
             const start = performance.now();
             const startRotation = rotation;
 
             function animate(now) {
                 const elapsed = now - start;
                 const t = Math.min(elapsed / duration, 1);
+                
+                // Improved easing: ease-out cubic dengan kontrol yang lebih halus
+                // Dari cepat di awal ke lambat di akhir
                 const eased = 1 - Math.pow(1 - t, 3);
+                
+                // Alternatif: ease-out dengan kontrol lebih halus
+                // const eased = t < 0.5 
+                //     ? 2 * t * t 
+                //     : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
                 rotation = startRotation + (targetRotation - startRotation) * eased;
                 drawWheel();
@@ -923,6 +993,7 @@
                 } else {
                     spinning = false;
                     spinBtn.disabled = participants.length <= 0;
+                    
                     const winner = participants[winnerIndex];
                     const winnerName = winner?.name || "Unknown";
                     winnerNameEl.textContent = winnerName;
@@ -945,6 +1016,8 @@
             participants = Object.entries(data).map(([id, value]) => ({
                 id,
                 name: value.name || "Participant",
+                email: value.email || "",
+                userId: value.userId || id,
                 timestamp: value.timestamp || null
             }));
 

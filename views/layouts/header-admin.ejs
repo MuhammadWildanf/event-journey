@@ -29,6 +29,9 @@
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+    
+    <!-- Bootstrap JS for dropdown -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -66,6 +69,25 @@
                     <li class="nav-item">
                         <a class="nav-link <%= active === 'services' ? 'active' : '' %>"
                             href="/admin/services">Services</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle <%= active === 'doorprize' ? 'active' : '' %>" 
+                           href="#" id="doorprizeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Doorprize
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="doorprizeDropdown">
+                            <li><a class="dropdown-item" href="/doorprize" target="_blank">
+                                <i class="bi bi-trophy"></i> Open Doorprize Page
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/doorprize/winners">
+                                <i class="bi bi-award"></i> Winners
+                            </a></li>
+                            <li><a class="dropdown-item" href="/admin/doorprize/settings">
+                                <i class="bi bi-gear"></i> Settings
+                            </a></li>
+                        </ul>
                     </li>
 
                 </ul>
