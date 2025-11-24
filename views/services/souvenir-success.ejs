@@ -79,8 +79,26 @@
         before collecting your souvenir.
     </p>
 
-    <a href="/dashboard" class="btn-back-custom">BACK</a>
+    <a href="javascript:void(0)" onclick="confirmBack()" class="btn-back-custom">BACK</a>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function confirmBack() {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Return to dashboard?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/dashboard";
+            }
+        });
+    }
+</script>
 
 <%- include("../layouts/footer") %>

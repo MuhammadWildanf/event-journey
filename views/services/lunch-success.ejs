@@ -10,7 +10,8 @@
     }
 
     .page-wrapper {
-        margin-top: 180px; /* sesuai desain */
+        margin-top: 180px;
+        /* sesuai desain */
         padding: 0 20px;
     }
 
@@ -22,11 +23,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px; /* jarak icon-text */
+        gap: 10px;
+        /* jarak icon-text */
     }
 
     .title-lunch .material-symbols-rounded {
-        font-size: 36px; /* mirip desain */
+        font-size: 36px;
+        /* mirip desain */
         color: #ffffff;
         font-weight: 400;
     }
@@ -86,8 +89,27 @@
         before collecting your lunch box.
     </p>
 
-    <a href="/dashboard" class="btn-back-custom">BACK</a>
+    <!-- <a href="/dashboard" class="btn-back-custom">BACK</a> -->
+    <a href="javascript:void(0)" onclick="confirmBack()" class="btn-back-custom">BACK</a>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function confirmBack() {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Return to dashboard?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/dashboard";
+            }
+        });
+    }
+</script>
 
 <%- include("../layouts/footer") %>
