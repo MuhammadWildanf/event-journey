@@ -1,0 +1,75 @@
+<%- include("../layouts/header-admin", { title: "Admin Dashboard" }) %>
+<div class="container py-4">
+
+    <h3 class="mt-4">Pengunjung Yang Sudah Visit ≥ 8 Booth</h3>
+
+    <div class="mb-3">
+        <label>Filter Souvenir Claimed:</label>
+        <select id="filterSouvenir" class="form-select" style="width:200px;">
+            <option value="">Semua</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+        </select>
+    </div>
+
+
+    <table id="visitedTable" class="table table-striped table-bordered mt-3" style="width:100%">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>UID</th>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>Visited Count</th>
+                <th>Souvenir Claimed</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% results.forEach((u, i) => { %>
+            <tr>
+                <td><%= i + 1 %></td>
+                <td><%= u.id %></td>
+                <td><%= u.name %></td>
+                <td><%= u.email %></td>
+                <td><%= u.visitedCount %></td>
+                <td>
+                    <% if (u.souvenir_claimed === "YES") { %>
+                    <span class="badge bg-success">YES</span>
+                    <% } else { %>
+                    <span class="badge bg-danger">NO</span>
+                    <% } %>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+</div>
+
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        let table = $('#visitedTable').DataTable({
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            order: [
+                [4, 'desc']
+            ]
+        });
+
+        // Filter berdasarkan dropdown
+        $('#filterSouvenir').on('change', function () {
+            let value = $(this).val(); // YES / NO / empty
+            table.column(5).search(value).draw();
+        });
+    });
+</script>
+
+
+
+<%- include("../layouts/footer") %>

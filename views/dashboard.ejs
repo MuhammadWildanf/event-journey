@@ -1,16 +1,19 @@
 <%- include("./layouts/header", { title: "Dashboard || SCM Digital Day 2025" }) %>
-<header class="d-flex flex-column justify-content-center align-items-center py-4">
+<header class="d-flex flex-column justify-content-center align-items-center py-4 position-relative">
   <!-- Logo Section -->
-  <div class="logo-container text-center">
-    <img src="/assets/img/logo.png" alt="SCM Digital Day 2025 Logo" class="logo-img" />
+  <div class="logo-container text-center mb-2">
+    <img src="/assets/img/logo.png" alt="SCM Digital Day 2025 Logo" class="logo-img" style="height:60px;" />
   </div>
 
   <!-- User Name Section -->
-  <div class="user-info text-center">
-    <strong>
-      Welcome <%= user.name %>
-    </strong>
+  <div class="user-info text-center mb-2">
+    <strong>Welcome, <%= user.name %></strong>
   </div>
+
+  <!-- Logout Button -->
+  <!-- <button id="logout" class="btn btn-outline-light position-absolute top-0 end-0 m-3">
+    <i class="bi bi-box-arrow-right me-1"></i> Logout
+  </button> -->
 </header>
 
 <% const btn=(url, active, classes, card, disabled)=> {
@@ -35,13 +38,7 @@
     </a>
 
     <%- btn('/lunch', user.lunch_active, 'grid-item square' , 'card-lunch' ) %>
-    <a href="<%= user.souvenir_active ? '/souvenir' : 'javascript:void(0)' %>" class="grid-item square <%= user.souvenir_active ? '' : 'not-visited' %>"
-      id="souvenir-btn" data-active="<%= user.souvenir_active %>" data-visited="<%= user.visited_count || 0 %>"
-      data-checkin="<%= user.today_checkin %>" data-quota-left="<%= user.souvenir_quota_left %>"
-      data-claimed="<%= user.souvenir_claimed ? 'true' : 'false' %>">
-
-      <div class="booth-card card-souvenir <%= user.souvenir_active ? '' : 'not-visited' %>"></div>
-    </a>
+    <div class="booth-card card-souvenir <%= user.souvenir_active ? '' : 'not-visited' %>"></div>
 
 
 
@@ -51,12 +48,59 @@
 
     <div class="download-guide">
       <a class="download-link" href="/assets/files/e-book-SCM-Digital-Day.pdf" target="_blank" rel="noopener">
-      <!-- <a class="download-link" href="/event-guide" rel="noopener"> -->
+        <!-- <a class="download-link" href="/event-guide" rel="noopener"> -->
         EVENT GUIDE
       </a>
     </div>
   </div>
 </main>
+
+
+<!-- <script>
+document.getElementById("logout").addEventListener("click", async () => {
+    const result = await Swal.fire({
+        title: "Logout",
+        text: "Are you sure you want to logout?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, logout",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3af0af",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const res = await fetch("/logout", { method: "POST" });
+
+        const data = await res.json();
+
+        if (data.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Logged Out",
+                text: "You have been logged out successfully.",
+                timer: 1500,
+                showConfirmButton: false,
+            }).then(() => {
+                window.location.href = "/login";
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.message || "Failed to logout.",
+            });
+        }
+    } catch (err) {
+        Swal.fire({
+            icon: "error",
+            title: "Connection Error",
+            text: "Unable to reach the server.",
+        });
+    }
+});
+</script> -->
 
 <script>
   // Handle click on souvenir button when not active

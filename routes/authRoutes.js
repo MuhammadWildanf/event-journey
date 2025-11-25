@@ -4,7 +4,7 @@ import {
     showRegister,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,resetPassword,showresetPassword
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -15,7 +15,10 @@ router.get("/register", showRegister);
 router.post("/login", loginUser);
 router.post("/register", registerUser);
 
-router.get("/logout", logoutUser);
+router.post("/logout", logoutUser);
+
+router.get("/reset-password", showresetPassword)
+router.post("/reset-password", resetPassword)
 
 router.get("/comingsoon", (req, res) => {
     res.render("comingsoon");

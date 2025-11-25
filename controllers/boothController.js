@@ -22,8 +22,6 @@ export const showBoothList = async (req, res) => {
     }
 };
 
-
-
 // 🧩 Menampilkan detail booth (review + rating)
 export const showBoothDetail = async (req, res) => {
     try {

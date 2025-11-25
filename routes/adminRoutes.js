@@ -28,7 +28,7 @@ import {
     serviceUpdate,
     serviceDelete, quotaLunchDetail,quotaSouvenirDetail,
     doorprizeWinners,
-    doorprizeSettings, doorprizeSettingsUpdate
+    doorprizeSettings, doorprizeSettingsUpdate, checkVisited,checkVisitedReview,exportUsersCleanExcel,saveEmailTargetsExcel,blastEmailSouvenir, boothListByRating
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -37,6 +37,12 @@ const router = express.Router();
 // Bisa tambahkan password static di .env
 
 router.get("/", adminDashboard);
+router.get("/export-users-clean", exportUsersCleanExcel);
+
+router.get('/checkVisit', checkVisited)
+router.get('/checkVisitedReview', checkVisitedReview)
+router.get("/export-email-targets", saveEmailTargetsExcel);
+router.get("/blast-email-souvenir", blastEmailSouvenir);
 
 /* BOOTH */
 router.get("/booths", boothList);
@@ -48,6 +54,8 @@ router.get("/booths/:id/delete", boothDelete);
 router.get("/booths/:id", boothDetail);
 router.get("/booths/:id/download-qr", boothDownloadQR);
 router.get("/export/booths", boothExportCSV);
+
+router.get("/booth-rating" , boothListByRating )
 
 /* USERS */
 router.get("/users", userList);

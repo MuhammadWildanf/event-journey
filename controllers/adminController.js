@@ -11,6 +11,10 @@ import {
     Parser
 } from "json2csv";
 import moment from "moment-timezone";
+import ExcelJS from "exceljs";
+import {
+    sendEmail
+} from "../utils/mailer.js";
 
 moment.locale("id");
 
@@ -43,6 +47,153 @@ function fileNameSafe(str) {
 }
 
 
+function formatTanggalIndo(dateString) {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString;
+
+    const options = {
+        timeZone: "Asia/Jakarta",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    };
+
+    return new Intl.DateTimeFormat("id-ID", options).format(date);
+}
+
+
+
+
+export const exportUsersCleanExcel = async (req, res) => {
+    const snap = await db.ref("users").get();
+    const users = snap.val() || {};
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Users Clean");
+
+    sheet.columns = [{
+            header: "No",
+            key: "no",
+            width: 8
+        },
+        {
+            header: "Name",
+            key: "name",
+            width: 25
+        },
+        {
+            header: "Email",
+            key: "email",
+            width: 30
+        },
+        {
+            header: "Created At",
+            key: "created_at",
+            width: 30
+        },
+        {
+            header: "Checkin Dates",
+            key: "checkin_dates",
+            width: 25
+        },
+        {
+            header: "Lunch Claimed Dates",
+            key: "lunch_claimed_dates",
+            width: 25
+        },
+        {
+            header: "Games Done",
+            key: "games_done",
+            width: 25
+        },
+        {
+            header: "Souvenir",
+            key: "souvenir_claimed",
+            width: 20
+        },
+        {
+            header: "Visited Count",
+            key: "visited_count",
+            width: 15
+        }
+    ];
+
+    function formatTanggalIndo(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        if (isNaN(date)) return dateString;
+
+        const opts = {
+            timeZone: "Asia/Jakarta",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        };
+        return new Intl.DateTimeFormat("id-ID", opts).format(date);
+    }
+
+    let no = 1;
+
+    for (const uid in users) {
+        const u = users[uid];
+
+        // ---- CHECKIN DATES ----
+        const checkinDates = u.checkin_dates ?
+            Object.keys(u.checkin_dates).join(", ") :
+            "Tidak ada";
+
+        // ---- LUNCH CLAIMED DATES ----
+        let lunchDates = "Belum pernah ambil";
+        if (u.lunch_claimed_dates) {
+            const list = Object.entries(u.lunch_claimed_dates)
+                .filter(([_, v]) => v === true)
+                .map(([date]) => date);
+
+            if (list.length > 0) lunchDates = list.join(", ");
+        }
+
+        // ---- GAMES DONE ----
+        let gamesDone = "Belum main";
+        if (u.games_done) {
+            const list = Object.entries(u.games_done)
+                .filter(([_, v]) => v === true)
+                .map(([game]) => game);
+
+            if (list.length > 0) gamesDone = list.join(", ");
+        }
+
+        // ---- SOUVENIR ----
+        const souvenirStatus = u.souvenir_claimed ? "Sudah ambil" : "Belum";
+
+        sheet.addRow({
+            no: no++,
+            name: u.name || "",
+            email: u.email || "",
+            created_at: formatTanggalIndo(u.created_at),
+            checkin_dates: checkinDates,
+            lunch_claimed_dates: lunchDates,
+            games_done: gamesDone,
+            souvenir_claimed: souvenirStatus,
+            visited_count: u.visited_count ??0
+        });
+    }
+
+    res.setHeader("Content-Disposition", "attachment; filename=users-clean.xlsx");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+    await workbook.xlsx.write(res);
+    res.end();
+};
+
+
+
+
 /* =====================================================
     🏠 ADMIN DASHBOARD
 ===================================================== */
@@ -58,6 +209,56 @@ export const adminDashboard = async (req, res) => {
         boothCount: Object.keys(booths).length,
     });
 };
+
+
+/* =====================================================
+    📌 LIST SEMUA BOOTH BERDASARKAN RATING (TINGGI → RENDAH)
+===================================================== */
+export const boothListByRating = async (req, res) => {
+    const boothsSnap = await db.ref("booths").get();
+    const booths = boothsSnap.exists() ? boothsSnap.val() : {};
+
+    const reviewsSnap = await db.ref("reviews").get();
+    const allReviews = reviewsSnap.exists() ? reviewsSnap.val() : {};
+
+    // Buat array booth dengan rating
+    const boothsWithRating = Object.entries(booths).map(([key, booth]) => {
+        const boothReviews = allReviews[key] ? Object.values(allReviews[key]) : [];
+
+        // Hitung average rating
+        let averageRating = 0;
+        if (boothReviews.length > 0) {
+            const total = boothReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0);
+            averageRating = total / boothReviews.length;
+        }
+
+        // Distribusi rating (1-5)
+        const ratingDistribution = {
+            5: boothReviews.filter(r => Number(r.rating) === 5).length,
+            4: boothReviews.filter(r => Number(r.rating) === 4).length,
+            3: boothReviews.filter(r => Number(r.rating) === 3).length,
+            2: boothReviews.filter(r => Number(r.rating) === 2).length,
+            1: boothReviews.filter(r => Number(r.rating) === 1).length,
+        };
+
+        return {
+            ...booth,
+            key,
+            averageRating: Number(averageRating.toFixed(2)),
+            totalReviews: boothReviews.length,
+            ratingDistribution
+        };
+    });
+
+    // Urutkan dari rating tertinggi → terendah
+    boothsWithRating.sort((a, b) => b.averageRating - a.averageRating);
+
+    res.render("admin/booths/list-by-rating", {
+        booths: boothsWithRating
+    });
+};
+
+
 
 
 /* =====================================================
@@ -185,7 +386,6 @@ export const boothUpdate = async (req, res) => {
 };
 
 
-
 /* =====================================================
     ❌ DELETE BOOTH + DELETE QR FILE
 ===================================================== */
@@ -311,9 +511,9 @@ export const userList = async (req, res) => {
 
     const users = Object.entries(usersRaw)
         .map(([id, u]) => {
-            const createdAt = u.created_at
-                ? moment(u.created_at).tz("Asia/Jakarta").format("DD MMMM YYYY HH:mm")
-                : "-";
+            const createdAt = u.created_at ?
+                moment(u.created_at).tz("Asia/Jakarta").format("DD MMMM YYYY HH:mm") :
+                "-";
 
             return {
                 id,
@@ -385,8 +585,12 @@ export const userUpdate = async (req, res) => {
     🔑 UPDATE USER PASSWORD
 ===================================================== */
 export const userUpdatePassword = async (req, res) => {
-    const { id } = req.params;
-    const { password } = req.body;
+    const {
+        id
+    } = req.params;
+    const {
+        password
+    } = req.body;
 
     if (!password) {
         return res.status(400).send("Password is required!");
@@ -504,7 +708,9 @@ export const userReset = async (req, res) => {
     🎁 RESET DOORPRIZE STATUS
 ===================================================== */
 export const userResetDoorprize = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
     await db.ref("users/" + id).update({
         doorprize_joined: false
@@ -515,8 +721,15 @@ export const userResetDoorprize = async (req, res) => {
 
 
 export const userUpdateStatus = async (req, res) => {
-    const { id } = req.params;
-    const { lunch_claimed, souvenir_claimed, photobooth_done, games_done } = req.body;
+    const {
+        id
+    } = req.params;
+    const {
+        lunch_claimed,
+        souvenir_claimed,
+        photobooth_done,
+        games_done
+    } = req.body;
 
     const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
     const userRef = db.ref("users/" + id);
@@ -542,9 +755,9 @@ export const userUpdateStatus = async (req, res) => {
 
     // Recompute visited_count + reward_ready dari booths_visited
     const visitedSnap = await userRef.child("booths_visited").get();
-    const visitedCount = visitedSnap.exists()
-        ? Object.keys(visitedSnap.val()).length
-        : 0;
+    const visitedCount = visitedSnap.exists() ?
+        Object.keys(visitedSnap.val()).length :
+        0;
 
     updates.visited_count = visitedCount;
     updates.reward_ready = visitedCount >= 8; // Updated to match souvenir requirement
@@ -587,7 +800,10 @@ export const quotaSettings = async (req, res) => {
     ✔ UPDATE QUOTA
 ===================================================== */
 export const quotaUpdate = async (req, res) => {
-    const { lunchQuota, souvenirQuota } = req.body;
+    const {
+        lunchQuota,
+        souvenirQuota
+    } = req.body;
 
     await db.ref("services/lunch/QUOTA").set(Number(lunchQuota));
     await db.ref("services/souvenir/QUOTA").set(Number(souvenirQuota));
@@ -693,7 +909,10 @@ export const serviceCreateForm = (req, res) => {
     ✔ CREATE SERVICE + QR
 ===================================================== */
 export const serviceCreate = async (req, res) => {
-    const { name, code } = req.body;
+    const {
+        name,
+        code
+    } = req.body;
 
     if (!name || !code) return res.send("Nama & Code wajib!");
 
@@ -701,12 +920,16 @@ export const serviceCreate = async (req, res) => {
     const fileName = fileNameSafe(key) + ".png";
 
     const qrDir = path.join(__dirname, "../qr/services");
-    if (!fs.existsSync(qrDir)) fs.mkdirSync(qrDir, { recursive: true });
+    if (!fs.existsSync(qrDir)) fs.mkdirSync(qrDir, {
+        recursive: true
+    });
 
     const qrPath = path.join(qrDir, fileName);
 
     // Generate QR dengan payload = key
-    await QRCode.toFile(qrPath, key, { width: 500 });
+    await QRCode.toFile(qrPath, key, {
+        width: 500
+    });
 
     await db.ref("services/" + key).set({
         code: key,
@@ -722,7 +945,9 @@ export const serviceCreate = async (req, res) => {
     ✏ FORM EDIT SERVICE
 ===================================================== */
 export const serviceEditForm = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
     const snap = await db.ref("services/" + id).get();
     if (!snap.exists()) return res.send("Service tidak ditemukan");
@@ -738,8 +963,13 @@ export const serviceEditForm = async (req, res) => {
     ✔ UPDATE SERVICE + REGENERATE QR
 ===================================================== */
 export const serviceUpdate = async (req, res) => {
-    const { id } = req.params;   // old code
-    const { name, code } = req.body;
+    const {
+        id
+    } = req.params; // old code
+    const {
+        name,
+        code
+    } = req.body;
 
     const newKey = slug(code);
     const newFileName = fileNameSafe(newKey) + ".png";
@@ -752,7 +982,9 @@ export const serviceUpdate = async (req, res) => {
 
     // Generate QR baru
     const newFile = path.join(qrDir, newFileName);
-    await QRCode.toFile(newFile, newKey, { width: 500 });
+    await QRCode.toFile(newFile, newKey, {
+        width: 500
+    });
 
     const serviceRef = db.ref("services");
     const oldSnap = await serviceRef.child(id).get();
@@ -779,7 +1011,9 @@ export const serviceUpdate = async (req, res) => {
     ❌ DELETE SERVICE + QR FILE
 ===================================================== */
 export const serviceDelete = async (req, res) => {
-    const { id } = req.params;
+    const {
+        id
+    } = req.params;
 
     const file = path.join(__dirname, "../qr/services/" + fileNameSafe(id) + ".png");
     if (fs.existsSync(file)) fs.unlinkSync(file);
@@ -796,7 +1030,7 @@ export const serviceDelete = async (req, res) => {
 export const doorprizeWinners = async (req, res) => {
     const winnersSnap = await db.ref("doorprize_winners").get();
     const winners = winnersSnap.exists() ? winnersSnap.val() : {};
-    
+
     // Convert to array and sort by wonAt (newest first)
     const winnersList = Object.entries(winners)
         .map(([id, winner]) => ({
@@ -808,7 +1042,7 @@ export const doorprizeWinners = async (req, res) => {
             wonAt: winner.wonAt || winner.timestamp || Date.now()
         }))
         .sort((a, b) => b.wonAt - a.wonAt); // Sort by wonAt descending
-    
+
     res.render("admin/doorprize-winners", {
         winners: winnersList,
         totalWinners: winnersList.length
@@ -822,21 +1056,321 @@ export const doorprizeWinners = async (req, res) => {
 export const doorprizeSettings = async (req, res) => {
     const settingsSnap = await db.ref("doorprize_settings").get();
     const settings = settingsSnap.exists() ? settingsSnap.val() : {};
-    
+
     res.render("admin/doorprize-settings", {
         spinDuration: settings.spin_duration || 5
     });
 };
 
 export const doorprizeSettingsUpdate = async (req, res) => {
-    const { spinDuration } = req.body;
-    
+    const {
+        spinDuration
+    } = req.body;
+
     // Validate spin duration (2-30 seconds)
     const duration = Math.max(2, Math.min(30, parseFloat(spinDuration) || 5));
-    
+
     await db.ref("doorprize_settings").update({
         spin_duration: duration
     });
-    
+
     res.redirect("/admin/doorprize/settings");
+};
+
+
+export const checkVisited = async (req, res) => {
+    const snap = await db.ref("users").get();
+    const users = snap.val() || {};
+
+    const yesList = [];
+    const noList = [];
+
+    for (const uid in users) {
+        const u = users[uid];
+        const visitedCount = u.visited_count ??0;
+
+        if (visitedCount >= 8) {
+            const data = {
+                id: uid,
+                name: u.name || "-",
+                email: u.email || "-",
+                visitedCount,
+                souvenir_claimed: u.souvenir_claimed === true ? "YES" : "NO"
+            };
+
+            if (u.souvenir_claimed === true) yesList.push(data);
+            else noList.push(data);
+        }
+    }
+
+    res.render("admin/cekvisited", {
+        results: [...yesList, ...noList] // ⬅ FIX
+    });
+};
+
+
+export const checkVisitedReview = async (req, res) => {
+    const userSnap = await db.ref("users").get();
+    const users = userSnap.val() || {};
+
+    const reviewSnap = await db.ref("reviews").get();
+    const reviews = reviewSnap.val() || {};
+
+    const results = [];
+
+    for (const uid in users) {
+        const u = users[uid];
+
+        if ((u.visited_count ??0) < 8) continue;
+        if (u.souvenir_claimed === true) continue;
+
+        let earliestReview = null;
+
+        const visitedBooths = u.booths_visited || {};
+
+        for (const boothId in reviews) {
+
+            // hanya booth yang dikunjungi user
+            if (!visitedBooths[boothId]) continue;
+
+            const boothReviews = reviews[boothId];
+
+            for (const revId in boothReviews) {
+                const r = boothReviews[revId];
+
+                // hanya review milik user
+                if (r.userId !== uid) continue;
+
+                if (!earliestReview || new Date(r.created_at) < new Date(earliestReview.created_at)) {
+                    earliestReview = r;
+                }
+            }
+        }
+
+        results.push({
+            id: uid,
+            name: u.name || "-",
+            email: u.email || "-",
+            visitedCount: u.visited_count ??0,
+            souvenir_claimed: "NO",
+            review_time: earliestReview ? earliestReview.created_at : null
+        });
+    }
+
+    // Sort review paling cepat
+    results.sort((a, b) => {
+        if (!a.review_time) return 1;
+        if (!b.review_time) return -1;
+        return new Date(a.review_time) - new Date(b.review_time);
+    });
+
+    res.render("admin/visited-review", {
+        results
+    });
+};
+
+
+export const saveEmailTargetsExcel = async (req, res) => {
+    const usersSnap = await db.ref("users").get();
+    const reviewsSnap = await db.ref("reviews").get();
+
+    const users = usersSnap.val() || {};
+    const reviews = reviewsSnap.val() || {};
+
+    const list = [];
+
+    for (const uid in users) {
+        const u = users[uid];
+
+        // Syarat utama
+        if ((u.visited_count ??0) < 8) continue;
+        if (u.souvenir_claimed === true) continue;
+
+        let earliestReview = null;
+
+        // Booth yang dikunjungi user
+        const visitedBooths = u.booths_visited || {};
+
+        for (const boothId in reviews) {
+
+            // Hanya booth yang dikunjungi user
+            if (!visitedBooths[boothId]) continue;
+
+            const boothReviews = reviews[boothId];
+
+            for (const revId in boothReviews) {
+                const r = boothReviews[revId];
+
+                // Hanya review milik user
+                if (r.userId !== uid) continue;
+
+                if (!earliestReview ||
+                    new Date(r.created_at) < new Date(earliestReview.created_at)) {
+                    earliestReview = r;
+                }
+            }
+        }
+
+        list.push({
+            uid,
+            name: u.name || "-",
+            email: u.email || "-",
+            review_time: earliestReview ? earliestReview.created_at : null,
+        });
+    }
+
+    // Urutkan dari review paling awal
+    list.sort((a, b) => {
+        if (!a.review_time) return 1;
+        if (!b.review_time) return -1;
+        return new Date(a.review_time) - new Date(b.review_time);
+    });
+
+    const top150 = list.slice(0, 150);
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Email Targets");
+
+    sheet.columns = [{
+            header: "No",
+            key: "no",
+            width: 8
+        },
+        {
+            header: "Name",
+            key: "name",
+            width: 30
+        },
+        {
+            header: "Email",
+            key: "email",
+            width: 30
+        },
+    ];
+
+    top150.forEach((u, i) => {
+        sheet.addRow({
+            no: i + 1,
+            name: u.name,
+            email: u.email,
+        });
+    });
+
+    res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=email-targets.xlsx"
+    );
+    res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+};
+
+
+export const blastEmailSouvenir = async (req, res) => {
+    try {
+        const usersSnap = await db.ref("users").get();
+        const reviewsSnap = await db.ref("reviews").get();
+
+        const users = usersSnap.val() || {};
+        const reviews = reviewsSnap.val() || {};
+
+        const list = [];
+
+        for (const uid in users) {
+            const u = users[uid];
+            if ((u.visited_count ??0) < 8) continue;
+            if (u.souvenir_claimed === true) continue;
+
+            let earliestReview = null;
+            const visitedBooths = u.booths_visited || {};
+
+            for (const boothId in reviews) {
+                if (!visitedBooths[boothId]) continue;
+                const boothReviews = reviews[boothId];
+                for (const revId in boothReviews) {
+                    const r = boothReviews[revId];
+                    if (r.userId !== uid) continue;
+                    if (!earliestReview || new Date(r.created_at) < new Date(earliestReview.created_at)) {
+                        earliestReview = r;
+                    }
+                }
+            }
+
+            list.push({
+                uid,
+                name: u.name || "-",
+                email: u.email || "-",
+                review_time: earliestReview ? earliestReview.created_at : null,
+            });
+        }
+
+        // urutkan berdasarkan review paling cepat
+        list.sort((a, b) => {
+            if (!a.review_time) return 1;
+            if (!b.review_time) return -1;
+            return new Date(a.review_time) - new Date(b.review_time);
+        });
+
+        const top150 = list.slice(0, 150);
+        const sendReport = [];
+
+        // ================================
+        // KIRIM EMAIL SATU PER SATU PAKAI sendEmail
+        // ================================
+        for (const user of top150) {
+            const emailBody = `
+Dengan Hormat SCM Digital Day 2025 Participants,
+
+Terima kasih telah berpartisipasi dalam SCM Digital Day 2025.
+
+Kami mencatat bahwa Bapak/Ibu (${user.name}) telah melakukan check-in di 8 booth selama acara. Dengan demikian, Bapak/Ibu berhak mendapatkan souvenir.
+
+Silakan mengambil souvenir pada:
+
+📅 Rabu, 26 November 2025
+⏰ Pukul 15.00 WIB
+📍 Souvenir Desk
+
+Mohon tunjukkan email ini kepada petugas sebagai bukti.
+
+⸻
+
+Terima kasih dan sampai jumpa!
+Semoga pengalaman Bapak/Ibu di SCM Digital Day 2025 bermanfaat dan menginspirasi.
+
+Catatan: Batas waktu pengambilan souvenir sampai dengan tanggal 26 November 2025 pukul 16.00 WIB. Panitia berhak menyerahkan souvenir yang tidak diambil kepada peserta lain.
+
+Salam,
+SCM Digital Day 2025 Committee
+    `;
+
+            const emailSent = await sendEmail(
+                user.email,
+                "Konfirmasi Check-in & Pengambilan Souvenir – SCM Digital Day 2025",
+                emailBody
+            );
+
+            sendReport.push({
+                email: user.email,
+                status: emailSent ? "sent" : "failed"
+            });
+
+            // delay untuk hindari spam
+            await new Promise(r => setTimeout(r, 300));
+        }
+
+        return res.json({
+            message: "Blast email selesai",
+            totalSent: sendReport.filter(x => x.status === "sent").length,
+            report: sendReport
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send("Error blasting emails");
+    }
 };

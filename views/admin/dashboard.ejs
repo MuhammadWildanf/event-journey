@@ -1,80 +1,88 @@
 <%- include("../layouts/header-admin", { title: "Admin Dashboard" }) %>
 
-    <div class="container py-4">
+<div class="container py-4">
 
-        <h2 class="mb-4">Admin Dashboard</h2>
+    <h2 class="mb-4">Admin Dashboard</h2>
 
-        <div class="row g-4">
-            <div class="col-md-4">
-                <a href="/admin/users" class="text-decoration-none text-dark">
-                    <div class="card shadow">
-                        <div class="card-body text-center">
-                            <h3>
-                                <%= userCount %>
-                            </h3>
-                            <p>Total Users</p>
-                        </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a href="/admin/users" class="text-decoration-none text-dark">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h3>
+                            <%= userCount %>
+                        </h3>
+                        <p>Total Users</p>
                     </div>
-                </a>
-
-            </div>
-
-            <div class="col-md-4">
-                <a href="/admin/booths" class="text-decoration-none text-dark">
-                    <div class="card shadow">
-                        <div class="card-body text-center">
-                            <h3>
-                                <%= boothCount %>
-                            </h3>
-                            <p>Total Booth</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-4">
-                <a href="/doorprize" target="_blank" class="text-decoration-none text-dark">
-                    <div class="card shadow">
-                        <div class="card-body text-center">
-                            <h3>
-                                <i class="bi bi-trophy"></i>
-                            </h3>
-                            <p>Doorprize</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
+                </div>
+            </a>
 
         </div>
 
-        <div class="row g-4 mt-2">
-            <div class="col-md-6">
-                <a href="/admin/doorprize/winners" class="text-decoration-none text-dark">
-                    <div class="card shadow">
-                        <div class="card-body text-center">
-                            <h5>
-                                <i class="bi bi-award"></i> Doorprize Winners
-                            </h5>
-                            <p class="text-muted mb-0">View all winners</p>
-                        </div>
+        <div class="col-md-4">
+            <a href="/admin/booths" class="text-decoration-none text-dark">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h3>
+                            <%= boothCount %>
+                        </h3>
+                        <p>Total Booth</p>
                     </div>
-                </a>
-            </div>
+                </div>
+            </a>
+        </div>
 
-            <div class="col-md-6">
-                <a href="/admin/doorprize/settings" class="text-decoration-none text-dark">
-                    <div class="card shadow">
-                        <div class="card-body text-center">
-                            <h5>
-                                <i class="bi bi-gear"></i> Doorprize Settings
-                            </h5>
-                            <p class="text-muted mb-0">Configure spin settings</p>
-                        </div>
+        <div class="col-md-4">
+            <a href="/doorprize" target="_blank" class="text-decoration-none text-dark">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h3>
+                            <i class="bi bi-trophy"></i>
+                        </h3>
+                        <p>Doorprize</p>
                     </div>
-                </a>
-            </div>
+                </div>
+            </a>
         </div>
 
     </div>
 
-    <%- include("../layouts/footer") %>
+    <div class="row g-4 mt-2">
+        <div class="col-md-6">
+            <a href="/admin/doorprize/winners" class="text-decoration-none text-dark">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h5>
+                            <i class="bi bi-award"></i> Doorprize Winners
+                        </h5>
+                        <p class="text-muted mb-0">View all winners</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a href="/admin/doorprize/settings" class="text-decoration-none text-dark">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <h5>
+                            <i class="bi bi-gear"></i> Doorprize Settings
+                        </h5>
+                        <p class="text-muted mb-0">Configure spin settings</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <hr class="mt-5">
+
+   
+
+
+
+
+</div>
+
+
+<%- include("../layouts/footer") %>

@@ -119,9 +119,44 @@ export const loginUser = async (req, res) => {
     });
 };
 
+export const showresetPassword = (req,res) => {
+     res.render("auth/reset-password");
+};
+
+
+export const resetPassword = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) return res.status(400).send("Email and password are required!");
+    if (!/^\d+$/.test(password)) return res.status(400).send("Password must be numeric.");
+    if (password.length < 6 || password.length > 32)
+        return res.status(400).send("Password must be 6-32 digits.");
+
+    const snap = await db.ref("users").get();
+    let userKey = null;
+
+    snap.forEach((child) => {
+        if (child.val().email === email) userKey = child.key;
+    });
+
+    if (!userKey) return res.status(404).send("Email not found!");
+
+    await db.ref(`users/${userKey}`).update({ password });
+
+    res.status(200).send("Password has been reset successfully!");
+};
+
+
 
 export const logoutUser = (req, res) => {
-    req.session.destroy(() => {
-        res.redirect("/login");
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Logout error:", err);
+            return res.status(500).json({ success: false, message: "Unable to logout. Please try again." });
+        }
+
+        res.clearCookie('connect.sid', { path: '/' });
+        res.json({ success: true, message: "Logout successful" });
     });
 };
+
