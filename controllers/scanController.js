@@ -55,7 +55,7 @@ export const handleScanResult = async (req, res) => {
         const SCAN_ACTIONS = {
             checkin: handleCheckin,
             lunch: handleLunchScan,
-            souvenir: handleSouvenirScan,
+            // souvenir: handleSouvenirScan,
             contract_dalgona: handleGameScan,
             scm_glass_bridge: handleGameScan,
             memory_game: handleGameScan,
