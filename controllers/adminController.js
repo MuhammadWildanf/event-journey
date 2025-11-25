@@ -1078,6 +1078,76 @@ export const doorprizeSettingsUpdate = async (req, res) => {
 };
 
 
+/* =====================================================
+    🏆 GRANDPRIZE WINNERS
+===================================================== */
+export const grandprizeWinners = async (req, res) => {
+    const winnersSnap = await db.ref("grandprize_winners").get();
+    const winners = winnersSnap.exists() ? winnersSnap.val() : {};
+
+    const winnersList = Object.entries(winners)
+        .map(([id, winner]) => ({
+            id,
+            name: winner.name || "Unknown",
+            email: winner.email || "",
+            userId: winner.userId || id,
+            timestamp: winner.timestamp || null,
+            wonAt: winner.wonAt || winner.timestamp || Date.now()
+        }))
+        .sort((a, b) => b.wonAt - a.wonAt); // newest first
+
+    res.render("admin/grandprize-winners", {
+        winners: winnersList,
+        totalWinners: winnersList.length
+    });
+};
+
+/* =====================================================
+    ⚙️ GRANDPRIZE SETTINGS
+===================================================== */
+export const grandprizeSettings = async (req, res) => {
+    const settingsSnap = await db.ref("grandprize_settings").get();
+    const settings = settingsSnap.exists() ? settingsSnap.val() : {};
+
+    res.render("admin/grandprize-settings", {
+        spinDuration: settings.spin_duration || 5
+    });
+};
+
+export const grandprizeSettingsUpdate = async (req, res) => {
+    const { spinDuration } = req.body;
+    const duration = Math.max(2, Math.min(30, parseFloat(spinDuration) || 5));
+
+    await db.ref("grandprize_settings").update({
+        spin_duration: duration
+    });
+
+    res.redirect("/admin/grandprize/settings");
+};
+
+/* =====================================================
+    ❌ RESET ALL DOORPRIZE & GRANDPRIZE DATA
+===================================================== */
+export const resetAllPrizes = async (req, res) => {
+    // Reset doorprize
+    const usersSnap = await db.ref("users").get();
+    const users = usersSnap.val() || {};
+
+    for (const uid in users) {
+        await db.ref("users/" + uid).update({
+            doorprize_joined: false,
+            grandprize_joined: false // optional, jika ada field user untuk grandprize
+        });
+    }
+
+    await db.ref("doorprize_winners").remove();
+    await db.ref("grandprize_winners").remove();
+
+    res.send("Semua data doorprize & grandprize telah di-reset");
+};
+
+
+
 export const checkVisited = async (req, res) => {
     const snap = await db.ref("users").get();
     const users = snap.val() || {};

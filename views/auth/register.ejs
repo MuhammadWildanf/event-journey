@@ -1,75 +1,229 @@
-<%- include("../layouts/header-auth", { title: "Reset Password || SCM Digital Day 2025", bodyClass: "page-auth" }) %>
+<%- include("../layouts/header-auth", { title: "Register || SCM Digital Day 2025" , bodyClass: "page-auth" }) %>
 
-<div class="auth-wrapper">
-    <img src="/assets/img/logo.png" alt="SCM Digital Day 2025" class="auth-logo">
-    <section class="auth-page">
-        <h1 class="auth-title">RESET PASSWORD</h1>
+    <div class="auth-wrapper">
 
-        <form id="resetForm" class="auth-form">
-            <div class="input-box">
-                <i class="bi bi-envelope"></i>
-                <input type="email" id="emailReset" name="email" placeholder="Enter your email">
-            </div>
+        <!-- LOGO -->
+        <img src="/assets/img/logo.png" alt="SCM Digital Day" class="auth-logo">
 
-            <div class="input-box">
-                <i class="bi bi-lock"></i>
-                <input type="password" id="passwordReset" name="password" placeholder="New Numeric Password" pattern="\d+" inputmode="numeric">
-            </div>
+        <section class="auth-page">
+            <h1 class="auth-title">REGISTRATION</h1>
 
-            <button type="submit" class="btn-auth">Reset Password</button>
-        </form>
+            <form id="registerForm" class="auth-form">
 
-        <p class="auth-link">
-            Back to <a href="/login">Login</a>
-        </p>
-    </section>
-</div>
+                <!-- NAME -->
+                <div class="input-box">
+                    <i class="bi bi-person"></i>
+                    <input type="text" id="name" name="name" placeholder="Full Name">
+                </div>
 
-<script>
-document.getElementById("resetForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("emailReset").value.trim();
-    const password = document.getElementById("passwordReset").value.trim();
+                <!-- EMAIL -->
+                <div class="input-box">
+                    <i class="bi bi-envelope"></i>
+                    <input type="email" id="email" name="email" placeholder="Email Address">
+                </div>
 
-    if (!email || !password) {
-        Swal.fire({ icon: "warning", title: "Attention", text: "Email and new password are required!", confirmButtonColor: "#3af0af" });
-        return;
-    }
+                <!-- PASSWORD -->
+                <div class="input-group-with-info" style="width: 100%; text-align:left;">
+                    <small class="password-info mb-1 d-block">
+                        Password must be at least 6 characters in numeric.
+                    </small>
+                    <div class="input-box">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Password" pattern="\d+"
+                            inputmode="numeric">
+                        <button type="button" class="togglePassword" data-target="password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
-    if (!/^\d+$/.test(password)) {
-        Swal.fire({ icon: "warning", title: "Invalid Password", text: "Password must be numeric.", confirmButtonColor: "#3af0af" });
-        return;
-    }
+                <!-- REPEAT PASSWORD -->
+                <div class="input-box">
+                    <i class="bi bi-lock-fill"></i>
+                    <input type="password" id="repeatpassword" name="repeatpassword" placeholder="Confirm Password"
+                        pattern="\d+" inputmode="numeric">
+                    <button type="button" class="togglePassword" data-target="repeatpassword">
+                        <i class="bi bi-eye"></i>
+                    </button>   
+                </div>
 
-    if (password.length < 6) {
-        Swal.fire({ icon: "warning", title: "Password Too Short", text: "Password must be at least 6 digits.", confirmButtonColor: "#3af0af" });
-        return;
-    }
 
-    if (password.length > 32) {
-        Swal.fire({ icon: "warning", title: "Password Too Long", text: "Password must be at most 32 digits.", confirmButtonColor: "#3af0af" });
-        return;
-    }
+                <button type="submit" class="btn-auth">CREATE ACCOUNT</button>
+                <p class="auth-link">Already have an account? <a href="/login">Login to Account</a></p>
+            </form>
+        </section>
+    </div>
 
-    try {
-        const res = await fetch("/reset-password", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
+    <script>
+        // === Toggle password visibility (multi-button) ===
+        document.querySelectorAll(".togglePassword").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const inputId = this.getAttribute("data-target");
+                const passField = document.getElementById(inputId);
+                const icon = this.querySelector("i");
+
+                if (passField.type === "password") {
+                    passField.type = "text";
+                    icon.classList.replace("bi-eye", "bi-eye-slash");
+                } else {
+                    passField.type = "password";
+                    icon.classList.replace("bi-eye-slash", "bi-eye");
+                }
+            });
         });
+    </script>
 
-        const text = await res.text();
+    <script>
 
-        if (res.ok) {
-            Swal.fire({ icon: "success", title: "Success", text: text, confirmButtonColor: "#3af0af" })
-                .then(() => window.location.href = "/login");
-        } else {
-            Swal.fire({ icon: "error", title: "Error", text: text, confirmButtonColor: "#3af0af" });
-        }
-    } catch (err) {
-        Swal.fire({ icon: "error", title: "Error", text: "Unable to reach server.", confirmButtonColor: "#3af0af" });
-    }
-});
-</script>
+        const escapeHtml = (str = "") => String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
 
-<%- include("../layouts/footer") %>
+        const registerForm = document.getElementById("registerForm");
+
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const repeat = document.getElementById("repeatpassword").value.trim();
+
+            if (!name || !email || !password || !repeat) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Attention",
+                    text: "All fields are required!",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            if (!/^\d+$/.test(password)) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Invalid Password",
+                    text: "Password must be numeric.",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            // Validasi untuk memastikan konfirmasi password hanya berisi angka
+            if (!/^\d+$/.test(repeat)) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Invalid Confirm Password",
+                    text: "Confirm password must be numeric.",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            if (password.length < 6) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Password Too Short",
+                    text: "Password must be at least 6 characters.",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            if (password.length > 32) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Password Too Long",
+                    text: "Password must be at most 32 characters.",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            if (password !== repeat) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Passwords Do Not Match",
+                    text: "Make sure password and confirm password are the same.",
+                    confirmButtonColor: "#3af0af",
+                });
+                return;
+            }
+
+            const confirmResult = await Swal.fire({
+                title: "Confirm Your Data",
+                html: `
+                    <p>Please confirm the information below:</p>
+                    <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+                    <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+                    <small class="text-muted d-block mt-2">If correct, click "Confirm". To edit, click "Cancel".</small>
+                `,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Confirm",
+                cancelButtonText: "Cancel",
+                confirmButtonColor: "#3af0af",
+                focusConfirm: false,
+            });
+
+            if (!confirmResult.isConfirmed) {
+                // user cancelled — return to form for editing
+                return;
+            }
+
+            try {
+                Swal.fire({
+                    title: "Registering...",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const res = await fetch("/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password
+                    }),
+                });
+
+                Swal.close(); // close loading
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Account Created",
+                        text: "Your account has been created successfully.",
+                        confirmButtonColor: "#3af0af",
+                    }).then(() => {
+                        window.location.href = "/dashboard";
+                    });
+                } else {
+                    const text = await res.text();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Registration Failed",
+                        text: text || "An error occurred, please try again later.",
+                        confirmButtonColor: "#3af0af",
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Connection Error",
+                    text: "Unable to reach the server.",
+                    confirmButtonColor: "#3af0af",
+                });
+            }
+        });
+    </script>
+
+    <%- include("../layouts/footer") %>
