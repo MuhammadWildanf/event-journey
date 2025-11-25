@@ -44,11 +44,14 @@ export const showDashboard = async (req, res) => {
             !d.lunch_claimed_dates?.[today];
 
         // SOUVENIR
+        // Cek souvenir_claimed dengan eksplisit (harus true, bukan truthy)
+        const souvenirClaimed = d.souvenir_claimed === true;
+        
         const souvenirActive =
             todayCheckin &&
             visitCount >= 8 &&
             souvenirCount < souvenirLimit &&
-            !d.souvenir_claimed;
+            !souvenirClaimed;
         // BOOTH
         const boothActive = todayCheckin;
 
@@ -72,7 +75,7 @@ export const showDashboard = async (req, res) => {
                 photobooth_active: photoActive,
                 games_active: gamesActive,
 
-                souvenir_claimed: d.souvenir_claimed ? true : false,
+                souvenir_claimed: souvenirClaimed,
                 souvenir_quota_left: Math.max(souvenirLimit - souvenirCount, 0),
             },
         });

@@ -500,6 +500,20 @@ export const userReset = async (req, res) => {
 };
 
 
+/* =====================================================
+    🎁 RESET DOORPRIZE STATUS
+===================================================== */
+export const userResetDoorprize = async (req, res) => {
+    const { id } = req.params;
+
+    await db.ref("users/" + id).update({
+        doorprize_joined: false
+    });
+
+    res.redirect("/admin/users");
+};
+
+
 export const userUpdateStatus = async (req, res) => {
     const { id } = req.params;
     const { lunch_claimed, souvenir_claimed, photobooth_done, games_done } = req.body;

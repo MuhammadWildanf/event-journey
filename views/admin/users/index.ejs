@@ -18,6 +18,7 @@
           <th class="text-center">Lunch</th>
           <th class="text-center">Souvenir</th>
           <th class="text-center">Games</th>
+          <th class="text-center">Doorprize</th>
           <th class="text-center">Date</th>
           <th class="text-center">Aksi</th>
         </tr>
@@ -30,6 +31,7 @@
           const souvenirClaimed = u.souvenir_claimed_dates && Object.keys(u.souvenir_claimed_dates).length > 0;
           const gamesDone = !!u.games_done;
           const rewardReady = !!u.reward_ready;
+          const doorprizeJoined = !!u.doorprize_joined;
           %>
 
           <tr>
@@ -71,12 +73,27 @@
             </td>
 
             <td class="text-center">
+              <% if (doorprizeJoined) { %>
+                <span class="badge bg-success">Sudah</span>
+                <% } else { %>
+                  <span class="badge bg-secondary">Belum</span>
+                  <% } %>
+            </td>
+
+            <td class="text-center">
               <%= u.createdAtFormatted %>
             </td>
 
 
             <td class="text-center">
               <a href="/admin/users/<%= u.id %>" class="btn btn-sm btn-info">Detail</a>
+              <% if (doorprizeJoined) { %>
+                <a href="/admin/users/<%= u.id %>/reset-doorprize" 
+                   onclick="return confirm('Reset doorprize status untuk user ini?')"
+                   class="btn btn-sm btn-warning" title="Reset Doorprize">
+                  Reset Doorprize
+                </a>
+              <% } %>
               <a href="/admin/users/<%= u.id %>/delete" onclick="return confirm('Hapus user ini?')"
                 class="btn btn-sm btn-danger">
                 Delete
