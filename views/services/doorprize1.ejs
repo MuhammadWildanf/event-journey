@@ -918,7 +918,7 @@
             console.log("Saving winner to Firebase:", winnerData);
             
             // Simpan ke winners
-            const winnersRef = rtdb.ref("doorprize_winners");
+            const winnersRef = rtdb.ref("doorprize_winners1");
             winnersRef.push(winnerData).then(() => {
                 console.log("Winner saved to doorprize_winners with email:", email);
                 // Setelah berhasil simpan ke winners, hapus dari doorprize
