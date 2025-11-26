@@ -922,7 +922,7 @@
             winnersRef.push(winnerData).then(() => {
                 console.log("Winner saved to doorprize_winners with email:", email);
                 // Setelah berhasil simpan ke winners, hapus dari doorprize
-                const doorprizeRef = rtdb.ref(`doorprize/${winner.id}`);
+                const doorprizeRef = rtdb.ref(`doorprize1/${winner.id}`);
                 doorprizeRef.remove().then(() => {
                     console.log("Winner removed from doorprize list");
                 }).catch((error) => {

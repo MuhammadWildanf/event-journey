@@ -174,6 +174,64 @@ export const handlegrandprize1 = async (req, res) => {
 };
 
 
+export const resetDoorprize1 = async (req, res) => {
+    try {
+        console.log("Resetting doorprize1...");
+
+        // Hapus seluruh peserta doorprize1
+        await db.ref("doorprize1").remove();
+
+        // Reset flag user
+        const usersRef = db.ref("users");
+        const usersSnap = await usersRef.get();
+
+        usersSnap.forEach((child) => {
+            child.ref.update({
+                doorprize_joined1: false
+            });
+        });
+
+        return res.json({
+            success: true,
+            message: "Doorprize 1 has been reset successfully."
+        });
+
+    } catch (err) {
+        console.error("Error resetting doorprize1:", err);
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+
+export const resetGrandprize1 = async (req, res) => {
+    try {
+        console.log("Resetting grandprize1...");
+
+        // Hapus seluruh peserta grandprize1
+        await db.ref("grandprize1").remove();
+
+        // Reset flag user
+        const usersRef = db.ref("users");
+        const usersSnap = await usersRef.get();
+
+        usersSnap.forEach((child) => {
+            child.ref.update({
+                grandprize_joined1: false
+            });
+        });
+
+        return res.json({
+            success: true,
+            message: "Grand prize 1 has been reset successfully."
+        });
+
+    } catch (err) {
+        console.error("Error resetting grandprize1:", err);
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+
 
 
 export const handledoorprize = async (req, res) => {

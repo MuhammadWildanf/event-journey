@@ -78,6 +78,108 @@
     <hr class="mt-5">
 
    
+<div class="row g-4 mt-1">
+
+    <!-- Reset Doorprize 1 -->
+    <div class="col-md-6">
+        <button id="reset-doorprize1-btn" class="btn btn-danger w-100 py-3">
+            <i class="bi bi-x-circle"></i> Reset Doorprize 1
+        </button>
+    </div>
+
+    <!-- Reset Grandprize 1 -->
+    <div class="col-md-6">
+        <button id="reset-grandprize1-btn" class="btn btn-danger w-100 py-3">
+            <i class="bi bi-x-circle"></i> Reset Grandprize 1
+        </button>
+    </div>
+
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div id="reset-modal" class="modal" tabindex="-1" style="display:none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="reset-title">Confirm Reset</h5>
+                <button type="button" class="btn-close" id="close-reset-modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="reset-message">Are you sure you want to reset this service?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="cancel-reset" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="confirm-reset" class="btn btn-danger">Reset</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+.modal {
+    background: rgba(0,0,0,0.6);
+    position: fixed;
+    inset: 0;
+    justify-content: center;
+    align-items: center;
+}
+.modal.show {
+    display: flex !important;
+}
+</style>
+
+
+
+<script>
+let selectedResetAction = null;
+
+const modal = document.getElementById("reset-modal");
+const confirmBtn = document.getElementById("confirm-reset");
+const cancelBtn = document.getElementById("cancel-reset");
+const closeBtn = document.getElementById("close-reset-modal");
+
+const resetTitle = document.getElementById("reset-title");
+const resetMessage = document.getElementById("reset-message");
+
+// Show modal for Doorprize 1
+document.getElementById("reset-doorprize1-btn").addEventListener("click", () => {
+    selectedResetAction = "/reset/doorprize1";
+    resetTitle.textContent = "Reset Doorprize 1";
+    resetMessage.textContent = "All participants & joined status will be cleared. Continue?";
+    modal.classList.add("show");
+});
+
+// Show modal for Grandprize 1
+document.getElementById("reset-grandprize1-btn").addEventListener("click", () => {
+    selectedResetAction = "/reset/grandprize1";
+    resetTitle.textContent = "Reset Grandprize 1";
+    resetMessage.textContent = "All participants & joined status will be cleared. Continue?";
+    modal.classList.add("show");
+});
+
+// Close modal
+cancelBtn.addEventListener("click", () => modal.classList.remove("show"));
+closeBtn.addEventListener("click", () => modal.classList.remove("show"));
+
+// Confirm reset
+confirmBtn.addEventListener("click", () => {
+    fetch(selectedResetAction, {
+        method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        modal.classList.remove("show");
+        location.reload();
+    }).catch(err => {
+        alert("Reset failed: " + err.message);
+    });
+});
+</script>
 
 
 

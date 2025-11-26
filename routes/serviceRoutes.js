@@ -12,7 +12,7 @@ import {
     showDoorprize,
     handledoorprize, showGrandprize,
     handlegrandprize,
-    viewDoorprize1,handledoorprize1,viewgrandprize1,handlegrandprize1
+    viewDoorprize1,handledoorprize1,viewgrandprize1,handlegrandprize1,resetDoorprize1,resetGrandprize1
 
 } from "../controllers/serviceController.js";
 
@@ -60,9 +60,13 @@ router.get("/grandprize", requireLogin, handlegrandprize);
 
 
 router.get("/doorprize1", viewDoorprize1);
-router.get("/doorprize1", handledoorprize1);
+router.post("/doorprize1", handledoorprize1);
 
 router.get("/grandprize1", viewgrandprize1);
-router.get("/grandprize1", handlegrandprize1);
+router.post("/grandprize1", handlegrandprize1);
+
+
+router.post("/reset/doorprize1", resetDoorprize1);
+router.post("/reset/grandprize1", resetGrandprize1);
 
 export default router;
