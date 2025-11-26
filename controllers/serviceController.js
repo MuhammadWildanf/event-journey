@@ -34,6 +34,148 @@ export const showDoorprize = (req, res) => {
 };
 
 
+
+export const viewDoorprize1 = (req, res) => {
+    try {
+        console.log("Rendering doorprize page...");
+        res.render("services/doorprize1", {
+            qrUrl: "/qr/services/doorprize1.png"
+        });
+    } catch (err) {
+        console.error("Error rendering doorprize page:", err);
+        res.status(500).send(`Error loading doorprize page: ${err.message}`);
+    }
+};
+
+
+export const handledoorprize1 = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect("/login");
+    }
+
+    const { code } = req.body;
+
+    if (code !== "doorprize1") {
+        return res.json({ success: false, message: "Invalid Doorprize QR code." });
+    }
+
+    const userRef = db.ref("users/" + user.id);
+    const userSnap = await userRef.get();
+    const userData = userSnap.val() || {};
+
+    // 1️⃣ Already joined doorprize?
+    if (userData.doorprize_joined1 === true) {
+        return res.json({
+            success: false,
+            message: "You have already registered for the door prize."
+        });
+    }
+
+    // 2️⃣ Get email from database or session (fallback)
+    const userEmail = userData.email || user.email || "";
+    const userName = userData.name || user.name || "";
+
+    console.log("Doorprize scan - User ID:", user.id);
+    console.log("Doorprize scan - Email from DB:", userData.email);
+    console.log("Doorprize scan - Email from session:", user.email);
+    console.log("Doorprize scan - Final email:", userEmail);
+
+    // 3️⃣ Save entry to /doorprize (include email)
+    const doorprizeRef = db.ref("doorprize1");
+    const newEntry = await doorprizeRef.push({
+        name: userName,
+        email: userEmail,
+        timestamp: Date.now(),
+        userId: user.id
+    });
+    
+    console.log("Doorprize entry saved with ID:", newEntry.key);
+
+    // 3️⃣ Mark user as joined
+    await userRef.update({
+        doorprize_joined1: true
+    });
+
+    return res.json({
+        success: true,
+        message: "Door prize entry submitted successfully.",
+        redirect: "/dashboard"
+    });
+};
+
+export const viewgrandprize1 = (req, res) => {
+    try {
+        console.log("Rendering grandprize page...");
+        res.render("services/grandprize1", {
+            qrUrl: "/qr/services/grandprize1.png"
+        });
+    } catch (err) {
+        console.error("Error rendering grandprize page:", err);
+        res.status(500).send(`Error loading grandprize page: ${err.message}`);
+    }
+};
+
+
+export const handlegrandprize1 = async (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect("/login");
+    }
+
+    const { code } = req.body;
+
+    if (code !== "grandprize1") {
+        return res.json({ success: false, message: "Invalid Grand prize QR code." });
+    }
+
+    const userRef = db.ref("users/" + user.id);
+    const userSnap = await userRef.get();
+    const userData = userSnap.val() || {};
+
+    // 1️⃣ Already joined doorprize?
+    if (userData.grandprize_joined1 === true) {
+        return res.json({
+            success: false,
+            message: "You have already registered for the grand prize."
+        });
+    }
+
+    // 2️⃣ Get email from database or session (fallback)
+    const userEmail = userData.email || user.email || "";
+    const userName = userData.name || user.name || "";
+
+    console.log("Doorprize scan - User ID:", user.id);
+    console.log("Doorprize scan - Email from DB:", userData.email);
+    console.log("Doorprize scan - Email from session:", user.email);
+    console.log("Doorprize scan - Final email:", userEmail);
+
+    // 3️⃣ Save entry to /doorprize (include email)
+    const doorprizeRef = db.ref("grandprize1");
+    const newEntry = await doorprizeRef.push({
+        name: userName,
+        email: userEmail,
+        timestamp: Date.now(),
+        userId: user.id
+    });
+    
+    console.log("Grandprize entry saved with ID:", newEntry.key);
+
+    // 3️⃣ Mark user as joined
+    await userRef.update({
+        grandprize_joined1: true
+    });
+
+    return res.json({
+        success: true,
+        message: "Grand prize entry submitted successfully.",
+        redirect: "/dashboard"
+    });
+};
+
+
+
+
 export const handledoorprize = async (req, res) => {
     const user = req.session.user;
     if (!user) {

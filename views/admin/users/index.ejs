@@ -1,37 +1,38 @@
 <%- include("../../layouts/header-admin", { title: "Data User" }) %>
 
-  <div class="container py-4">
+<div class="container py-4">
 
-    <div class="d-flex justify-content-between mb-3 align-items-center">
-      <h3 class="mb-0">Data User</h3>
-      <a href="/admin/users/export" class="btn btn-success">
-        Export CSV
-      </a>
-      <a href="/admin/export-users-clean" class="btn btn-success">
-  Export Users Excel
-</a>
+  <div class="d-flex justify-content-between mb-3 align-items-center">
+    <h3 class="mb-0">Data User</h3>
+    <a href="/admin/users/export" class="btn btn-success">
+      Export CSV
+    </a>
+    <a href="/admin/export-users-clean" class="btn btn-success">
+      Export Users Excel
+    </a>
 
-<a href="/admin/users/reset-doorprize-all" class="btn btn-warning" onclick="return confirm('Reset doorprize semua user?')">Reset Semua Doorprize</a>
+    <a href="/admin/users/reset-all-prize" class="btn btn-warning"
+      onclick="return confirm('Reset doorprize semua user?')">Reset Semua Doorprize</a>
 
-    </div>
+  </div>
 
-    <table class="table table-striped table-bordered datatable align-middle">
-      <thead class="table-dark">
-        <tr>
-          <th>Nama</th>
-          <th>Email</th>
-          <th class="text-center">Visited</th>
-          <th class="text-center">Lunch</th>
-          <th class="text-center">Souvenir</th>
-          <th class="text-center">Games</th>
-          <th class="text-center">Doorprize</th>
-          <th class="text-center">Date</th>
-          <th class="text-center">Aksi</th>
-        </tr>
-      </thead>
+  <table class="table table-striped table-bordered datatable align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Nama</th>
+        <th>Email</th>
+        <th class="text-center">Visited</th>
+        <th class="text-center">Lunch</th>
+        <th class="text-center">Souvenir</th>
+        <th class="text-center">Games</th>
+        <th class="text-center">Doorprize</th>
+        <th class="text-center">Date</th>
+        <th class="text-center">Aksi</th>
+      </tr>
+    </thead>
 
-      <tbody>
-        <% users.forEach(u=> {
+    <tbody>
+      <% users.forEach(u=> {
           const visitedCount = u.visited_count || (u.booths_visited ? Object.keys(u.booths_visited).length : 0);
           const lunchClaimed = u.lunch_claimed_dates && Object.keys(u.lunch_claimed_dates).length > 0;
           const souvenirClaimed = u.souvenir_claimed_dates && Object.keys(u.souvenir_claimed_dates).length > 0;
@@ -40,77 +41,77 @@
           const doorprizeJoined = !!u.doorprize_joined;
           %>
 
-          <tr>
-            <td>
-              <%= u.name %>
-            </td>
-            <td>
-              <%= u.email %>
-            </td>
+      <tr>
+        <td>
+          <%= u.name %>
+        </td>
+        <td>
+          <%= u.email %>
+        </td>
 
-            <td class="text-center">
-              <span class="badge bg-primary">
-                <%= visitedCount %> booth
-              </span>
-            </td>
+        <td class="text-center">
+          <span class="badge bg-primary">
+            <%= visitedCount %> booth
+          </span>
+        </td>
 
-            <td class="text-center">
-              <% if (lunchClaimed) { %>
-                <span class="badge bg-success">Sudah</span>
-                <% } else { %>
-                  <span class="badge bg-secondary">Belum</span>
-                  <% } %>
-            </td>
+        <td class="text-center">
+          <% if (lunchClaimed) { %>
+          <span class="badge bg-success">Sudah</span>
+          <% } else { %>
+          <span class="badge bg-secondary">Belum</span>
+          <% } %>
+        </td>
 
-            <td class="text-center">
-              <% if (souvenirClaimed) { %>
-                <span class="badge bg-success">Sudah</span>
-                <% } else { %>
-                  <span class="badge bg-secondary">Belum</span>
-                  <% } %>
-            </td>
+        <td class="text-center">
+          <% if (souvenirClaimed) { %>
+          <span class="badge bg-success">Sudah</span>
+          <% } else { %>
+          <span class="badge bg-secondary">Belum</span>
+          <% } %>
+        </td>
 
-            <td class="text-center">
-              <% if (gamesDone) { %>
-                <span class="badge bg-success">Selesai</span>
-                <% } else { %>
-                  <span class="badge bg-secondary">Belum</span>
-                  <% } %>
-            </td>
+        <td class="text-center">
+          <% if (gamesDone) { %>
+          <span class="badge bg-success">Selesai</span>
+          <% } else { %>
+          <span class="badge bg-secondary">Belum</span>
+          <% } %>
+        </td>
 
-            <td class="text-center">
-              <% if (doorprizeJoined) { %>
-                <span class="badge bg-success">Sudah</span>
-                <% } else { %>
-                  <span class="badge bg-secondary">Belum</span>
-                  <% } %>
-            </td>
+        <td class="text-center">
+          <% if (doorprizeJoined) { %>
+          <span class="badge bg-success">Sudah</span>
+          <% } else { %>
+          <span class="badge bg-secondary">Belum</span>
+          <% } %>
+        </td>
 
-            <td class="text-center">
-              <%= u.createdAtFormatted %>
-            </td>
+        <td class="text-center">
+          <%= u.createdAtFormatted %>
+        </td>
 
 
-            <td class="text-center">
-              <a href="/admin/users/<%= u.id %>" class="btn btn-sm btn-info">Detail</a>
-              <% if (doorprizeJoined) { %>
-                <a href="/admin/users/<%= u.id %>/reset-doorprize" 
-                   onclick="return confirm('Reset doorprize status untuk user ini?')"
-                   class="btn btn-sm btn-warning" title="Reset Doorprize">
-                  Reset Doorprize
-                </a>
-              <% } %>
-              <a href="/admin/users/<%= u.id %>/delete" onclick="return confirm('Hapus user ini?')"
-                class="btn btn-sm btn-danger">
-                Delete
-              </a>
-            </td>
-          </tr>
+        <td class="text-center">
+          <a href="/admin/users/<%= u.id %>" class="btn btn-sm btn-info">Detail</a>
+          <% if (doorprizeJoined) { %>
+          <a href="/admin/users/<%= u.id %>/reset-doorprize"
+            onclick="return confirm('Reset doorprize status untuk user ini?')" class="btn btn-sm btn-warning"
+            title="Reset Doorprize">
+            Reset Doorprize
+          </a>
+          <% } %>
+          <a href="/admin/users/<%= u.id %>/delete" onclick="return confirm('Hapus user ini?')"
+            class="btn btn-sm btn-danger">
+            Delete
+          </a>
+        </td>
+      </tr>
 
-          <% }) %>
-      </tbody>
-    </table>
+      <% }) %>
+    </tbody>
+  </table>
 
-  </div>
+</div>
 
-  <%- include("../../layouts/footer") %>
+<%- include("../../layouts/footer") %>

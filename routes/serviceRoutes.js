@@ -11,7 +11,8 @@ import {
     handleguesbook,
     showDoorprize,
     handledoorprize, showGrandprize,
-    handlegrandprize
+    handlegrandprize,
+    viewDoorprize1,handledoorprize1,viewgrandprize1,handlegrandprize1
 
 } from "../controllers/serviceController.js";
 
@@ -55,5 +56,13 @@ router.post("/doorprize", requireLogin, handledoorprize);
 
 router.get("/grandprize", showGrandprize);
 router.get("/grandprize", requireLogin, handlegrandprize);
+
+
+
+router.get("/doorprize1", viewDoorprize1);
+router.get("/doorprize1", handledoorprize1);
+
+router.get("/grandprize1", viewgrandprize1);
+router.get("/grandprize1", handlegrandprize1);
 
 export default router;

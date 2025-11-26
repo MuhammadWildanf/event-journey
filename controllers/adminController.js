@@ -180,7 +180,7 @@ export const exportUsersCleanExcel = async (req, res) => {
             lunch_claimed_dates: lunchDates,
             games_done: gamesDone,
             souvenir_claimed: souvenirStatus,
-            visited_count: u.visited_count ??0
+            visited_count: u.visited_count ?? 0
         });
     }
 
@@ -190,32 +190,6 @@ export const exportUsersCleanExcel = async (req, res) => {
     await workbook.xlsx.write(res);
     res.end();
 };
-
-
-export const userResetDoorprizeAll = async (req, res) => {
-    try {
-        const usersSnap = await db.ref("users").get();
-        const users = usersSnap.val();
-
-        if (!users) {
-            return res.send("User tidak ditemukan.");
-        }
-
-        // Siapkan batch update untuk semua user
-        const updates = {};
-        Object.keys(users).forEach(uid => {
-            updates[uid + "/doorprize_joined"] = false;
-        });
-
-        await db.ref("users").update(updates);
-
-        res.send("Semua user berhasil direset doorprize!");
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Terjadi kesalahan saat mereset doorprize semua user.");
-    }
-};
-
 
 
 /* =====================================================
@@ -1139,7 +1113,9 @@ export const grandprizeSettings = async (req, res) => {
 };
 
 export const grandprizeSettingsUpdate = async (req, res) => {
-    const { spinDuration } = req.body;
+    const {
+        spinDuration
+    } = req.body;
     const duration = Math.max(2, Math.min(30, parseFloat(spinDuration) || 5));
 
     await db.ref("grandprize_settings").update({
@@ -1153,21 +1129,33 @@ export const grandprizeSettingsUpdate = async (req, res) => {
     ❌ RESET ALL DOORPRIZE & GRANDPRIZE DATA
 ===================================================== */
 export const resetAllPrizes = async (req, res) => {
-    // Reset doorprize
+  try {
     const usersSnap = await db.ref("users").get();
     const users = usersSnap.val() || {};
 
-    for (const uid in users) {
-        await db.ref("users/" + uid).update({
-            doorprize_joined: false,
-            grandprize_joined: false // optional, jika ada field user untuk grandprize
-        });
+    if (Object.keys(users).length === 0) {
+      return res.status(404).send("Tidak ada user ditemukan");
     }
 
-    await db.ref("doorprize_winners").remove();
-    await db.ref("grandprize_winners").remove();
+    await Promise.all(
+      Object.keys(users).map(uid => {
+        // reset doorprize dan grandprize, tambahkan default jika field tidak ada
+        return db.ref("users/" + uid).update({
+          doorprize_joined: false,
+          grandprize_joined: false
+        });
+      })
+    );
 
-    res.send("Semua data doorprize & grandprize telah di-reset");
+    // Optional: hapus data doorprize & grandprize di root jika ingin bersih-bersih
+    await db.ref("doorprize").remove();
+    await db.ref("grandprize").remove();
+
+    res.send("✅ Semua doorprize & grandprize berhasil di-reset");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Terjadi kesalahan saat reset");
+  }
 };
 
 
@@ -1181,7 +1169,7 @@ export const checkVisited = async (req, res) => {
 
     for (const uid in users) {
         const u = users[uid];
-        const visitedCount = u.visited_count ??0;
+        const visitedCount = u.visited_count ?? 0;
 
         if (visitedCount >= 8) {
             const data = {
@@ -1215,7 +1203,7 @@ export const checkVisitedReview = async (req, res) => {
     for (const uid in users) {
         const u = users[uid];
 
-        if ((u.visited_count ??0) < 8) continue;
+        if ((u.visited_count ?? 0) < 8) continue;
         if (u.souvenir_claimed === true) continue;
 
         let earliestReview = null;
@@ -1245,7 +1233,7 @@ export const checkVisitedReview = async (req, res) => {
             id: uid,
             name: u.name || "-",
             email: u.email || "-",
-            visitedCount: u.visited_count ??0,
+            visitedCount: u.visited_count ?? 0,
             souvenir_claimed: "NO",
             review_time: earliestReview ? earliestReview.created_at : null
         });
@@ -1277,7 +1265,7 @@ export const saveEmailTargetsExcel = async (req, res) => {
         const u = users[uid];
 
         // Syarat utama
-        if ((u.visited_count ??0) < 8) continue;
+        if ((u.visited_count ?? 0) < 8) continue;
         if (u.souvenir_claimed === true) continue;
 
         let earliestReview = null;

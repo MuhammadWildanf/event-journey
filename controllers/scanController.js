@@ -1,7 +1,7 @@
 import {
     handleLunchScan,
     handleSouvenirScan, handleGameScan,
-    showguestbook, handledoorprize, handlegrandprize
+    showguestbook, handledoorprize, handlegrandprize, handledoorprize1,handlegrandprize1
 } from "./serviceController.js";
 import {
     handleCheckin
@@ -61,7 +61,9 @@ export const handleScanResult = async (req, res) => {
             memory_game: handleGameScan,
             guestbook: showguestbook,
             doorprize: handledoorprize,
-            grandprize: handlegrandprize
+            doorprize1: handledoorprize1,
+            grandprize: handlegrandprize,
+            grandprize1: handlegrandprize1
         };
 
 

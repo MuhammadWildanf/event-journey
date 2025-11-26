@@ -28,7 +28,7 @@ import {
     serviceUpdate,
     serviceDelete, quotaLunchDetail,quotaSouvenirDetail,
     doorprizeWinners,
-    doorprizeSettings, doorprizeSettingsUpdate, checkVisited,checkVisitedReview,exportUsersCleanExcel,saveEmailTargetsExcel,blastEmailSouvenir, boothListByRating,userResetDoorprizeAll 
+    doorprizeSettings, doorprizeSettingsUpdate, checkVisited,checkVisitedReview,exportUsersCleanExcel,saveEmailTargetsExcel,blastEmailSouvenir, boothListByRating,resetAllPrizes
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -67,7 +67,7 @@ router.get("/users/:id/delete", userDelete);
 router.post("/users/:id/reset", userReset);
 router.get("/users/:id/reset-doorprize", userResetDoorprize);
 router.post("/users/:id/status", userUpdateStatus);
-router.get("/users/reset-doorprize-all", userResetDoorprizeAll);
+router.get("/users/reset-all-prize", resetAllPrizes);
 
 
 router.get("/quota", quotaSettings);
