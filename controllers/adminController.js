@@ -192,6 +192,30 @@ export const exportUsersCleanExcel = async (req, res) => {
 };
 
 
+export const userResetDoorprizeAll = async (req, res) => {
+    try {
+        const usersSnap = await db.ref("users").get();
+        const users = usersSnap.val();
+
+        if (!users) {
+            return res.send("User tidak ditemukan.");
+        }
+
+        // Siapkan batch update untuk semua user
+        const updates = {};
+        Object.keys(users).forEach(uid => {
+            updates[uid + "/doorprize_joined"] = false;
+        });
+
+        await db.ref("users").update(updates);
+
+        res.send("Semua user berhasil direset doorprize!");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Terjadi kesalahan saat mereset doorprize semua user.");
+    }
+};
+
 
 
 /* =====================================================
@@ -1340,64 +1364,180 @@ export const saveEmailTargetsExcel = async (req, res) => {
 };
 
 
+// export const blastEmailSouvenir = async (req, res) => {
+//     try {
+//         const usersSnap = await db.ref("users").get();
+//         const reviewsSnap = await db.ref("reviews").get();
+
+//         const users = usersSnap.val() || {};
+//         const reviews = reviewsSnap.val() || {};
+
+//         const list = [];
+
+//         for (const uid in users) {
+//             const u = users[uid];
+//             if ((u.visited_count ??0) < 8) continue;
+//             if (u.souvenir_claimed === true) continue;
+
+//             let earliestReview = null;
+//             const visitedBooths = u.booths_visited || {};
+
+//             for (const boothId in reviews) {
+//                 if (!visitedBooths[boothId]) continue;
+//                 const boothReviews = reviews[boothId];
+//                 for (const revId in boothReviews) {
+//                     const r = boothReviews[revId];
+//                     if (r.userId !== uid) continue;
+//                     if (!earliestReview || new Date(r.created_at) < new Date(earliestReview.created_at)) {
+//                         earliestReview = r;
+//                     }
+//                 }
+//             }
+
+//             list.push({
+//                 uid,
+//                 name: u.name || "-",
+//                 email: u.email || "-",
+//                 review_time: earliestReview ? earliestReview.created_at : null,
+//             });
+//         }
+
+//         // urutkan berdasarkan review paling cepat
+//         list.sort((a, b) => {
+//             if (!a.review_time) return 1;
+//             if (!b.review_time) return -1;
+//             return new Date(a.review_time) - new Date(b.review_time);
+//         });
+
+//         const top150 = list.slice(0, 150);
+//         const sendReport = [];
+
+//         // ================================
+//         // KIRIM EMAIL SATU PER SATU PAKAI sendEmail
+//         // ================================
+//         for (const user of top150) {
+//             const emailBody = `
+// Dengan Hormat SCM Digital Day 2025 Participants,
+
+// Terima kasih telah berpartisipasi dalam SCM Digital Day 2025.
+
+// Kami mencatat bahwa Bapak/Ibu (${user.name}) telah melakukan check-in di 8 booth selama acara. Dengan demikian, Bapak/Ibu berhak mendapatkan souvenir.
+
+// Silakan mengambil souvenir pada:
+
+// 📅 Rabu, 26 November 2025
+// ⏰ Pukul 15.00 WIB
+// 📍 Souvenir Desk
+
+// Mohon tunjukkan email ini kepada petugas sebagai bukti.
+
+// ⸻
+
+// Terima kasih dan sampai jumpa!
+// Semoga pengalaman Bapak/Ibu di SCM Digital Day 2025 bermanfaat dan menginspirasi.
+
+// Catatan: Batas waktu pengambilan souvenir sampai dengan tanggal 26 November 2025 pukul 16.00 WIB. Panitia berhak menyerahkan souvenir yang tidak diambil kepada peserta lain.
+
+// Salam,
+// SCM Digital Day 2025 Committee
+//     `;
+
+//             const emailSent = await sendEmail(
+//                 user.email,
+//                 "Konfirmasi Check-in & Pengambilan Souvenir – SCM Digital Day 2025",
+//                 emailBody
+//             );
+
+//             sendReport.push({
+//                 email: user.email,
+//                 status: emailSent ? "sent" : "failed"
+//             });
+
+//             // delay untuk hindari spam
+//             await new Promise(r => setTimeout(r, 300));
+//         }
+
+//         return res.json({
+//             message: "Blast email selesai",
+//             totalSent: sendReport.filter(x => x.status === "sent").length,
+//             report: sendReport
+//         });
+
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).send("Error blasting emails");
+//     }
+// };
+
+
+const failedEmails = [
+    "mk.bambang.febrianto@pertamina.com",
+    "wijaya.budiarti@pertamina.com",
+    "mk.safira.azzahra@mitrakerja.pertamina.com",
+    "mk.m.atthariqh@pertamina.com",
+    "firmansyahmaulana130@gmail.com",
+    "riki.febri@pertamina.com",
+    "mk.hafsah@pertamina.com",
+    "bathara.praditya@pertamina.com",
+    "mk.shafira.sholihah@pertamina.com",
+    "mk.ferrizcha@pertamina.com",
+    "sashafiyah18@gmail.com",
+    "mk.nani.ariani@pertamina.com",
+    "yulia.ramadhani@pertamina.com",
+    "wicakson.bagus@gmail.com",
+    "distantykartika@gmail.com",
+    "harani.dita@internship.pertamina.com",
+    "mk.andi.mulyadi1@pertamina.com",
+    "Yeni.damayanti@pertamina.com",
+    "adinda.neonatasha@gmail.com",
+    "rosa.firmandani@gmail.com",
+    "mk.dicky.fachrudin@pertamina.com",
+    "peggy.nahumury@pertamina.com",
+    "ingrid.indirasari@pertamina.com",
+    "wengku.sumanto@pertamina.com",
+    "afaurita@yahoo.com",
+    "mk.aqilah.salsabila@mitrakerja.pertamina.com",
+    "mk.viska.dewi1@pertamina.com",
+    "mk.sekar.putri@pertamina.com",
+    "mk.joy.lazuardi@pertamina.com",
+    "mk.fitriyah.wartoyo@pertamina.com",
+    "affan.phe@pertamina.com",
+    "maya.anggiana@pertamina.com",
+    "Riduan.mulkan@pertamina.com",
+    "admin.ercmphe@pertamina.com",
+    "mk.muhammad.nugraha4@mitrakerja.pertamina.com",
+    "mk.javier.joost@mitrakerja.pertamina.com",
+    "mk.hery.hariyanto@pertamina.com",
+    "syairinputrik@gmail.com",
+    "anindya.pt29@gmail.com",
+    "michaela.zamira@irawan.id",
+    "yunuswaluyo74@gmail.com",
+    "mk.arnita@mitrakerja.pertamina.com",
+    "dinda.anindar@pertamina.com",
+    "agifarry03@gmail.com",
+    "kaila.budianto@internship.pertamina.com",
+    "marisa.tedjo@pertamina.com",
+    "mk.rizky.haq2@pertamina.com",
+    "analistya.pingkan@pertamina.com",
+    "mk.praditya.p@pertamina.com",
+    "kofahbaskoro@gmail.com",
+    "erlangga.utomo@pertamina.com",
+    "mk.rizka.ramdhani@pertamina.com",
+    "sukimanopan@gmail.com",
+    "mk.molita.sari@pertamina.com"
+];
+
 export const blastEmailSouvenir = async (req, res) => {
     try {
-        const usersSnap = await db.ref("users").get();
-        const reviewsSnap = await db.ref("reviews").get();
-
-        const users = usersSnap.val() || {};
-        const reviews = reviewsSnap.val() || {};
-
-        const list = [];
-
-        for (const uid in users) {
-            const u = users[uid];
-            if ((u.visited_count ??0) < 8) continue;
-            if (u.souvenir_claimed === true) continue;
-
-            let earliestReview = null;
-            const visitedBooths = u.booths_visited || {};
-
-            for (const boothId in reviews) {
-                if (!visitedBooths[boothId]) continue;
-                const boothReviews = reviews[boothId];
-                for (const revId in boothReviews) {
-                    const r = boothReviews[revId];
-                    if (r.userId !== uid) continue;
-                    if (!earliestReview || new Date(r.created_at) < new Date(earliestReview.created_at)) {
-                        earliestReview = r;
-                    }
-                }
-            }
-
-            list.push({
-                uid,
-                name: u.name || "-",
-                email: u.email || "-",
-                review_time: earliestReview ? earliestReview.created_at : null,
-            });
-        }
-
-        // urutkan berdasarkan review paling cepat
-        list.sort((a, b) => {
-            if (!a.review_time) return 1;
-            if (!b.review_time) return -1;
-            return new Date(a.review_time) - new Date(b.review_time);
-        });
-
-        const top150 = list.slice(0, 150);
         const sendReport = [];
 
-        // ================================
-        // KIRIM EMAIL SATU PER SATU PAKAI sendEmail
-        // ================================
-        for (const user of top150) {
+        for (const email of failedEmails) {
             const emailBody = `
 Dengan Hormat SCM Digital Day 2025 Participants,
 
 Terima kasih telah berpartisipasi dalam SCM Digital Day 2025.
 
-Kami mencatat bahwa Bapak/Ibu (${user.name}) telah melakukan check-in di 8 booth selama acara. Dengan demikian, Bapak/Ibu berhak mendapatkan souvenir.
+Kami mencatat bahwa Bapak/Ibu telah melakukan check-in di 8 booth selama acara. Dengan demikian, Bapak/Ibu berhak mendapatkan souvenir.
 
 Silakan mengambil souvenir pada:
 
@@ -1416,20 +1556,20 @@ Catatan: Batas waktu pengambilan souvenir sampai dengan tanggal 26 November 2025
 
 Salam,
 SCM Digital Day 2025 Committee
-    `;
+            `;
 
             const emailSent = await sendEmail(
-                user.email,
+                email,
                 "Konfirmasi Check-in & Pengambilan Souvenir – SCM Digital Day 2025",
                 emailBody
             );
 
             sendReport.push({
-                email: user.email,
+                email,
                 status: emailSent ? "sent" : "failed"
             });
 
-            // delay untuk hindari spam
+            // delay supaya tidak dianggap spam
             await new Promise(r => setTimeout(r, 300));
         }
 
